@@ -6,11 +6,34 @@ namespace RaylibBindings {
 
     void InitAllFunctions(qjs::ObjectBinder &ns) {
 
-        // Window and Graphics
+        // Window Management
         ns.register_function("InitWindow", ::InitWindow);
         ns.register_function("CloseWindow", ::CloseWindow);
         ns.register_function("WindowShouldClose", ::WindowShouldClose);
-        ns.register_function("ClearBackground", ::ClearBackground);
+        ns.register_function("IsWindowReady", ::IsWindowReady);
+        ns.register_function("IsWindowFullscreen", ::IsWindowFullscreen);
+        ns.register_function("IsWindowHidden", ::IsWindowHidden);
+        ns.register_function("IsWindowMinimized", ::IsWindowMinimized);
+        ns.register_function("IsWindowMaximized", ::IsWindowMaximized);
+        ns.register_function("IsWindowFocused", ::IsWindowFocused);
+        ns.register_function("IsWindowResized", ::IsWindowResized);
+        ns.register_function("ToggleFullscreen", ::ToggleFullscreen);
+        ns.register_function("ToggleBorderlessWindowed", ::ToggleBorderlessWindowed);
+        ns.register_function("RestoreWindow", ::RestoreWindow);
+        ns.register_function("MaximizeWindow", ::MaximizeWindow);
+        ns.register_function("MinimizeWindow", ::MinimizeWindow);
+        ns.register_function("SetWindowTitle", ::SetWindowTitle);
+        ns.register_function("SetWindowPosition", ::SetWindowPosition);
+        ns.register_function("SetWindowMonitor", ::SetWindowMonitor);
+        ns.register_function("SetWindowMinSize", ::SetWindowMinSize);
+        ns.register_function("SetWindowMaxSize", ::SetWindowMaxSize);
+        ns.register_function("SetWindowSize", ::SetWindowSize);
+        ns.register_function("SetWindowFocused", ::SetWindowFocused);
+
+        // Window State
+        ns.register_function("IsWindowState", ::IsWindowState);
+        ns.register_function("SetWindowState", ::SetWindowState);
+        ns.register_function("ClearWindowState", ::ClearWindowState);
 
         // Screen and Display
         ns.register_function("GetScreenWidth", ::GetScreenWidth);
@@ -32,6 +55,7 @@ namespace RaylibBindings {
         ns.register_function("GetFrameTime", ::GetFrameTime);
 
         // Draw
+        ns.register_function("ClearBackground", ::ClearBackground);
         ns.register_function("DrawFPS", ::DrawFPS);
 
         // fixme: this is a bit of a hack to convert the string to a C string, but it works for now. We might want to implement a more robust solution in the future.

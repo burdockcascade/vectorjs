@@ -8,6 +8,11 @@ const window_ctx = {
     ToggleFullscreen: _rl.ToggleFullscreen,
     SetTitle: _rl.SetWindowTitle,
     SetTargetFPS: _rl.SetTargetFPS,
+    SetPosition: _rl.SetWindowPosition,
+    SetMonitor: _rl.SetWindowMonitor,
+    SetMinSize: _rl.SetWindowMinSize,
+    SetMaxSize: _rl.SetWindowMaxSize,
+    SetFocused: _rl.SetWindowFocused,
 }
 
 const screen_ctx = {

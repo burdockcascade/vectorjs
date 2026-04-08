@@ -9,7 +9,12 @@
     IsFullscreen: _rl.IsFullscreen,
     ToggleFullscreen: _rl.ToggleFullscreen,
     SetTitle: _rl.SetWindowTitle,
-    SetTargetFPS: _rl.SetTargetFPS
+    SetTargetFPS: _rl.SetTargetFPS,
+    SetPosition: _rl.SetWindowPosition,
+    SetMonitor: _rl.SetWindowMonitor,
+    SetMinSize: _rl.SetWindowMinSize,
+    SetMaxSize: _rl.SetWindowMaxSize,
+    SetFocused: _rl.SetWindowFocused
   };
   var screen_ctx = {
     GetWidth: _rl.GetScreenWidth,
