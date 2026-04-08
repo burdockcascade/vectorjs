@@ -1,4 +1,4 @@
-import {App, Color, Vector2} from "vectorjs";
+import {Application, Color, Vector2} from "vectorjs";
 
 
 const screenWidth = 800;
@@ -48,5 +48,5 @@ class MyApplication {
     }
 };
 
-const app = new App(screenHeight, screenWidth, "Monitor & Window Info");
+const app = new Application(screenHeight, screenWidth, "Monitor & Window Info");
 app.Run(new MyApplication());

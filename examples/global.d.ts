@@ -138,7 +138,7 @@ declare module "vectorjs" {
         WithLayer2D: (cb: (ctx: DrawContext2D) => void) => void;
     }
 
-    export interface IGame {
+    export interface IApplication {
         OnStart?: (ctx: InitContext) => void;
         OnUpdate?: (dt: number, ctx: UpdateContext) => void;
         OnDraw?: (ctx: RenderContext) => void;
@@ -148,9 +148,9 @@ declare module "vectorjs" {
     /**
      * Main App class to run the game loop.
      */
-    export class App {
+    export class Application {
         constructor(height: number, width: number, title: string);
-        Run(game: IGame): void;
+        Run(game: IApplication): void;
         SetConfigFlag(flag: number): void;
         SetFPS(fps: number): void;
         SetExitKey(key: number): void;

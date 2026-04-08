@@ -150,7 +150,7 @@ var renderContext = {
     cb(drawContext2D);
   }
 };
-var App = class {
+var Application = class {
   constructor(height, width, title) {
     this.height = height;
     this.width = width;
@@ -359,7 +359,7 @@ var Vector3 = class _Vector3 {
   }
 };
 export {
-  App,
+  Application,
   Color,
   Vector2,
   Vector3

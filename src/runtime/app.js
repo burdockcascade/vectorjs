@@ -72,7 +72,7 @@ const renderContext = {
     }
 }
 
-export class App {
+export class Application {
 
     constructor(height, width, title) {
         this.height = height;
