@@ -20,6 +20,17 @@ const screenHeight = 450;
 
 class MyApplication {
 
+    constructor() {
+        this.textColor = Color.DARKBLUE;
+        const startPos = { x: 40, y: 40 };
+        const lineSpacing = 30;
+        this.titleTextPos = { x: startPos.x, y: startPos.y }
+        this.totalMonitorTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 2 }
+        this.monitorTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 3 }
+        this.refreshRateTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 4 }
+        this.currentMonitorTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 6 }
+    }
+
     OnUpdate(dt, context) {
         // We can capture real-time window state from the updateContext
         this.currWidth = context.Screen.GetWidth();
@@ -35,25 +46,15 @@ class MyApplication {
 
     OnDraw(render) {
         render.WithLayer2D((ctx) => {
-            const textColor = Color.DARKBLUE;
-            const startPos = { x: 40, y: 40 };
-            const lineSpacing = 30;
-
-            ctx.DrawText("MONITOR & WINDOW STATISTICS", startPos, 25, Color.MAROON);
+            ctx.DrawText("MONITOR & WINDOW STATISTICS", this.titleTextPos, 25, Color.MAROON);
 
             // Displaying captured Monitor Info
-            ctx.DrawText(`Total Monitors: ${this.monCount}`,
-                { x: startPos.x, y: startPos.y + lineSpacing * 2 }, 20, textColor);
-
-            ctx.DrawText(`Monitor ${this.monitorIndex} Physical Size: ${this.physWidth}mm x ${this.physHeight}mm`,
-                { x: startPos.x, y: startPos.y + lineSpacing * 3 }, 20, textColor);
-
-            ctx.DrawText(`Refresh Rate: ${this.refreshRate} Hz`,
-                { x: startPos.x, y: startPos.y + lineSpacing * 4 }, 20, textColor);
+            ctx.DrawText(`Total Monitors: ${this.monCount}`, this.totalMonitorTextPos, 20, this.textColor);
+            ctx.DrawText(`Monitor ${this.monitorIndex} Physical Size: ${this.physWidth}mm x ${this.physHeight}mm`, this.monitorTextPos, 20, this.textColor);
+            ctx.DrawText(`Refresh Rate: ${this.refreshRate} Hz`, this.refreshRateTextPos, 20, this.textColor);
 
             // Displaying real-time Window Info
-            ctx.DrawText(`Current Window: ${this.currWidth}x${this.currHeight}`,
-                { x: startPos.x, y: startPos.y + lineSpacing * 6 }, 20, Color.BLACK);
+            ctx.DrawText(`Current Window: ${this.currWidth}x${this.currHeight}`, this.currentMonitorTextPos, 20, Color.BLACK);
 
             ctx.DrawFPS({ x: 10, y: screenHeight - 30 });
         });
