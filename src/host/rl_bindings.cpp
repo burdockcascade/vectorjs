@@ -46,6 +46,29 @@ namespace RaylibBindings {
         ns.register_function("GetMonitorRefreshRate", ::GetMonitorRefreshRate);
         ns.register_function("GetCurrentMonitor", ::GetCurrentMonitor);
 
+        // Keyboard
+        ns.register_function("IsKeyPressed", ::IsKeyPressed);
+        ns.register_function("IsKeyPressedRepeat", ::IsKeyPressedRepeat);
+        ns.register_function("IsKeyDown", ::IsKeyDown);
+        ns.register_function("IsKeyReleased", ::IsKeyReleased);
+        ns.register_function("IsKeyUp", ::IsKeyUp);
+        ns.register_function("GetKeyPressed", ::GetKeyPressed);
+        ns.register_function("SetExitKey", ::SetExitKey);
+
+        // Mouse
+        ns.register_function("IsMouseButtonPressed", ::IsMouseButtonPressed);
+        ns.register_function("IsMouseButtonDown", ::IsMouseButtonDown);
+        ns.register_function("IsMouseButtonReleased", ::IsMouseButtonReleased);
+        ns.register_function("IsMouseButtonUp", ::IsMouseButtonUp);
+        ns.register_function("GetMouseX", ::GetMouseX);
+        ns.register_function("GetMouseY", ::GetMouseY);
+        ns.register_function("GetMousePosition", ::GetMousePosition);
+        ns.register_function("SetMousePosition", ::SetMousePosition);
+        ns.register_function("SetMouseOffset", ::SetMouseOffset);
+        ns.register_function("SetMouseScale", ::SetMouseScale);
+        ns.register_function("GetMouseWheelMove", ::GetMouseWheelMove);
+        ns.register_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV);
+
         // Drawing
         ns.register_function("BeginDrawing", ::BeginDrawing);
         ns.register_function("EndDrawing", ::EndDrawing);
