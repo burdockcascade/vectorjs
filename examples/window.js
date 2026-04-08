@@ -1,11 +1,9 @@
 const screenWidth = 800;
 const screenHeight = 450;
 
-const app = new App(screenHeight, screenWidth, "Monitor & Window Info");
+class MyApplication {
 
-const game = {
-
-    OnUpdate: (dt, context) => {
+    OnUpdate(dt, context) {
         // We can capture real-time window state from the updateContext
         this.currWidth = context.Screen.GetWidth();
         this.currHeight = context.Screen.GetHeight();
@@ -16,9 +14,9 @@ const game = {
         this.physWidth = context.Monitor.GetPhysicalWidth(this.monitorIndex);
         this.physHeight = context.Monitor.GetPhysicalHeight(this.monitorIndex);
         this.refreshRate = context.Monitor.GetRefreshRate(this.monitorIndex);
-    },
+    }
 
-    OnDraw: (render) => {
+    OnDraw(render) {
         render.WithLayer2D((ctx) => {
             const textColor = Color.DARKBLUE;
             const startPos = { x: 40, y: 40 };
@@ -45,4 +43,5 @@ const game = {
     }
 };
 
-app.Run(game);
+const app = new App(screenHeight, screenWidth, "Monitor & Window Info");
+app.Run(new MyApplication());
