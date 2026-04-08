@@ -1,12 +1,12 @@
 #include <CLI/CLI.hpp>
 #include <raylib.h>
 #include <string>
-#include <exception> // Added for std::exception
+#include <exception> 
 #include "runner.hpp"
 
 int main(const int argc, char** argv) {
 
-    SetTraceLogLevel(LOG_INFO);
+    SetTraceLogLevel(LOG_NONE); 
 
     CLI::App args{"QuickJS Raylib Runner"};
 
