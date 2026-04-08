@@ -20,11 +20,11 @@ jobs:
       - name: Build
         run: xmake -y
       - name: Rename binary
-        run: mv build/windows/x64/release/arge.exe arge-windows-x86_64.exe
+        run: mv build/windows/x64/release/vectorjs.exe vectorjs-windows-x86_64.exe
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: arge-windows-x86_64.exe
+          files: vectorjs-windows-x86_64.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -44,11 +44,11 @@ jobs:
       - name: Build
         run: xmake f -p linux -a x86_64 --sdk=/usr/bin --cc=gcc-14 --cxx=g++-14 -y && xmake -y
       - name: Rename binary
-        run: mv build/linux/x86_64/release/arge arge-linux-x86_64
+        run: mv build/linux/x86_64/release/vectorjs vectorjs-linux-x86_64
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: arge-linux-x86_64
+          files: vectorjs-linux-x86_64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -64,10 +64,10 @@ jobs:
       - name: Build
         run: xmake -y
       - name: Rename binary
-        run: mv build/macosx/arm64/release/arge arge-macos-arm64
+        run: mv build/macosx/arm64/release/vectorjs vectorjs-macos-arm64
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v2
         with:
-          files: arge-macos-arm64
+          files: vectorjs-macos-arm64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
