@@ -1,4 +1,4 @@
-![Build Status](https://github.com/vectorjsdev/vectorjs/actions/workflows/verify-build.yml/badge.svg)
+![Build Status](https://github.com/burdockcascade/vectorjs/actions/workflows/verify-build.yml/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![C++ 23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)
 ![Powered by Raylib](https://img.shields.io/badge/Powered%20by-Raylib_5.5-blue)
