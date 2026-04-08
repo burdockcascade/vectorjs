@@ -6,7 +6,7 @@ set_languages("cxx23")
 add_rules("mode.debug", "mode.release")
 
 add_requires("cli11 2.6.2")
-add_requires("raylib master")
+add_requires("raylib 5.5")
 add_requires("quickjs-ng 0.13.0")
 
 task("compile-runtime")
