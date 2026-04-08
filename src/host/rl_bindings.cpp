@@ -293,7 +293,7 @@ namespace RaylibBindings {
 
     void InitRaylib(qjs::Engine &engine) {
 
-        SetRandomSeed(static_cast<unsigned int>(time(NULL)));
+        SetRandomSeed(static_cast<unsigned int>(time(nullptr)));
 
         auto global = engine.get_global_object();
         auto rl = global.create_object("_rl");
