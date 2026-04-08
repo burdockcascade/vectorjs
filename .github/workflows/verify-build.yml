@@ -5,12 +5,18 @@ concurrency:
 on:
   pull_request:
     branches:
-      - main
-      - master
+      - 'main'
+      - 'master'
+    paths:
+      - 'src/**'
+      - 'examples/**'
   push:
     branches:
-      - main
-      - master
+      - 'main'
+      - 'master'
+    paths:
+      - 'src/**'
+      - 'examples/**'
 jobs:
   windows-build:
     runs-on: windows-latest
