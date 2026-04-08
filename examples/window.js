@@ -14,17 +14,18 @@ class MyApplication {
         this.currentMonitorTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 6 }
     }
 
-    OnUpdate(dt, context) {
+    OnUpdate(dt, ctx) {
+
         // We can capture real-time window state from the updateContext
-        this.currWidth = context.Screen.GetWidth();
-        this.currHeight = context.Screen.GetHeight();
+        this.currWidth = ctx.Screen.GetWidth();
+        this.currHeight = ctx.Screen.GetHeight();
 
         // Update current Monitor info in case of changes (e.g., monitor added/removed)
-        this.monitorIndex = context.Monitor.GetMonitor();
-        this.monCount = context.Monitor.GetCount();
-        this.physWidth = context.Monitor.GetPhysicalWidth(this.monitorIndex);
-        this.physHeight = context.Monitor.GetPhysicalHeight(this.monitorIndex);
-        this.refreshRate = context.Monitor.GetRefreshRate(this.monitorIndex);
+        this.monitorIndex = ctx.Monitor.GetMonitor();
+        this.monCount = ctx.Monitor.GetCount();
+        this.physWidth = ctx.Monitor.GetPhysicalWidth(this.monitorIndex);
+        this.physHeight = ctx.Monitor.GetPhysicalHeight(this.monitorIndex);
+        this.refreshRate = ctx.Monitor.GetRefreshRate(this.monitorIndex);
     }
 
     OnDraw(render) {
