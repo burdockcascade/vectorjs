@@ -1,6 +1,6 @@
 set_project("vectorjs")
 set_description("VectorJS")
-set_version("0.0.0") -- x-release-please-version
+set_version("0.0.1") -- x-release-please-version
 set_languages("cxx23")
 
 add_rules("mode.debug", "mode.release")
