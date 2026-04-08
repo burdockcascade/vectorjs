@@ -1,7 +1,7 @@
 name: Verify Build
 concurrency:
-  group: verify-build
-  cancel-in-progress: false
+  group: verify-build-${github.ref}
+  cancel-in-progress: true
 on:
   pull_request:
     branches:
