@@ -17,6 +17,7 @@
 #include <type_traits>
 
 #include <quickjs.h>
+#include <ranges>
 
 namespace qjs {
 
@@ -246,13 +247,25 @@ namespace qjs {
         Engine() : rt(JS_NewRuntime()), ctx(JS_NewContext(rt.get())) {
             global_obj = JS_GetGlobalObject(ctx.get());
         }
-        ~Engine() { JS_FreeValue(ctx.get(), global_obj); }
+        ~Engine() {
+            for (const auto &mod: embedded_modules | std::views::values) {
+                JS_FreeValue(ctx.get(), mod);
+            }
+            JS_FreeValue(ctx.get(), global_obj);
+        }
 
         // Script execution
         inline std::expected<std::string, std::string> eval_global(std::string_view code, std::string_view file) const;
         inline std::expected<std::string, std::string> eval_module(std::string_view code, std::string_view file) const;
         inline std::expected<std::string, std::string> run_file(const std::filesystem::path& p) const;
+
+        std::expected<std::string, std::string> run_file_as_module(const std::filesystem::path &p) const;
+
         inline std::expected<std::string, std::string> run_bytecode(const uint8_t* bytecode, size_t len) const;
+
+        void set_module_loader(JSModuleLoaderFunc* loader, void* opaque = nullptr) const;
+
+        void register_bytecode_module(const std::string_view &name, const uint8_t* bytecode, size_t len);
 
         // Object binding
         inline ObjectBinder create_object(std::string_view name);
@@ -286,6 +299,8 @@ namespace qjs {
             }
         }
 
+        std::unordered_map<std::string, JSValue> embedded_modules;
+
     private:
         struct RTDel { void operator()(JSRuntime* r) const { JS_FreeRuntime(r); } };
         struct CTDel { void operator()(JSContext* c) const { JS_FreeContext(c); } };
@@ -298,6 +313,10 @@ namespace qjs {
     };
 
     // ==== INLINE IMPLEMENTATION ====
+
+    inline void Engine::set_module_loader(JSModuleLoaderFunc* loader, void* opaque) const {
+        JS_SetModuleLoaderFunc(rt.get(), nullptr, loader, opaque);
+    }
 
     inline std::expected<std::string, std::string> Engine::eval_global(std::string_view code, std::string_view filename) const {
         return wrap_result(JS_Eval(ctx.get(), code.data(), code.size(), filename.data(), JS_EVAL_TYPE_GLOBAL));
@@ -319,6 +338,26 @@ namespace qjs {
         std::stringstream b;
         b << f.rdbuf();
         return eval_global(b.str(), p.filename().string());
+    }
+
+    inline std::expected<std::string, std::string> Engine::run_file_as_module(const std::filesystem::path& p) const {
+        std::ifstream f(p);
+        if (!f) return std::unexpected("File not found: " + p.string());
+        std::stringstream b;
+        b << f.rdbuf();
+        return eval_module(b.str(), p.filename().string());
+    }
+
+    inline void Engine::register_bytecode_module(const std::string_view &name, const uint8_t* bytecode, size_t len) {
+        const auto mod_obj = JS_ReadObject(ctx.get(), bytecode, len, JS_READ_OBJ_BYTECODE);
+
+        if (JS_IsException(mod_obj)) {
+            std::string msg = converter<std::string>::get(ctx.get(), mod_obj);
+            JS_FreeValue(ctx.get(), mod_obj);
+            return;
+        }
+
+        embedded_modules[name.data()] = mod_obj;
     }
 
     inline ObjectBinder Engine::create_object(std::string_view name) {

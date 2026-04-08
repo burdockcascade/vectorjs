@@ -11,7 +11,7 @@ add_requires("quickjs-ng 0.13.0")
 
 task("compile-runtime")
     on_run(function ()
-        os.execv("npx.cmd", {"esbuild", "src/runtime/runtime.js", "--bundle", "--outfile=src/runtime/dist.js"})
+        os.execv("npx.cmd", {"esbuild", "src/runtime/runtime.js", "--bundle", "--target=es2023", "--format=esm", "--outfile=src/runtime/dist.js"})
         os.execv("qjsc", {"-s", "-s", "-n", "runtime.js", "-N", "qjsc_runtime", "-C", "-m", "-o", "src/host/runtime.hpp", "src/runtime/dist.js"})
         print("JavaScript runtime compiled to src/app/runtime.h")
     end)

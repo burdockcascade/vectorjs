@@ -1,3 +1,6 @@
+import {App, Color, Vector2} from "vectorjs";
+
+
 const screenWidth = 800;
 const screenHeight = 450;
 
@@ -5,7 +8,7 @@ class MyApplication {
 
     constructor() {
         this.textColor = Color.DARKBLUE;
-        const startPos = { x: 40, y: 40 };
+        const startPos = new Vector2( 40, 40 );
         const lineSpacing = 30;
         this.titleTextPos = { x: startPos.x, y: startPos.y }
         this.totalMonitorTextPos = { x: startPos.x, y: startPos.y + lineSpacing * 2 }
@@ -40,7 +43,7 @@ class MyApplication {
             // Displaying real-time Window Info
             ctx.DrawText(`Current Window: ${this.currWidth}x${this.currHeight}`, this.currentMonitorTextPos, 20, Color.BLACK);
 
-            ctx.DrawFPS({ x: 10, y: screenHeight - 30 });
+            ctx.DrawFPS(new Vector2(10, screenHeight - 30));
         });
     }
 };

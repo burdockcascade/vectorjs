@@ -6,7 +6,7 @@
 
 int main(const int argc, char** argv) {
 
-    SetTraceLogLevel(LOG_NONE); 
+    SetTraceLogLevel(LOG_ALL);
 
     CLI::App args{"QuickJS Raylib Runner"};
 
@@ -18,7 +18,7 @@ int main(const int argc, char** argv) {
 
     // Optional flag for verbose logging
     bool verbose = false;
-    args.add_flag("-v,--verbose", verbose, "Enable verbose logging");
+    args.add_flag("-d,--debug", verbose, "Enable debug logging");
 
     // Enable verbose logging if the flag is set
     if (verbose) {

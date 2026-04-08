@@ -1,3 +1,5 @@
+import { Color } from './color.js';
+
 const window_ctx = {
     IsReady: _rl.IsWindowReady,
     IsMinimized: _rl.IsWindowMinimized,
