@@ -11,7 +11,7 @@ class MyApplication {
             ctx.DrawFPS(fpsPos);
         });
     }
-};
+}
 
 const app = new Application(screenHeight, screenWidth, "Monitor & Window Info");
 app.Run(new MyApplication());

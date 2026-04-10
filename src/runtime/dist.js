@@ -1,3 +1,6 @@
+// src/runtime/app.js
+import { Core, Shapes, Text } from "Raylib";
+
 // src/runtime/color.js
 var Color = class _Color {
   constructor(r = 255, g = 255, b = 255, a = 255) {
@@ -87,33 +90,33 @@ var Color = class _Color {
 
 // src/runtime/app.js
 var window_ctx = {
-  IsReady: _rl.IsWindowReady,
-  IsMinimized: _rl.IsWindowMinimized,
-  IsResized: _rl.IsWindowResized,
-  IsHidden: _rl.IsWindowHidden,
-  IsFocused: _rl.IsWindowFocused,
-  IsFullscreen: _rl.IsFullscreen,
-  ToggleFullscreen: _rl.ToggleFullscreen,
-  SetTitle: _rl.SetWindowTitle,
-  SetTargetFPS: _rl.SetTargetFPS,
-  SetPosition: _rl.SetWindowPosition,
-  SetMonitor: _rl.SetWindowMonitor,
-  SetMinSize: _rl.SetWindowMinSize,
-  SetMaxSize: _rl.SetWindowMaxSize,
-  SetFocused: _rl.SetWindowFocused
+  IsReady: Core.IsWindowReady,
+  IsMinimized: Core.IsWindowMinimized,
+  IsResized: Core.IsWindowResized,
+  IsHidden: Core.IsWindowHidden,
+  IsFocused: Core.IsWindowFocused,
+  IsFullscreen: Core.IsWindowFullscreen,
+  ToggleFullscreen: Core.ToggleFullscreen,
+  SetTitle: Core.SetWindowTitle,
+  SetTargetFPS: Core.SetTargetFPS,
+  SetPosition: Core.SetWindowPosition,
+  SetMonitor: Core.SetWindowMonitor,
+  SetMinSize: Core.SetWindowMinSize,
+  SetMaxSize: Core.SetWindowMaxSize,
+  SetFocused: Core.SetWindowFocused
 };
 var screen_ctx = {
-  GetWidth: _rl.GetScreenWidth,
-  GetHeight: _rl.GetScreenHeight
+  GetWidth: Core.GetScreenWidth,
+  GetHeight: Core.GetScreenHeight
 };
 var monitor_ctx = {
-  GetCount: _rl.GetMonitorCount,
-  GetWidth: _rl.GetMonitorWidth,
-  GetHeight: _rl.GetMonitorHeight,
-  GetPhysicalWidth: _rl.GetMonitorPhysicalWidth,
-  GetPhysicalHeight: _rl.GetMonitorPhysicalHeight,
-  GetRefreshRate: _rl.GetMonitorRefreshRate,
-  GetMonitor: _rl.GetCurrentMonitor
+  GetCount: Core.GetMonitorCount,
+  GetWidth: Core.GetMonitorWidth,
+  GetHeight: Core.GetMonitorHeight,
+  GetPhysicalWidth: Core.GetMonitorPhysicalWidth,
+  GetPhysicalHeight: Core.GetMonitorPhysicalHeight,
+  GetRefreshRate: Core.GetMonitorRefreshRate,
+  GetMonitor: Core.GetCurrentMonitor
 };
 var initContext = {
   Window: window_ctx,
@@ -121,31 +124,30 @@ var initContext = {
   Monitor: monitor_ctx
 };
 var updateContext = {
-  GetFrameTime: _rl.GetFrameTime,
+  GetFrameTime: Core.GetFrameTime,
   Input: {
-    IsKeyDown: _rl.IsKeyDown,
-    IsKeyUp: _rl.IsKeyUp,
-    IsKeyPressed: _rl.IsKeyPressed
+    IsKeyDown: Core.IsKeyDown,
+    IsKeyUp: Core.IsKeyUp,
+    IsKeyPressed: Core.IsKeyPressed
   },
   Mouse: {
-    GetPosition: _rl.GetMousePosition,
-    GetDelta: _rl.GetMouseDelta,
-    IsButtonDown: _rl.IsMouseButtonDown,
-    IsButtonUp: _rl.IsMouseButtonUp,
-    IsButtonPressed: _rl.IsMouseButtonPressed
+    GetPosition: Core.GetMousePosition,
+    GetDelta: Core.GetMouseDelta,
+    IsButtonDown: Core.IsMouseButtonDown,
+    IsButtonUp: Core.IsMouseButtonUp,
+    IsButtonPressed: Core.IsMouseButtonPressed
   },
   Window: window_ctx,
   Screen: screen_ctx,
   Monitor: monitor_ctx
 };
 var drawContext2D = {
-  DrawFPS: (position) => _rl.DrawFPS(position.x, position.y),
-  DrawRectangle: (position, size, color) => _rl.DrawRectangle(position.x, position.y, size.x, size.y, color),
-  DrawCircle: (position, radius, color) => _rl.DrawCircle(position.x, position.y, radius, color),
-  DrawText: (text, position, size, color) => _rl.DrawText(text, position.x, position.y, size, color)
+  DrawFPS: (position) => Text.DrawFPS(position.x, position.y),
+  DrawRectangle: (position, size, color) => Shapes.DrawRectangle(position.x, position.y, size.x, size.y, color),
+  DrawCircle: (position, radius, color) => Shapes.DrawCircle(position.x, position.y, radius, color),
+  DrawText: (text, position, size, color) => Text.DrawText(text, position.x, position.y, size, color)
 };
 var renderContext = {
-  SetBackgroundColor: _rl.SetBackgroundColor,
   WithLayer2D: (cb) => {
     cb(drawContext2D);
   }
@@ -158,35 +160,35 @@ var Application = class {
     this.fps = 60;
   }
   Run(game) {
-    _rl.InitWindow(this.width, this.height, this.title);
-    _rl.SetTargetFPS(this.fps);
+    Core.InitWindow(this.width, this.height, this.title);
+    Core.SetTargetFPS(this.fps);
     if (game.OnStart) {
       game.OnStart(initContext);
     }
-    while (!_rl.WindowShouldClose()) {
+    while (!Core.WindowShouldClose()) {
       if (game.OnUpdate) {
-        game.OnUpdate(_rl.GetFrameTime(), updateContext);
+        game.OnUpdate(Core.GetFrameTime(), updateContext);
       }
-      _rl.BeginDrawing();
-      _rl.ClearBackground(Color.WHITE);
+      Core.BeginDrawing();
+      Core.ClearBackground(Color.WHITE);
       if (game.OnDraw) {
         game.OnDraw(renderContext);
       }
-      _rl.EndDrawing();
+      Core.EndDrawing();
     }
     if (game.OnEnd) {
       game.OnEnd();
     }
-    _rl.CloseWindow();
+    Core.CloseWindow();
   }
   SetConfigFlag(flag) {
-    _rl.SetConfigFlag(flag);
+    Core.SetConfigFlag(flag);
   }
   SetFPS(fps) {
     this.fps = fps;
   }
   SetExitKey(key) {
-    _rl.SetExitKey(key);
+    Core.SetExitKey(key);
   }
 };
 
