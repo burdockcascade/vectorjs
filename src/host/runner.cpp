@@ -1,7 +1,6 @@
 #include <string>
 #include <fstream>
 #include "runner.hpp"
-#include "runtime.hpp"
 #include "qjs_wrapper.hpp"
 #include "modules/rl_module.hpp"
 
@@ -12,17 +11,17 @@ static void declare_api(qjs::Engine& engine) {
     auto console = engine.make_object();
 
     // Basic logging functions
-    console.set("log", [](std::string msg) {
+    console.set("log", [](const std::string& msg) {
         TraceLog(LOG_INFO, "%s", msg.c_str());
     });
 
     // Error logging
-    console.set("error", [](std::string msg) {
+    console.set("error", [](const std::string& msg) {
         TraceLog(LOG_ERROR, "%s", msg.c_str());
     });
 
     // Warning logging
-    console.set("warn", [](std::string msg) {
+    console.set("warn", [](const std::string& msg) {
         TraceLog(LOG_WARNING, "%s", msg.c_str());
     });
 
@@ -32,9 +31,10 @@ Runner::Runner(std::string path) : scriptPath(std::move(path)) {
     declare_api(engine);
     RaylibModule::register_raylib_module(engine);
 
+    // todo: runtime for future release
     // Load runtime bytecode
-    TraceLog(LOG_DEBUG, "Loading runtime");
-    engine.register_module_bytecode("vectorjs", qjsc_runtime, qjsc_runtime_size);
+    //TraceLog(LOG_DEBUG, "Loading runtime");
+    //engine.register_module_bytecode("vectorjs", qjsc_runtime, qjsc_runtime_size);
 
 }
 
@@ -48,9 +48,8 @@ void Runner::Run() const {
 
     // Run user script
     TraceLog(LOG_INFO, "Running script: %s", scriptPath.c_str());
-    if (auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module); !result) {
+    if (const auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module); !result) {
         TraceLog(LOG_ERROR, "Failed to run script: %s", result.error().c_str());
-        return;
     }
 
 }
