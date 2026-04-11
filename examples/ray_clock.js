@@ -6,6 +6,7 @@ const screenHeight = 600;
 const centerX = screenWidth / 2;
 const centerY = screenHeight / 2;
 const clockRadius = 250;
+const isTicking = true;
 
 Core.InitWindow(screenWidth, screenHeight, "Raylib JS - Analog Clock");
 Core.SetTargetFPS(60);
@@ -36,7 +37,9 @@ function drawHand(value, max, length, thickness, color) {
 while (!Core.WindowShouldClose()) {
     // Get Current Time
     const now = new Date();
-    const sec = now.getSeconds() + now.getMilliseconds() / 1000;
+    const sec = isTicking
+        ? now.getSeconds()
+        : now.getSeconds() + (now.getMilliseconds() / 1000);
     const min = now.getMinutes() + sec / 60;
     const hrs = (now.getHours() % 12) + min / 60;
 
