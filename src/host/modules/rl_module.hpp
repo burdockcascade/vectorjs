@@ -55,5 +55,5 @@ namespace qjs {
 }
 
 namespace RaylibModule {
-    void RegisterRaylibModule(qjs::Engine &engine);
+    void register_raylib_module(qjs::Engine &engine);
 }

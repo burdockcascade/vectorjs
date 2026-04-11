@@ -4,7 +4,7 @@
 
 namespace RaylibModule {
 
-    static void RegisterRaylibFunctions(const qjs::Engine &engine, qjs::Module &module) {
+    static void register_raylib_functions(const qjs::Engine &engine, qjs::Module &module) {
 
         // Core functions
         auto core_obj = engine.make_object()
@@ -97,6 +97,10 @@ namespace RaylibModule {
             .set("MeasureTextEx", ::MeasureTextEx);
         module.add("Text", text_obj);
 
+    }
+
+    static void register_raylib_objects_objects(const qjs::Engine &engine, qjs::Module &module) {
+
         auto info_obj = engine.make_object()
             .set("Version", RAYLIB_VERSION)
             .set("VersionMajor", RAYLIB_VERSION_MAJOR)
@@ -105,12 +109,8 @@ namespace RaylibModule {
             .set("Website", "https://www.raylib.com");
         module.add("Info", info_obj);
 
-    }
-
-    static void RegisterRaylibEnums(qjs::Engine &ns, qjs::Module &module) {
-
         // Enum: ConfigFlags
-        auto ConfigFlags_obj = ns.make_object()
+        auto ConfigFlags_obj = engine.make_object()
             .set("FLAG_VSYNC_HINT", FLAG_VSYNC_HINT)
             .set("FLAG_FULLSCREEN_MODE", FLAG_FULLSCREEN_MODE)
             .set("FLAG_WINDOW_RESIZABLE", FLAG_WINDOW_RESIZABLE)
@@ -130,7 +130,7 @@ namespace RaylibModule {
         module.add("ConfigFlags", ConfigFlags_obj);
 
         // Enum: KeyboardKey
-        auto KeyboardKey_obj = ns.make_object()
+        auto KeyboardKey_obj = engine.make_object()
             .set("KEY_NULL", KEY_NULL)
             .set("KEY_APOSTROPHE", KEY_APOSTROPHE)
             .set("KEY_COMMA", KEY_COMMA)
@@ -244,7 +244,7 @@ namespace RaylibModule {
         module.add("KeyboardKey", KeyboardKey_obj);
 
         // Enum: MouseButton
-        auto MouseButton_obj = ns.make_object()
+        auto MouseButton_obj = engine.make_object()
             .set("MOUSE_BUTTON_LEFT", MOUSE_BUTTON_LEFT)
             .set("MOUSE_BUTTON_RIGHT", MOUSE_BUTTON_RIGHT)
             .set("MOUSE_BUTTON_MIDDLE", MOUSE_BUTTON_MIDDLE)
@@ -255,7 +255,7 @@ namespace RaylibModule {
         module.add("MouseButton", MouseButton_obj);
 
         // Enum: MouseCursor
-        auto MouseCursor_obj = ns.make_object()
+        auto MouseCursor_obj = engine.make_object()
             .set("MOUSE_CURSOR_DEFAULT", MOUSE_CURSOR_DEFAULT)
             .set("MOUSE_CURSOR_ARROW", MOUSE_CURSOR_ARROW)
             .set("MOUSE_CURSOR_IBEAM", MOUSE_CURSOR_IBEAM)
@@ -270,7 +270,7 @@ namespace RaylibModule {
         module.add("MouseCursor", MouseCursor_obj);
 
         // Enum: GamepadButton
-        auto GamepadButton_obj = ns.make_object()
+        auto GamepadButton_obj = engine.make_object()
             .set("GAMEPAD_BUTTON_UNKNOWN", GAMEPAD_BUTTON_UNKNOWN)
             .set("GAMEPAD_BUTTON_LEFT_FACE_UP", GAMEPAD_BUTTON_LEFT_FACE_UP)
             .set("GAMEPAD_BUTTON_LEFT_FACE_RIGHT", GAMEPAD_BUTTON_LEFT_FACE_RIGHT)
@@ -292,7 +292,7 @@ namespace RaylibModule {
         module.add("GamepadButton", GamepadButton_obj);
 
         // Enum: GamepadAxis
-        auto GamepadAxis_obj = ns.make_object()
+        auto GamepadAxis_obj = engine.make_object()
             .set("GAMEPAD_AXIS_LEFT_X", GAMEPAD_AXIS_LEFT_X)
             .set("GAMEPAD_AXIS_LEFT_Y", GAMEPAD_AXIS_LEFT_Y)
             .set("GAMEPAD_AXIS_RIGHT_X", GAMEPAD_AXIS_RIGHT_X)
@@ -302,7 +302,7 @@ namespace RaylibModule {
         module.add("GamepadAxis", GamepadAxis_obj);
 
         // Enum: CameraMode
-        auto CameraMode_obj = ns.make_object()
+        auto CameraMode_obj = engine.make_object()
             .set("CAMERA_CUSTOM", CAMERA_CUSTOM)
             .set("CAMERA_FREE", CAMERA_FREE)
             .set("CAMERA_ORBITAL", CAMERA_ORBITAL)
@@ -311,25 +311,23 @@ namespace RaylibModule {
         module.add("CameraMode", CameraMode_obj);
 
         // Enum: CameraProjection
-        auto CameraProjection_obj = ns.make_object()
+        auto CameraProjection_obj = engine.make_object()
             .set("CAMERA_PERSPECTIVE", CAMERA_PERSPECTIVE)
             .set("CAMERA_ORTHOGRAPHIC", CAMERA_ORTHOGRAPHIC);
         module.add("CameraProjection", CameraProjection_obj);
 
     }
 
-    void RegisterRaylibModule(qjs::Engine &engine) {
-
-        SetRandomSeed(static_cast<unsigned int>(time(nullptr)));
+    void register_raylib_module(qjs::Engine &engine) {
 
         // Create the module and get a reference to it for further exports
         auto raylib_mod = engine.define_module("Raylib");
 
         // Initialize all function groups in the module
-        RegisterRaylibFunctions(engine, raylib_mod);
+        register_raylib_functions(engine, raylib_mod);
 
         // Initialize all enums in the module
-        RegisterRaylibEnums(engine, raylib_mod);
+        register_raylib_objects_objects(engine, raylib_mod);
 
     }
 

@@ -30,7 +30,7 @@ static void declare_api(qjs::Engine& engine) {
 
 Runner::Runner(std::string path) : scriptPath(std::move(path)) {
     declare_api(engine);
-    RaylibModule::RegisterRaylibModule(engine);
+    RaylibModule::register_raylib_module(engine);
 
     // Load runtime bytecode
     TraceLog(LOG_DEBUG, "Loading runtime");
