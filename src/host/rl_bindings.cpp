@@ -87,7 +87,7 @@ namespace RaylibBindings {
         // Initialize Core functions in the module
         module.add("Core", core_obj);
 
-        // SHAPES
+        // ---- SHAPES ----
         auto shapes_obj = engine.make_object();
 
         // Rectangle
@@ -113,16 +113,12 @@ namespace RaylibBindings {
         // Initialize Shapes functions in the module
         module.add("Shapes", shapes_obj);
 
-        // TEXT
+        // ---- TEXT ----
         auto text_obj = engine.make_object();
 
         // Text
         text_obj.set("DrawFPS", ::DrawFPS);
-
-        // fixme: this is a bit of a hack to convert the string to a C string, but it works for now. We might want to implement a more robust solution in the future.
-        text_obj.set("DrawText", [](const std::string& text, int x, int y, int fontSize, Color color) {
-            ::DrawText(text.c_str(), x, y, fontSize, color);
-        });
+        text_obj.set("DrawText", ::DrawText);
 
         // Initialize Text functions in the module
         module.add("Text", text_obj);
