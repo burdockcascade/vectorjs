@@ -1,6 +1,6 @@
 ## How To Run
 ```shell
-$ xmake run [target]
+xmake run [target]
 ```
 
 ## Examples
