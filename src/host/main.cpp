@@ -8,7 +8,7 @@ int main(const int argc, char** argv) {
 
     SetTraceLogLevel(LOG_NONE);
 
-    CLI::App args{"QuickJS Raylib Runner"};
+    CLI::App args{"VectorJS"};
 
     // Required option for script path
     std::string scriptPath;
