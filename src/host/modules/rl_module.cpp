@@ -90,7 +90,11 @@ namespace RaylibModule {
         // Text functions
         auto text_obj = engine.make_object()
             .set("DrawFPS", ::DrawFPS)
-            .set("DrawText", ::DrawText);
+            .set("DrawText", ::DrawText)
+            .set("DrawTextEx", ::DrawTextEx)
+            .set("DrawTextPro", ::DrawTextPro)
+            .set("MeasureText", ::MeasureText)
+            .set("MeasureTextEx", ::MeasureTextEx);
         module.add("Text", text_obj);
 
     }
