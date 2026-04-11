@@ -65,13 +65,13 @@ namespace RaylibBindings {
         core_obj.set("IsMouseButtonUp", ::IsMouseButtonUp);
         core_obj.set("GetMouseX", ::GetMouseX);
         core_obj.set("GetMouseY", ::GetMouseY);
-        // fixme core_obj.set("GetMousePosition", ::GetMousePosition);
-        // fixme core_obj.set("GetMouseDelta", ::GetMouseDelta);
+        core_obj.set("GetMousePosition", ::GetMousePosition);
+        core_obj.set("GetMouseDelta", ::GetMouseDelta);
         core_obj.set("SetMousePosition", ::SetMousePosition);
         core_obj.set("SetMouseOffset", ::SetMouseOffset);
         core_obj.set("SetMouseScale", ::SetMouseScale);
         core_obj.set("GetMouseWheelMove", ::GetMouseWheelMove);
-        // fixme core_obj.set("GetMouseWheelMoveV", ::GetMouseWheelMoveV);
+        core_obj.set("GetMouseWheelMoveV", ::GetMouseWheelMoveV);
 
         // Drawing
         core_obj.set("BeginDrawing", ::BeginDrawing);

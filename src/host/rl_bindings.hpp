@@ -23,13 +23,13 @@ namespace qjs {
 
             return Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a)};
         }
-        static JSValue put(JSContext* ctx, Color val) {
+        static Value put(JSContext* ctx, Color val) {
             const JSValue obj = JS_NewObject(ctx);
             JS_SetPropertyStr(ctx, obj, "r", JS_NewInt32(ctx, val.r));
             JS_SetPropertyStr(ctx, obj, "g", JS_NewInt32(ctx, val.g));
             JS_SetPropertyStr(ctx, obj, "b", JS_NewInt32(ctx, val.b));
             JS_SetPropertyStr(ctx, obj, "a", JS_NewInt32(ctx, val.a));
-            return obj;
+            return { ctx, obj };
         }
     };
 
@@ -44,11 +44,11 @@ namespace qjs {
             JS_FreeValue(ctx, x_val); JS_FreeValue(ctx, y_val);
             return Vector2{static_cast<float>(x), static_cast<float>(y)};
         }
-        static JSValue put(JSContext* ctx, Vector2 val) {
+        static Value put(JSContext* ctx, Vector2 val) {
             const JSValue obj = JS_NewObject(ctx);
             JS_SetPropertyStr(ctx, obj, "x", JS_NewFloat64(ctx, val.x));
             JS_SetPropertyStr(ctx, obj, "y", JS_NewFloat64(ctx, val.y));
-            return obj;
+            return { ctx, obj };
         }
     };
 
