@@ -97,6 +97,14 @@ namespace RaylibModule {
             .set("MeasureTextEx", ::MeasureTextEx);
         module.add("Text", text_obj);
 
+        auto info_obj = engine.make_object()
+            .set("Version", RAYLIB_VERSION)
+            .set("VersionMajor", RAYLIB_VERSION_MAJOR)
+            .set("VersionMinor", RAYLIB_VERSION_MINOR)
+            .set("VersionPatch", RAYLIB_VERSION_PATCH)
+            .set("Website", "https://www.raylib.com");
+        module.add("Info", info_obj);
+
     }
 
     static void RegisterRaylibEnums(qjs::Engine &ns, qjs::Module &module) {

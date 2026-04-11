@@ -306,4 +306,17 @@ declare module "Raylib" {
         function MeasureText(text: string, fontSize: number): number;
         function MeasureTextEx(font: any, text: string, fontSize: number, spacing: number): Vector2;
     }
+
+    export namespace Info {
+        /** The full version string (e.g., "5.5") */
+        const Version: string;
+        /** The major version number */
+        const VersionMajor: number;
+        /** The minor version number */
+        const VersionMinor: number;
+        /** The patch version number */
+        const VersionPatch: number;
+        /** The official Raylib website URL */
+        const Website: string;
+    }
 }
