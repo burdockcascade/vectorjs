@@ -6,7 +6,7 @@ namespace qjs {
 
     template<>
     struct converter<Color> {
-        static Color get(JSContext* ctx, JSValueConst v) {
+        static Color get(JSContext* ctx, const JSValue v) {
             uint32_t r, g, b, a;
             const JSValue r_val = JS_GetPropertyStr(ctx, v, "r");
             const JSValue g_val = JS_GetPropertyStr(ctx, v, "g");
@@ -23,7 +23,7 @@ namespace qjs {
 
             return Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a)};
         }
-        static Value put(JSContext* ctx, Color val) {
+        static Value put(JSContext* ctx, const Color val) {
             const JSValue obj = JS_NewObject(ctx);
             JS_SetPropertyStr(ctx, obj, "r", JS_NewInt32(ctx, val.r));
             JS_SetPropertyStr(ctx, obj, "g", JS_NewInt32(ctx, val.g));
@@ -35,7 +35,7 @@ namespace qjs {
 
     template<>
     struct converter<Vector2> {
-        static Vector2 get(JSContext* ctx, JSValueConst v) {
+        static Vector2 get(JSContext* ctx, const JSValue v) {
             double x, y;
             const JSValue x_val = JS_GetPropertyStr(ctx, v, "x");
             const JSValue y_val = JS_GetPropertyStr(ctx, v, "y");
@@ -44,7 +44,7 @@ namespace qjs {
             JS_FreeValue(ctx, x_val); JS_FreeValue(ctx, y_val);
             return Vector2{static_cast<float>(x), static_cast<float>(y)};
         }
-        static Value put(JSContext* ctx, Vector2 val) {
+        static Value put(JSContext* ctx, const Vector2 val) {
             const JSValue obj = JS_NewObject(ctx);
             JS_SetPropertyStr(ctx, obj, "x", JS_NewFloat64(ctx, val.x));
             JS_SetPropertyStr(ctx, obj, "y", JS_NewFloat64(ctx, val.y));
