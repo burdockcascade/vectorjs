@@ -3,7 +3,7 @@
 #include "runner.hpp"
 #include "runtime.hpp"
 #include "qjs_wrapper.hpp"
-#include "rl_bindings.hpp"
+#include "modules/rl_module.hpp"
 
 static void declare_api(qjs::Engine& engine) {
     auto global = engine.global();
@@ -30,7 +30,7 @@ static void declare_api(qjs::Engine& engine) {
 
 Runner::Runner(std::string path) : scriptPath(std::move(path)) {
     declare_api(engine);
-    RaylibBindings::InitRaylib(engine);
+    RaylibModule::RegisterRaylibModule(engine);
 
     // Load runtime bytecode
     TraceLog(LOG_DEBUG, "Loading runtime");

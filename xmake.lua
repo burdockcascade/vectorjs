@@ -41,5 +41,5 @@ task("compile-runtime")
 
 target("vectorjs")
     set_kind("binary")
-    add_files("src/host/*.cpp")
+    add_files("src/host/**.cpp")
     add_packages("cli11", "raylib", "quickjs-ng")

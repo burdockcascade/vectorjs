@@ -1,6 +1,6 @@
 #pragma once
 #include <raylib.h>
-#include "qjs_wrapper.hpp"
+#include "../qjs_wrapper.hpp"
 
 namespace qjs {
 
@@ -54,6 +54,6 @@ namespace qjs {
 
 }
 
-namespace RaylibBindings {
-    void InitRaylib(qjs::Engine &engine);
+namespace RaylibModule {
+    void RegisterRaylibModule(qjs::Engine &engine);
 }
