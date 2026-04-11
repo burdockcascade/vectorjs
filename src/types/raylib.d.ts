@@ -3,7 +3,7 @@
  * Based on the rl_module.cpp mappings.
  */
 
-declare module "Raylib" {
+declare module "src/types/raylib" {
     // --- Raylib Structs ---
     export interface Vector2 {
         x: number;

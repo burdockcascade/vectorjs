@@ -1,4 +1,4 @@
-declare module "vectorjs" {
+declare module "src/types/vectorjs" {
     /**
      * Vector2 math for 2D operations.
      */
