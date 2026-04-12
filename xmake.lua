@@ -8,6 +8,7 @@ add_rules("mode.debug", "mode.release")
 add_requires("cli11 2.6.2")
 add_requires("raylib 5.5")
 add_requires("quickjs-ng 0.13.0")
+add_requires("spdlog 1.17")
 
 task("compile-runtime")
     on_run(function ()
@@ -42,4 +43,8 @@ task("compile-runtime")
 target("vectorjs")
     set_kind("binary")
     add_files("src/host/**.cpp")
-    add_packages("cli11", "raylib", "quickjs-ng")
+    add_packages("cli11", "raylib", "quickjs-ng", "spdlog")
+
+    if is_plat("windows") then
+        add_defines("WIN32_LEAN_AND_MEAN", "NOGDI", "NOUSER")
+    end

@@ -4,6 +4,7 @@
 #include "runner.hpp"
 #include "qjs_wrapper.hpp"
 #include "modules/rl_module.hpp"
+#include "logger.hpp"
 
 static void register_console_object(qjs::Engine& engine) {
     auto global = engine.global();
@@ -13,17 +14,17 @@ static void register_console_object(qjs::Engine& engine) {
 
     // Basic logging functions
     console.set("log", [](std::string msg) {
-        std::println("[log] {}", msg);
+        Log::Info("{}", msg);
     });
 
     // Error logging
     console.set("error", [](std::string msg) {
-        std::println("[error] {}", msg);
+        Log::Error("{}", msg);
     });
 
     // Warning logging
     console.set("warn", [](std::string msg) {
-        std::println("[warn] {}", msg);
+        Log::Warn("{}", msg);
     });
 
     global.set("console", std::move(console));
@@ -44,7 +45,7 @@ Runner::Runner(std::string path) : scriptPath(std::move(path)) {
 void Runner::Run() const {
 
     // Run user script
-    TraceLog(LOG_INFO, "Running script: %s", scriptPath.c_str());
+    Log::Info("Running script: {}", scriptPath);
     if (const auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module); !result) {
         std::println("Error: {}", result.error());
     }
