@@ -39,14 +39,11 @@ static void show_bsod(const std::string &errStr) {
 
 void Runner::Run() const {
 
-    // Run user script
-    Log::Debug("Running script: {}", scriptPath);
     auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module);
 
     // Check if the script evaluation returned an error
     if (!result.has_value()) {
         std::string errStr = result.error().to_string();
-        Log::Error("{}", errStr);
         show_bsod(errStr);
     }
 }
