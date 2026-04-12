@@ -52,6 +52,46 @@ namespace qjs {
         }
     };
 
+    template<>
+    struct converter<Texture> {
+        static Texture get(JSContext* ctx, const JSValue v) {
+            uint32_t id;
+            int32_t width;
+            int32_t height;
+            int32_t mipmaps;
+            int32_t format;
+
+            const JSValue id_val = JS_GetPropertyStr(ctx, v, "id");
+            const JSValue width_val = JS_GetPropertyStr(ctx, v, "width");
+            const JSValue height_val = JS_GetPropertyStr(ctx, v, "height");
+            const JSValue mipmaps_val = JS_GetPropertyStr(ctx, v, "mipmaps");
+            const JSValue format_val = JS_GetPropertyStr(ctx, v, "format");
+
+            JS_ToUint32(ctx, &id, id_val);
+            JS_ToInt32(ctx, &width, width_val);
+            JS_ToInt32(ctx, &height, height_val);
+            JS_ToInt32(ctx, &mipmaps, mipmaps_val);
+            JS_ToInt32(ctx, &format, format_val);
+
+            JS_FreeValue(ctx, id_val); 
+            JS_FreeValue(ctx, width_val);
+            JS_FreeValue(ctx, height_val);
+            JS_FreeValue(ctx, mipmaps_val);
+            JS_FreeValue(ctx, format_val);
+            return Texture{id, width, height, mipmaps, format};
+        }
+
+        static Value put(JSContext* ctx, const Texture &val) {
+            const JSValue obj = JS_NewObject(ctx);
+            JS_SetPropertyStr(ctx, obj, "id", JS_NewUint32(ctx, val.id));
+            JS_SetPropertyStr(ctx, obj, "width", JS_NewInt32(ctx, val.width));
+            JS_SetPropertyStr(ctx, obj, "height", JS_NewInt32(ctx, val.height));
+            JS_SetPropertyStr(ctx, obj, "mipmaps", JS_NewInt32(ctx, val.mipmaps));
+            JS_SetPropertyStr(ctx, obj, "format", JS_NewInt32(ctx, val.format));
+            return { ctx, obj };
+        }
+    };
+
 }
 
 namespace RaylibModule {

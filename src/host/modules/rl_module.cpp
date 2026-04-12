@@ -84,7 +84,8 @@ namespace RaylibModule {
             .set("DrawLine", ::DrawLine)
             .set("DrawLineEx", ::DrawLineEx)
             .set("DrawLineV", ::DrawLineV)
-            .set("DrawLineBezier", ::DrawLineBezier);
+            .set("DrawLineBezier", ::DrawLineBezier)
+            .set("DrawTexture", ::DrawTexture);
         module.add("Shapes", shapes_obj);
 
         // Text functions
@@ -96,6 +97,12 @@ namespace RaylibModule {
             .set("MeasureText", ::MeasureText)
             .set("MeasureTextEx", ::MeasureTextEx);
         module.add("Text", text_obj);
+
+        // Texture functions
+         auto texture_obj = engine.make_object()
+            .set("LoadTexture", ::LoadTexture)
+            .set("UnloadTexture", ::UnloadTexture);
+        module.add("Texture", texture_obj);
 
     }
 

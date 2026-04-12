@@ -10,6 +10,14 @@ declare module "src/types/raylib" {
         y: number;
     }
 
+    export interface Texture {
+        id: number;
+        width: number;
+        height: number;
+        mipmaps: number;
+        format: number;
+    }
+
     export interface Color {
         r: number;
         g: number;
@@ -295,6 +303,7 @@ declare module "src/types/raylib" {
         function DrawLineEx(startPos: Vector2, endPos: Vector2, thick: number, color: Color): void;
         function DrawLineV(startPos: Vector2, endPos: Vector2, color: Color): void;
         function DrawLineBezier(startPos: Vector2, endPos: Vector2, thick: number, color: Color): void;
+        function DrawTexture(texture: Texture, posX: number, posY: number, tint: Color);
     }
 
     // --- Text Functions ---
@@ -318,5 +327,10 @@ declare module "src/types/raylib" {
         const VersionPatch: number;
         /** The official Raylib website URL */
         const Website: string;
+    }
+
+    export namespace Texture {
+        function LoadTexture(filePath: string): Texture;
+        function UnloadTexture(texture: Texture): void;
     }
 }
