@@ -25,6 +25,35 @@ declare module "src/types/raylib" {
         a: number;
     }
 
+    export namespace Palette {
+        const LIGHTGRAY: Color;
+        const GRAY: Color;
+        const DARKGRAY: Color;
+        const YELLOW: Color;
+        const GOLD: Color;
+        const ORANGE: Color;
+        const PINK: Color;
+        const RED: Color;
+        const MAROON: Color;
+        const GREEN: Color;
+        const LIME: Color;
+        const DARKGREEN: Color;
+        const SKYBLUE: Color;
+        const BLUE: Color;
+        const DARKBLUE: Color;
+        const PURPLE: Color;
+        const VIOLET: Color;
+        const DARKPURPLE: Color;
+        const BEIGE: Color;
+        const BROWN: Color;
+        const DARKBROWN: Color;
+        const WHITE: Color;
+        const BLACK: Color;
+        const BLANK: Color;
+        const MAGENTA: Color;
+        const RAYWHITE: Color;
+    }
+
     // --- Enums ---
     export namespace ConfigFlags {
         const FLAG_VSYNC_HINT: number;

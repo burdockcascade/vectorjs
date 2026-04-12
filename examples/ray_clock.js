@@ -1,4 +1,4 @@
-import { Core, Shapes, Text, Info } from "Raylib";
+import { Core, Shapes, Text, Info, Palette } from "Raylib";
 
 // 1. Setup
 const screenWidth = 600;
@@ -13,12 +13,12 @@ Core.SetTargetFPS(60);
 
 // Colors (Using Object format as required)
 const colors = {
-    bg: { r: 30, g: 30, b: 30, a: 255 },
-    face: { r: 240, g: 240, b: 240, a: 255 },
-    hourHand: { r: 50, g: 50, b: 50, a: 255 },
-    minuteHand: { r: 80, g: 80, b: 80, a: 255 },
-    secondHand: { r: 230, g: 30, b: 30, a: 255 }, // Red
-    ticks: { r: 100, g: 100, b: 100, a: 255 }
+    bg: Palette.DARKGRAY,
+    face: Palette.WHITE,
+    hourHand: Palette.BLACK,
+    minuteHand: Palette.BLACK,
+    secondHand: Palette.RED,
+    ticks: Palette.BLACK
 };
 
 function drawHand(value, max, length, thickness, color) {

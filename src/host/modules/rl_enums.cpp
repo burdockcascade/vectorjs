@@ -6,6 +6,35 @@ namespace RaylibModule {
 
     void register_raylib_objects(const qjs::Engine &engine, qjs::Module &module) {
 
+        auto palette_obj = engine.make_object()
+             .set("LIGHTGRAY", LIGHTGRAY)
+             .set("GRAY", GRAY)
+             .set("DARKGRAY", DARKGRAY)
+             .set("YELLOW", YELLOW)
+             .set("GOLD", GOLD)
+             .set("ORANGE", ORANGE)
+             .set("PINK", PINK)
+             .set("RED", RED)
+             .set("MAROON", MAROON)
+             .set("GREEN", GREEN)
+             .set("LIME", LIME)
+             .set("DARKGREEN", DARKGREEN)
+             .set("SKYBLUE", SKYBLUE)
+             .set("BLUE", BLUE)
+             .set("DARKBLUE", DARKBLUE)
+             .set("PURPLE", PURPLE)
+             .set("VIOLET", VIOLET)
+             .set("DARKPURPLE", DARKPURPLE)
+             .set("BEIGE", BEIGE)
+             .set("BROWN", BROWN)
+             .set("DARKBROWN", DARKBROWN)
+             .set("WHITE", WHITE)
+             .set("BLACK", BLACK)
+             .set("BLANK", BLANK)
+             .set("MAGENTA", MAGENTA)
+             .set("RAYWHITE", RAYWHITE);
+        module.add("Palette", palette_obj);
+
         auto info_obj = engine.make_object()
             .set("Version", RAYLIB_VERSION)
             .set("VersionMajor", RAYLIB_VERSION_MAJOR)
