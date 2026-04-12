@@ -4,6 +4,7 @@
 #include <exception> 
 #include "runner.hpp"
 #include "logger.hpp"
+#include "screens.hpp"
 
 int main(const int argc, char** argv) {
 
@@ -23,6 +24,11 @@ int main(const int argc, char** argv) {
     // Unified level setting
     if (verbose) {
         Log::SetLevel(spdlog::level::debug);
+    }
+
+    if (scriptPath.empty()) {
+        VectorJS::show_welcome();
+        return 0;
     }
 
     try {
