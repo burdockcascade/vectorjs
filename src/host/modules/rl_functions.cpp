@@ -104,7 +104,8 @@ namespace RaylibModule {
             .set("DrawTexture", ::DrawTexture)
             .set("DrawTextureEx", ::DrawTextureEx)
             .set("DrawTextureRec", ::DrawTextureRec)
-            .set("DrawTexturePro", ::DrawTexturePro);
+            .set("DrawTexturePro", ::DrawTexturePro)
+            .set("SetTextLineSpacing", ::SetTextLineSpacing);
         module.add("Texture", texture_obj);
 
     }
