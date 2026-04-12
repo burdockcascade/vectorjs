@@ -1,8 +1,9 @@
 ![Build Status](https://github.com/burdockcascade/vectorjs/actions/workflows/verify-build.yml/badge.svg)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![C++ 23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)
-![Powered by Raylib](https://img.shields.io/badge/Powered%20by-Raylib_5.5-blue)
-![QuickJS-ng](https://img.shields.io/badge/QuickJS--ng-0.14.0-orange)
+[![Powered by Raylib](https://img.shields.io/badge/Powered%20by-Raylib_5.5-blue)](https://github.com/raysan5/raylib)
+[![QuickJS-ng](https://img.shields.io/badge/QuickJS--ng-0.14.0-orange)](https://github.com/quickjs-ng/quickjs)
+[![xmake](https://img.shields.io/badge/build-xmake-007ACC?logo=cplusplus&logoColor=white)](https://xmake.io)
 
 # VectorJS
 VectorJS is a lightweight, cross-platform game engine and runner that allows you to build 2D and 3D games/apps using JavaScript powered by the high-performance [Raylib](https://github.com/raysan5/raylib) graphics library and the [QuickJS-NG](https://github.com/quickjs-ng/quickjs) engine.
