@@ -43,12 +43,6 @@ Runner::Runner(std::string path) : scriptPath(std::move(path)) {
 
 void Runner::Run() const {
 
-    // Check if script exists
-    if (const std::ifstream t(scriptPath); !t.is_open()) {
-        TraceLog(LOG_ERROR, "Failed to open script: %s", scriptPath.c_str());
-        return;
-    }
-
     // Run user script
     TraceLog(LOG_INFO, "Running script: %s", scriptPath.c_str());
     if (const auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module); !result) {

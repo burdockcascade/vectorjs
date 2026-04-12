@@ -1,6 +1,7 @@
 #include <CLI/CLI.hpp>
 #include <raylib.h>
 #include <string>
+#include <print>
 #include <exception> 
 #include "runner.hpp"
 
@@ -13,7 +14,6 @@ int main(const int argc, char** argv) {
     // Required option for script path
     std::string scriptPath;
     args.add_option("script", scriptPath, "Path to the JS game script")
-        ->required()
         ->check(CLI::ExistingFile);
 
     // Optional flag for verbose logging
