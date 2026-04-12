@@ -148,16 +148,13 @@ namespace qjs {
     struct function_traits<R(*)(Args...)> {
         using return_type = R;
         using args_tuple = std::tuple<Args...>;
-        using function_type = R(Args...); // <--- Add this
         static constexpr size_t arity = sizeof...(Args);
     };
 
-    // Do the same for the member function pointer specializations:
     template<typename C, typename R, typename... Args>
     struct function_traits<R(C::*)(Args...) const> {
         using return_type = R;
         using args_tuple = std::tuple<Args...>;
-        using function_type = R(Args...); // <--- Add this
         static constexpr size_t arity = sizeof...(Args);
     };
 
@@ -165,17 +162,12 @@ namespace qjs {
     struct function_traits<R(C::*)(Args...)> {
         using return_type = R;
         using args_tuple = std::tuple<Args...>;
-        using function_type = R(Args...); // Added
         static constexpr size_t arity = sizeof...(Args);
     };
 
-
     // --- Concepts ---
     template<typename T>
-    concept is_class_type = std::is_class_v<std::remove_cvref_t<T>>;
-
-    template<typename T>
-    concept callable = (is_class_type<T> && requires(T t) {
+    concept callable = (std::is_class_v<std::remove_cvref_t<T>> && requires {
         &std::remove_cvref_t<T>::operator();
     }) || std::is_function_v<std::remove_pointer_t<std::remove_cvref_t<T>>>;
 
@@ -183,30 +175,28 @@ namespace qjs {
         virtual ~CallableBase() = default;
     };
 
-    // 2. Strongly-typed wrapper holding the specific std::function
-    template<typename FuncType>
+    // Strongly-typed wrapper holding the exact functor (avoids std::function overhead)
+    template<typename F>
     struct CallableWrapper : CallableBase {
-        std::function<FuncType> func;
-        explicit CallableWrapper(std::function<FuncType> f) : func(std::move(f)) {}
+        F func;
+        explicit CallableWrapper(F f) : func(std::move(f)) {}
     };
 
     // --- Bridge Components ---
-    // Defined as inline to prevent multiple definition errors across translation units
     inline JSClassID wrapper_class_id = 0;
 
-    template<typename R, typename ArgsTuple>
+    template<typename F, typename R, typename ArgsTuple>
     struct Invoker;
 
-    template<typename R, typename... Args>
-    struct Invoker<R, std::tuple<Args...>> {
-        static JSValue apply(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* data) {
+    template<typename F, typename R, typename... Args>
+    struct Invoker<F, R, std::tuple<Args...>> {
+        static JSValue apply(JSContext* ctx, JSValueConst /*this_val*/, int argc, JSValueConst* argv, int /*magic*/, JSValue* data) {
             void* p = JS_GetOpaque(data[0], wrapper_class_id);
             if (!p) {
                 return JS_ThrowTypeError(ctx, "Failed to retrieve C++ lambda closure");
             }
 
-            // 3. Cast the opaque pointer back to our specific wrapper type
-            auto* wrapper = static_cast<CallableWrapper<R(Args...)>*>(p);
+            auto* wrapper = static_cast<CallableWrapper<F>*>(p);
             auto& func = wrapper->func;
 
             auto args = [&]<size_t... Is>(std::index_sequence<Is...>) {
@@ -218,8 +208,7 @@ namespace qjs {
                     std::apply(func, std::move(args));
                     return JS_UNDEFINED;
                 } else {
-                    R result = std::apply(func, std::move(args));
-                    Value ret = converter<R>::put(ctx, result);
+                    Value ret = converter<R>::put(ctx, std::apply(func, std::move(args)));
                     return JS_DupValue(ctx, ret.get());
                 }
             } catch (const std::exception& e) {
@@ -242,11 +231,10 @@ namespace qjs {
                 name = class_name;
             }
 
-            // Check if class is registered for this runtime
             if (!JS_IsRegisteredClass(rt, class_id)) {
                 JSClassDef def{
                     .class_name = name.c_str(),
-                    .finalizer = [](JSRuntime* rt, JSValue val) {
+                    .finalizer = [](JSRuntime* /*rt*/, JSValue val) {
                         auto* obj = static_cast<T*>(JS_GetOpaque(val, class_id));
                         delete obj; // JS GC calls C++ destructor
                     }
@@ -256,14 +244,12 @@ namespace qjs {
         }
     };
 
-    // 3. Strongly-typed wrapper holding member function pointers
     template<typename MemFunc>
     struct MemberCallableWrapper : CallableBase {
         MemFunc func;
         explicit MemberCallableWrapper(MemFunc f) : func(f) {}
     };
 
-    // Helper to safely initialize the Lambda storage class across all function types
     inline void init_wrapper_class(JSContext* ctx) {
         auto rt = JS_GetRuntime(ctx);
         if (wrapper_class_id == 0) {
@@ -272,7 +258,7 @@ namespace qjs {
         if (!JS_IsRegisteredClass(rt, wrapper_class_id)) {
             JSClassDef def{
                 .class_name = "CppLambda",
-                .finalizer = [](JSRuntime* rt, JSValue val) {
+                .finalizer = [](JSRuntime* /*rt*/, JSValue val) {
                     auto* base = static_cast<CallableBase*>(JS_GetOpaque(val, wrapper_class_id));
                     delete base;
                 }
@@ -283,7 +269,7 @@ namespace qjs {
 
     template<typename MethodType, typename C, typename R, typename... Args>
     struct MemberInvokerImpl {
-        static JSValue apply(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* data) {
+        static JSValue apply(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int /*magic*/, JSValue* data) {
             C* instance = static_cast<C*>(JS_GetOpaque(this_val, ClassRegistry<C>::class_id));
             if (!instance) return JS_ThrowTypeError(ctx, "Method called on incompatible object");
 
@@ -298,17 +284,15 @@ namespace qjs {
             }(std::index_sequence_for<Args...>{});
 
             try {
-                // Apply the extracted arguments via a small lambda to pair them with the instance pointer
+                auto caller = [instance, method_ptr](auto&&... unpacked) {
+                    return (instance->*method_ptr)(std::forward<decltype(unpacked)>(unpacked)...);
+                };
+
                 if constexpr (std::is_void_v<R>) {
-                    std::apply([instance, method_ptr](auto&&... unpacked) {
-                        (instance->*method_ptr)(std::forward<decltype(unpacked)>(unpacked)...);
-                    }, std::move(args));
+                    std::apply(caller, std::move(args));
                     return JS_UNDEFINED;
                 } else {
-                    R result = std::apply([instance, method_ptr](auto&&... unpacked) {
-                        return (instance->*method_ptr)(std::forward<decltype(unpacked)>(unpacked)...);
-                    }, std::move(args));
-                    Value ret = converter<R>::put(ctx, result);
+                    Value ret = converter<R>::put(ctx, std::apply(caller, std::move(args)));
                     return JS_DupValue(ctx, ret.get());
                 }
             } catch (const std::exception& e) {
@@ -319,23 +303,22 @@ namespace qjs {
         }
     };
 
-    // Replace the existing create_js_function with this setup supporting standard lambdas...
     template<typename F>
     requires callable<F>
     JSValue create_js_function(JSContext* ctx, F&& func) {
         using traits = function_traits<std::decay_t<F>>;
-        using R = typename traits::return_type;
-        using ArgsTuple = typename traits::args_tuple;
-        using FuncType = typename traits::function_type;
+        using R = traits::return_type;
+        using ArgsTuple = traits::args_tuple;
+        using DecayF = std::decay_t<F>; // Deduce the raw functor
 
         init_wrapper_class(ctx);
 
         JSValue opaque_obj = JS_NewObjectClass(ctx, wrapper_class_id);
-        auto* func_ptr = new CallableWrapper<FuncType>(std::forward<F>(func));
+        auto* func_ptr = new CallableWrapper<DecayF>(std::forward<F>(func));
         JS_SetOpaque(opaque_obj, func_ptr);
 
         JSValue js_func = JS_NewCFunctionData(ctx,
-            &Invoker<R, ArgsTuple>::apply,
+            &Invoker<DecayF, R, ArgsTuple>::apply,
             static_cast<int>(traits::arity), 0, 1, &opaque_obj
         );
 
@@ -343,7 +326,6 @@ namespace qjs {
         return js_func;
     }
 
-    // ...and add these two new overloads to support const and non-const class member functions!
     template<typename C, typename R, typename... Args>
     JSValue create_js_function(JSContext* ctx, R (C::*method)(Args...)) {
         init_wrapper_class(ctx);
@@ -392,13 +374,12 @@ namespace qjs {
         };
         std::vector<Overload> overloads;
 
-        static JSValue apply(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv, int magic, JSValue* data) {
+        static JSValue apply(JSContext* ctx, JSValueConst /*this_val*/, int argc, JSValueConst* argv, int /*magic*/, JSValue* data) {
             void* p = JS_GetOpaque(data[0], wrapper_class_id);
             if (!p) return JS_ThrowTypeError(ctx, "Failed to retrieve constructor dispatcher");
 
             auto* dispatcher = static_cast<ConstructorDispatcher<T>*>(p);
 
-            // Iterate through registered overloads to find one matching the argument count
             for (const auto& overload : dispatcher->overloads) {
                 if (static_cast<size_t>(argc) == overload.arity) {
                     try {
@@ -440,7 +421,6 @@ namespace qjs {
     public:
         explicit Object(Value v) : val_(std::move(v)) {}
 
-        // Unified Set for primitives/values
         template<typename T>
         requires (!callable<T> && !std::is_member_function_pointer_v<std::decay_t<T>>)
         Object& set(std::string_view prop, T&& value, const Prop mode) {
@@ -463,7 +443,6 @@ namespace qjs {
             return set(prop, std::forward<T>(value), Prop::Locked);
         }
 
-        // Unified Set for C++ lambdas and member functions
         template<typename F>
         requires (callable<F> || std::is_member_function_pointer_v<std::decay_t<F>>)
         Object& set(const std::string_view prop, F&& func, const Prop mode) {
@@ -474,14 +453,12 @@ namespace qjs {
             return *this;
         }
 
-        // Add function to object
         template<typename F>
         requires (callable<F> || std::is_member_function_pointer_v<std::decay_t<F>>)
         Object& set_function(const std::string_view prop, F&& func) {
-            return set(prop, func, Prop::ReadOnly);
+            return set(prop, std::forward<F>(func), Prop::ReadOnly);
         }
 
-        // Get
         template<typename T>
         T get(const std::string_view prop) const {
             auto ctx = val_.ctx();
@@ -494,38 +471,33 @@ namespace qjs {
         [[nodiscard]] bool remove(const std::string_view prop) const {
             const auto ctx = val_.ctx();
             const JSAtom atom = JS_NewAtomLen(ctx, prop.data(), prop.size());
-
-            // JS_DeleteProperty returns 1 if successful, 0 if not (or if non-configurable)
             const int ret = JS_DeleteProperty(ctx, val_.get(), atom, 0);
             JS_FreeAtom(ctx, atom);
-
             return ret == 1;
         }
 
         template<typename... Args>
         Value invoke(const std::string_view prop, Args&&... args) const {
             auto ctx = val_.ctx();
-
-            // 1. Get the function property
             const JSValue func = JS_GetPropertyStr(ctx, val_.get(), prop.data());
+
             if (!JS_IsFunction(ctx, func)) {
                 JS_FreeValue(ctx, func);
-                // Return an exception or undefined depending on your error handling preference
-                return { ctx, JS_ThrowTypeError(ctx, "Property is not a function") };
+                return { ctx, JS_ThrowTypeError(ctx, "Property '%s' is not a function", prop.data()) };
             }
 
-            // 2. Convert C++ arguments to JSValues using your converter
             std::vector<Value> managed_args;
+            managed_args.reserve(sizeof...(Args));
             (managed_args.push_back(converter<std::decay_t<Args>>::put(ctx, std::forward<Args>(args))), ...);
 
             std::vector<JSValue> raw_args;
+            raw_args.reserve(sizeof...(Args));
             for (const auto& arg : managed_args) raw_args.push_back(arg.get());
 
-            // 3. Call the function natively (val_.get() acts as the 'this' context!)
             JSValue result = JS_Call(ctx, func, val_.get(), raw_args.size(), raw_args.data());
-
             JS_FreeValue(ctx, func);
-            return { ctx, result }; // Wrap the result so memory is managed
+
+            return { ctx, result };
         }
 
         [[nodiscard]] std::vector<std::string> keys() const {
@@ -534,16 +506,15 @@ namespace qjs {
             uint32_t plen = 0;
             std::vector<std::string> result;
 
-            // Get only enumerable properties (like Object.keys())
             if (JS_GetOwnPropertyNames(ctx, &ptab, &plen, val_.get(), JS_GPN_STRING_MASK | JS_GPN_ENUM_ONLY) == 0) {
+                result.reserve(plen);
                 for(uint32_t i = 0; i < plen; i++) {
                     if (const char* str = JS_AtomToCString(ctx, ptab[i].atom)) {
                         result.emplace_back(str);
                         JS_FreeCString(ctx, str);
                     }
-                    JS_FreeAtom(ctx, ptab[i].atom); // Free each atom
+                    JS_FreeAtom(ctx, ptab[i].atom);
                 }
-                // QuickJS requires using js_free for the property array itself
                 js_free(ctx, ptab);
             }
             return result;
@@ -572,11 +543,10 @@ namespace qjs {
                 default:                   return JS_PROP_WRITABLE | JS_PROP_ENUMERABLE | JS_PROP_CONFIGURABLE;
             }
         }
-
     };
 
     template<>
-        struct converter<Object> {
+    struct converter<Object> {
         static Value put(JSContext* ctx, const Object& val) {
             return val.as_value();
         }
@@ -595,11 +565,9 @@ namespace qjs {
     template<typename T>
     class Class {
     public:
-        // Takes ownership of the JS Constructor function, JS Prototype object, and dispatcher
         Class(Object constructor, Object prototype, ConstructorDispatcher<T>* dispatcher)
             : constructor_(std::move(constructor)), prototype_(std::move(prototype)), dispatcher_(dispatcher) {}
 
-        // Standard constructor registration
         template<typename... Args>
         Class& constructor() {
             auto factory = [](JSContext* ctx, int argc, JSValueConst* argv) -> T* {
@@ -616,7 +584,6 @@ namespace qjs {
             return *this;
         }
 
-        // Custom constructor registration (Factory lambda)
         template<typename F>
         requires callable<F>
         Class& constructor(F&& func) {
@@ -625,7 +592,6 @@ namespace qjs {
             return *this;
         }
 
-        // method: Binds an instance method to the prototype
         template<typename F>
         requires (callable<F> || std::is_member_function_pointer_v<std::decay_t<F>>)
         Class& method(std::string_view name, F&& func) {
@@ -633,7 +599,6 @@ namespace qjs {
             return *this;
         }
 
-        // static_method: Binds a static method to the constructor
         template<typename F>
         requires callable<F>
         Class& static_method(std::string_view name, F&& func) {
@@ -641,7 +606,6 @@ namespace qjs {
             return *this;
         }
 
-        // variable: Binds a mutable default value to the prototype
         template<typename V>
         requires (!callable<V> && !std::is_member_function_pointer_v<std::decay_t<V>>)
         Class& variable(std::string_view name, V&& value) {
@@ -649,7 +613,6 @@ namespace qjs {
             return *this;
         }
 
-        // constant: Binds a read-only value to the prototype
         template<typename V>
         requires (!callable<V> && !std::is_member_function_pointer_v<std::decay_t<V>>)
         Class& constant(std::string_view name, V&& value) {
@@ -657,8 +620,6 @@ namespace qjs {
             return *this;
         }
 
-        // static_variable: Binds a mutable static value to the constructor
-        // (Added to maintain symmetry with static_constant!)
         template<typename V>
         requires (!callable<V> && !std::is_member_function_pointer_v<std::decay_t<V>>)
         Class& static_variable(std::string_view name, V&& value) {
@@ -666,7 +627,6 @@ namespace qjs {
             return *this;
         }
 
-        // static_constant: Binds a read-only static value to the constructor
         template<typename V>
         requires (!callable<V> && !std::is_member_function_pointer_v<std::decay_t<V>>)
         Class& static_constant(std::string_view name, V&& value) {
@@ -674,7 +634,6 @@ namespace qjs {
             return *this;
         }
 
-        // Expose the constructor so it can be added to modules or objects directly
         [[nodiscard]] const Object& get_constructor() const {
             return constructor_;
         }
@@ -684,11 +643,10 @@ namespace qjs {
         Object prototype_;
         ConstructorDispatcher<T>* dispatcher_;
 
-        // Helper to deduce the argument types and wire up a custom lambda
         template<typename F, typename... Args>
         void register_custom_factory(F func, std::tuple<Args...>) {
             using traits = function_traits<std::decay_t<F>>;
-            using Ret = typename traits::return_type;
+            using Ret = traits::return_type;
             constexpr size_t arity = traits::arity;
 
             auto factory = [f = std::move(func)](JSContext* ctx, int argc, JSValueConst* argv) -> T* {
@@ -696,7 +654,6 @@ namespace qjs {
                     return std::make_tuple(converter<std::decay_t<Args>>::get(ctx, (Is < argc ? argv[Is] : JS_UNDEFINED))...);
                 }(std::index_sequence_for<Args...>{});
 
-                // If the lambda returns a T*, just use it. If it returns T by value, wrap it in 'new'
                 if constexpr (std::is_pointer_v<Ret> && std::is_same_v<std::remove_pointer_t<Ret>, T>) {
                     return std::apply(f, std::move(args));
                 } else if constexpr (std::is_same_v<Ret, T>) {
@@ -712,7 +669,7 @@ namespace qjs {
         }
     };
 
-}
+} // namespace qjs
 
 
 
@@ -726,7 +683,6 @@ namespace qjs {
         Module(JSContext* ctx, JSModuleDef* m, std::function<void(std::string, Value)> add_cb)
             : ctx_(ctx), m_(m), add_cb_(std::move(add_cb)) {}
 
-        // 1. Export primitives, variables, and standard Objects
         template<typename T>
         requires (!callable<T> && !std::is_member_function_pointer_v<std::decay_t<T>>)
         Module& add(const std::string& name, T&& value) {
@@ -735,7 +691,6 @@ namespace qjs {
             return *this;
         }
 
-        // 2. Export C++ lambdas and functions
         template<typename F>
         requires (callable<F> || std::is_member_function_pointer_v<std::decay_t<F>>)
         Module& add(const std::string& name, F&& func) {
@@ -745,13 +700,11 @@ namespace qjs {
             return *this;
         }
 
-        // 3a. Export a registered C++ Class (Non-const lvalue)
         template<typename T>
         Module& add(const std::string& name, Class<T>& cls) {
             return add(name, cls.get_constructor());
         }
 
-        // 3b. Export a registered C++ Class (Const lvalue / rvalue)
         template<typename T>
         Module& add(const std::string& name, const Class<T>& cls) {
             return add(name, cls.get_constructor());
@@ -795,9 +748,8 @@ namespace qjs {
 
             JS_SetHostPromiseRejectionTracker(rt.get(), promise_rejection_tracker, this);
 
-            // Updated Module Loader: Handles C++, Pre-registered Source, Bytecode, and Files
             JS_SetModuleLoaderFunc(rt.get(), nullptr, [](JSContext* ctx, const char* module_name, void* opaque) -> JSModuleDef* {
-                Engine* eng = static_cast<Engine*>(opaque);
+                auto* eng = static_cast<Engine*>(opaque);
                 std::string name_str(module_name);
 
                 // 1. Check Native C++ modules
@@ -841,7 +793,6 @@ namespace qjs {
                 std::string code(size, '\0');
                 f.read(code.data(), size);
 
-                // Compile source file into a module
                 JSValue func_val = JS_Eval(ctx, code.data(), code.size(),
                                            module_name, JS_EVAL_TYPE_MODULE | JS_EVAL_FLAG_COMPILE_ONLY);
 
@@ -854,15 +805,21 @@ namespace qjs {
         }
 
         ~Engine() {
-            // --- NEW: Clean up any lingering rejection values ---
+            // Clean up any lingering rejection values
             if (!JS_IsUndefined(last_promise_rejection_)) {
                 JS_FreeValue(ctx.get(), last_promise_rejection_);
             }
         }
 
-        // --- Execution APIs (Running code immediately) ---
+        // --- Memory Management APIs ---
 
-        // Evaluates a raw string of JavaScript code
+        // Triggers the QuickJS cycle collector to clean up unreferenced memory islands
+        void run_gc() const {
+            JS_RunGC(rt.get());
+        }
+
+        // --- Execution APIs ---
+
         std::expected<std::string, EngineError> eval(std::string_view code, std::string_view filename = "<eval>", const EvalMode mode = EvalMode::Script) const {
             int eval_flags = (mode == EvalMode::Module) ? JS_EVAL_TYPE_MODULE : JS_EVAL_TYPE_GLOBAL;
             JSValue ret = JS_Eval(ctx.get(), code.data(), code.size(), filename.data(), eval_flags);
@@ -870,16 +827,13 @@ namespace qjs {
             return handle_execution_result(ret);
         }
 
-        // Reads a JS file from disk and evaluates it
         std::expected<std::string, EngineError> eval_file(const std::filesystem::path& p, EvalMode mode = EvalMode::Script) const {
             std::ifstream f(p, std::ios::binary | std::ios::ate);
 
             if (!f) {
                 return std::unexpected(EngineError{
                     .message = "File not found: " + p.string(),
-                    .filename = p.string(),
-                    .line_number = -1, // No line number for FS errors
-                    .stack = ""        // No stack trace available
+                    .filename = p.string()
                 });
             }
 
@@ -889,17 +843,13 @@ namespace qjs {
             if (!f.read(code.data(), size)) {
                 return std::unexpected(EngineError{
                     .message = "Failed to read file: " + p.string(),
-                    .filename = p.string(),
-                    .line_number = -1, // No line number for FS errors
-                    .stack = ""        // No stack trace available
+                    .filename = p.string()
                 });
             }
 
             return eval(code, p.string(), mode);
         }
 
-        // Executes QuickJS bytecode
-        // Note: Bytecode inherently knows if it's a Script or Module based on how it was compiled.
         std::expected<std::string, EngineError> eval_bytecode(const uint8_t* bytecode, size_t len) const {
             const JSValue obj = JS_ReadObject(ctx.get(), bytecode, len, JS_READ_OBJ_BYTECODE);
             if (JS_IsException(obj)) return wrap_result(obj);
@@ -908,30 +858,25 @@ namespace qjs {
             return handle_execution_result(ret);
         }
 
-        // --- Loading/Registration APIs (Making code available for import) ---
+        // --- Loading/Registration APIs ---
 
-        // Registers a raw JS string as a module that can be imported by other scripts
         void register_module_source(const std::string& name, std::string_view code) {
             source_modules_[name] = std::string(code);
         }
 
-        // Registers QuickJS bytecode as a module that can be imported by other scripts
         void register_module_bytecode(const std::string& name, const uint8_t* bytecode, size_t len) {
             bytecode_modules_[name] = { bytecode, len };
         }
 
         // --- Compilation APIs ---
 
-        // Compiles a JavaScript file into QuickJS bytecode
         std::expected<std::vector<uint8_t>, EngineError> compile_file_to_bytecode(const std::filesystem::path& p, EvalMode mode = EvalMode::Module) const {
             std::ifstream f(p, std::ios::binary | std::ios::ate);
 
             if (!f) {
                 return std::unexpected(EngineError{
                     .message = "File not found: " + p.string(),
-                    .filename = p.string(),
-                    .line_number = -1, // No line number for FS errors
-                    .stack = ""        // No stack trace available
+                    .filename = p.string()
                 });
             }
 
@@ -939,14 +884,10 @@ namespace qjs {
             f.seekg(0, std::ios::beg);
             std::string code(size, '\0');
             if (!f.read(code.data(), size)) {
-                if (!f) {
-                    return std::unexpected(EngineError{
-                        .message = "Failed to read the file",
-                        .filename = p.string(),
-                        .line_number = -1, // No line number for FS errors
-                        .stack = ""        // No stack trace available
-                    });
-                }
+                return std::unexpected(EngineError{
+                    .message = "Failed to read the file",
+                    .filename = p.string()
+                });
             }
 
             int eval_flags = JS_EVAL_FLAG_COMPILE_ONLY;
@@ -964,14 +905,10 @@ namespace qjs {
             JS_FreeValue(ctx.get(), func_val);
 
             if (!out_buf) {
-                if (!f) {
-                    return std::unexpected(EngineError{
-                        .message = "Failed to serialize the bytecode",
-                        .filename = p.string(),
-                        .line_number = -1, // No line number for FS errors
-                        .stack = ""        // No stack trace available
-                    });
-                }
+                return std::unexpected(EngineError{
+                    .message = "Failed to serialize the bytecode",
+                    .filename = p.string()
+                });
             }
 
             std::vector<uint8_t> bytecode(out_buf, out_buf + out_buf_len);
@@ -1017,7 +954,6 @@ namespace qjs {
             return Class<T>(Object(Value(ctx_ptr, js_ctor)), Object(proto_val), dispatcher);
         }
 
-        // Define a new Native Module
         Module define_module(const std::string& name) {
             auto m_def = std::make_unique<ModuleDef>();
             m_def->name = name;
@@ -1025,7 +961,7 @@ namespace qjs {
             modules_.push_back(std::move(m_def));
 
             JSModuleDef* js_module = JS_NewCModule(ctx.get(), name.c_str(), module_init_func);
-            def_ptr->js_module = js_module; // <-- Save the module pointer!
+            def_ptr->js_module = js_module;
 
             module_map_[js_module] = def_ptr;
 
@@ -1033,7 +969,7 @@ namespace qjs {
                 def_ptr->exports.emplace_back(std::move(exp_name), std::move(val));
             };
 
-            return Module(ctx.get(), js_module, std::move(add_cb));
+            return {ctx.get(), js_module, std::move(add_cb)};
         }
 
         [[nodiscard]] Object& global() {
@@ -1051,12 +987,11 @@ namespace qjs {
         struct ModuleDef {
             std::string name;
             std::vector<std::pair<std::string, Value>> exports;
-            JSModuleDef* js_module;
+            JSModuleDef* js_module{};
         };
         std::vector<std::unique_ptr<ModuleDef>> modules_;
         std::unordered_map<JSModuleDef*, ModuleDef*> module_map_;
 
-        // In-memory module registries for JS Source and Bytecode
         std::unordered_map<std::string, std::string> source_modules_;
         struct EmbeddedBytecode {
             const uint8_t* data;
@@ -1065,7 +1000,7 @@ namespace qjs {
         std::unordered_map<std::string, EmbeddedBytecode> bytecode_modules_;
 
         static int module_init_func(JSContext *ctx, JSModuleDef *m) {
-            Engine* eng = static_cast<Engine*>(JS_GetContextOpaque(ctx));
+            auto* eng = static_cast<Engine*>(JS_GetContextOpaque(ctx));
             if (!eng) return -1;
             return eng->init_module_internal(m);
         }
@@ -1082,17 +1017,14 @@ namespace qjs {
 
         mutable JSValue last_promise_rejection_ = JS_UNDEFINED;
 
-        // Callback invoked by QuickJS when a Promise rejects without a .catch() handler
-        static void promise_rejection_tracker(JSContext *ctx, JSValueConst promise, JSValueConst reason, bool is_handled, void *opaque) {
-            Engine* eng = static_cast<Engine*>(opaque);
+        static void promise_rejection_tracker(JSContext *ctx, JSValueConst /*promise*/, JSValueConst reason, bool is_handled, void *opaque) {
+            const auto* eng = static_cast<Engine*>(opaque);
             if (!is_handled) {
-                // A new rejection occurred! Save the reason.
                 if (!JS_IsUndefined(eng->last_promise_rejection_)) {
                     JS_FreeValue(ctx, eng->last_promise_rejection_);
                 }
                 eng->last_promise_rejection_ = JS_DupValue(ctx, reason);
             } else {
-                // A previously rejected promise was handled later, clear the error.
                 if (!JS_IsUndefined(eng->last_promise_rejection_)) {
                     JS_FreeValue(ctx, eng->last_promise_rejection_);
                     eng->last_promise_rejection_ = JS_UNDEFINED;
@@ -1103,7 +1035,6 @@ namespace qjs {
         std::expected<std::string, EngineError> handle_execution_result(JSValue ret) const {
             if (JS_IsException(ret)) return wrap_result(ret);
 
-            // Spin the Event Loop to handle Promises (Modules always run as promises!)
             JSContext* pctx;
             int err;
             while ((err = JS_ExecutePendingJob(rt.get(), &pctx)) > 0) {}
@@ -1112,8 +1043,7 @@ namespace qjs {
                 JSValue exception = JS_GetException(pctx);
                 JS_FreeValue(ctx.get(), ret);
 
-                // FIX: The event loop failed. Throw the extracted error object
-                // back into the context so wrap_result recognizes it as an exception.
+                // The event loop failed. Throw the extracted error object back.
                 JS_Throw(ctx.get(), exception);
                 return wrap_result(JS_EXCEPTION);
             }
@@ -1121,18 +1051,15 @@ namespace qjs {
             if (!JS_IsUndefined(last_promise_rejection_)) {
                 JSValue rejected = JS_DupValue(ctx.get(), last_promise_rejection_);
 
-                // Reset internal state
                 JS_FreeValue(ctx.get(), last_promise_rejection_);
                 last_promise_rejection_ = JS_UNDEFINED;
                 JS_FreeValue(ctx.get(), ret);
 
-                // FIX: The module's promise rejected. Throw the rejected value
-                // back into the context so wrap_result recognizes it as an exception.
+                // The module's promise rejected. Throw the rejected value back.
                 JS_Throw(ctx.get(), rejected);
                 return wrap_result(JS_EXCEPTION);
             }
 
-            // If it succeeds, it returns the stringified success value (usually "[object Promise]")
             return wrap_result(ret);
         }
 
