@@ -52,7 +52,7 @@ void Runner::Run() const {
     // Run user script
     TraceLog(LOG_INFO, "Running script: %s", scriptPath.c_str());
     if (const auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module); !result) {
-        TraceLog(LOG_ERROR, "Failed to run script: %s", result.error().c_str());
+        std::println("Error: {}", result.error());
     }
 
 }

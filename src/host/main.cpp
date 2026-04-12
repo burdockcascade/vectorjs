@@ -31,7 +31,7 @@ int main(const int argc, char** argv) {
         Runner runner(scriptPath);
         runner.Run();
     } catch (const std::exception& e) {
-        TraceLog(LOG_ERROR, "%s", e.what());
+        std::println("Error: {}", e.what());
         return 1;
     }
 
