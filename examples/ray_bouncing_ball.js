@@ -2,7 +2,7 @@ import { Core, Shapes, Text, Palette } from "Raylib";
 
 // 1. Initialization
 const windowWidth = 800;
-const windowHeight = 450;
+const windowHeight = 600;
 const circleRadius = 30;
 
 Core.InitWindow(windowWidth, windowHeight, "Raylib JS - Bouncing Circle");
