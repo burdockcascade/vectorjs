@@ -1,8 +1,8 @@
 ![Build Status](https://github.com/burdockcascade/vectorjs/actions/workflows/verify-build.yml/badge.svg)
-![License](https://img.shields.io/badge/License-MIT-green)
+![License](https://img.shields.io/github/license/burdockcascade/vectorjs)
 ![C++ 23](https://img.shields.io/badge/C%2B%2B-23-blue.svg)
-[![Powered by Raylib](https://img.shields.io/badge/Powered%20by-Raylib_5.5-blue)](https://github.com/raysan5/raylib)
-[![QuickJS-ng](https://img.shields.io/badge/QuickJS--ng-0.14.0-orange)](https://github.com/quickjs-ng/quickjs)
+[![Powered by Raylib](https://img.shields.io/badge/Raylib-5.5-blue)](https://github.com/raysan5/raylib)
+[![QuickJS-ng](https://img.shields.io/badge/QuickJS-0.14.0-blue)](https://github.com/quickjs-ng/quickjs)
 [![xmake](https://img.shields.io/badge/build-xmake-007ACC?logo=cplusplus&logoColor=white)](https://xmake.io)
 
 # VectorJS
