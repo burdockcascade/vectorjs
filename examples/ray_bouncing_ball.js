@@ -1,24 +1,24 @@
-import { Core, Shapes, Text } from "Raylib";
+import { Core, Shapes, Text, Palette } from "Raylib";
 
 // 1. Initialization
-const screenWidth = 800;
-const screenHeight = 450;
+const windowWidth = 800;
+const windowHeight = 450;
 const circleRadius = 30;
 
-Core.InitWindow(screenWidth, screenHeight, "Raylib JS - Bouncing Circle");
+Core.InitWindow(windowWidth, windowHeight, "Raylib JS - Bouncing Circle");
 Core.SetTargetFPS(60);
 
 // 2. State Variables
-let posX = screenWidth / 2;
-let posY = screenHeight / 2;
+let posX = windowWidth / 2;
+let posY = windowHeight / 2;
 
 let velX = 4;
 let velY = 4;
 
 // Colors (Assuming your wrapper handles objects as {r, g, b, a})
-const ballColor = { r: 255, g: 0, b: 0, a: 255 }; // Red
-const textColor = { r: 200, g: 200, b: 200, a: 255 }; // Light Gray
-const bgColor = { r: 18, g: 18, b: 18, a: 255 }; // Dark Background
+const ballColor = Palette.RED;
+const textColor = Palette.LIGHTGRAY;
+const bgColor = Palette.DARKBLUE;
 
 // 3. Main Game Loop
 while (!Core.WindowShouldClose()) {

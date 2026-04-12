@@ -1,4 +1,4 @@
-import { Core, Text, Shapes, Info } from "Raylib";
+import { Core, Text, Shapes, Info, Palette } from "Raylib";
 
 // 1. Setup
 const screenWidth = 400;
@@ -9,10 +9,10 @@ Core.InitWindow(screenWidth, screenHeight, "Raylib Info - v" + Info.Version);
 Core.SetTargetFPS(60);
 
 // Colors using your new hex string support
-const bgColor = { r: 24, g: 24, b: 24, a: 255 };
-const textColor = { r: 0, g: 170, b: 0, a: 255 }; // Raylib Green
-const headerColor = { r: 255, g: 255, b: 255, a: 255 };
-const subtextColor = { r: 136, g: 136, b: 136, a: 255 };
+const bgColor = Palette.RAYWHITE;
+const textColor = Palette.DARKGREEN;
+const headerColor = Palette.BLACK;
+const subtextColor = Palette.DARKGRAY;
 
 // 2. Main Loop
 while (!Core.WindowShouldClose()) {
