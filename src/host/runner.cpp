@@ -1,34 +1,37 @@
+#include <print>
 #include <string>
 #include <fstream>
 #include "runner.hpp"
 #include "qjs_wrapper.hpp"
 #include "modules/rl_module.hpp"
 
-static void declare_api(qjs::Engine& engine) {
+static void register_console_object(qjs::Engine& engine) {
     auto global = engine.global();
 
     // Create a global 'console' object
     auto console = engine.make_object();
 
     // Basic logging functions
-    console.set("log", [](const std::string& msg) {
-        TraceLog(LOG_INFO, "%s", msg.c_str());
+    console.set("log", [](std::string msg) {
+        std::println("[log] {}", msg);
     });
 
     // Error logging
-    console.set("error", [](const std::string& msg) {
-        TraceLog(LOG_ERROR, "%s", msg.c_str());
+    console.set("error", [](std::string msg) {
+        std::println("[error] {}", msg);
     });
 
     // Warning logging
-    console.set("warn", [](const std::string& msg) {
-        TraceLog(LOG_WARNING, "%s", msg.c_str());
+    console.set("warn", [](std::string msg) {
+        std::println("[warn] {}", msg);
     });
+
+    global.set("console", std::move(console));
 
 }
 
 Runner::Runner(std::string path) : scriptPath(std::move(path)) {
-    declare_api(engine);
+    register_console_object(engine);
     RaylibModule::register_raylib_module(engine);
 
     // todo: runtime for future release
