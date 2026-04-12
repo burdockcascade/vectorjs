@@ -28,7 +28,7 @@ int main(const int argc, char** argv) {
     CLI11_PARSE(args, argc, argv);
 
     try {
-        Runner runner(scriptPath);
+        const Runner runner(scriptPath);
         runner.Run();
     } catch (const std::exception& e) {
         std::println("Error: {}", e.what());
