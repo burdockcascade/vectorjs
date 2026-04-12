@@ -7,7 +7,7 @@ add_rules("mode.debug", "mode.release")
 
 add_requires("cli11 2.6.2")
 add_requires("raylib 5.5")
-add_requires("quickjs-ng 0.13.0")
+add_requires("quickjs-ng 0.14.0")
 add_requires("spdlog 1.17")
 
 task("compile-runtime")
