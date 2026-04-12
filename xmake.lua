@@ -40,6 +40,22 @@ task("compile-runtime")
         description = "Compile runtime.js to a C header using qjsc"
     }
 
+task("typedoc")
+    on_run(function ()
+        os.execv("npx.cmd", {
+            "typedoc",
+            "--entryPointStrategy", 
+            "expand",
+            "src/types/raylib.d.ts",
+            "src/types/vectorjs.d.ts"
+        })
+        print("Documentation generated in the docs/ directory")
+    end)
+    set_menu {
+        usage = "xmake typedoc",
+        description = "Generate TypeScript documentation using TypeDoc"
+    }
+
 target("vectorjs")
     set_kind("binary")
     add_files("src/host/**.cpp")

@@ -11,3 +11,6 @@ CMakeLists.txt
 
 # Jetbrains
 .idea
+
+# Node
+node_modules

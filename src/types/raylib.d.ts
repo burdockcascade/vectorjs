@@ -331,7 +331,7 @@ declare module "src/types/raylib" {
     export namespace Texture {
         function LoadTexture(filePath: string): Texture;
         function UnloadTexture(texture: Texture): void;
-        function DrawTexture(texture: Texture, posX: number, posY: number, tint: Color);
+        function DrawTexture(texture: Texture, posX: number, posY: number, tint: Color): void;
         function DrawTextureEx(texture: Texture, position: Vector2, rotation: number, scale: number, tint: Color): void;
         function DrawTextureRec(texture: Texture, source: { x: number, y: number, width: number, height: number }, position: Vector2, tint: Color): void;
         function DrawTexturePro(texture: Texture, source: { x: number, y: number, width: number, height: number }, dest: { x: number, y: number, width: number, height: number }, origin: Vector2, rotation: number, tint: Color): void;
