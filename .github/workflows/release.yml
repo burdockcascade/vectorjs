@@ -10,6 +10,7 @@ permissions:
 jobs:
   windows-release:
     runs-on: windows-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: xmake-io/github-action-setup-xmake@v1
@@ -30,6 +31,7 @@ jobs:
 
   linux-release:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Installation
         run: |
@@ -54,6 +56,7 @@ jobs:
 
   macos-release:
     runs-on: macos-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v6
       - uses: xmake-io/github-action-setup-xmake@v1

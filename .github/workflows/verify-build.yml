@@ -20,6 +20,7 @@ on:
 jobs:
   windows-build:
     runs-on: windows-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - uses: xmake-io/github-action-setup-xmake@v1
@@ -31,6 +32,7 @@ jobs:
         run: xmake -y
   linux-build:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Installation
         run: |
@@ -46,6 +48,7 @@ jobs:
         run: xmake f -p linux -a x86_64 --sdk=/usr/bin --cc=gcc-14 --cxx=g++-14 -y && xmake -y
   mac-build:
     runs-on: macos-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
       - uses: xmake-io/github-action-setup-xmake@v1
