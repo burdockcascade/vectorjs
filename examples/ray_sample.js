@@ -1,4 +1,4 @@
-import { Core, Shapes, Texture, Text } from "Raylib";
+import { Core, Texture, Text } from "Raylib";
 
 // 1. Setup
 const screenWidth = 800;
@@ -17,7 +17,7 @@ while (!Core.WindowShouldClose()) {
     Core.BeginDrawing();
     Core.ClearBackground(bgColor);
 
-    Shapes.DrawTexture(my_sample_texture, 0, 0, { r: 255, g: 255, b: 255, a: 255 })
+    Texture.DrawTexture(my_sample_texture, 0, 0, { r: 255, g: 255, b: 255, a: 255 })
 
     Text.DrawText("Look at this masterpiece!", 10, 10, 20, { r: 255, g: 255, b: 255, a: 255 });
 
