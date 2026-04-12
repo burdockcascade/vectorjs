@@ -94,7 +94,8 @@ namespace RaylibModule {
             .set("DrawTextEx", ::DrawTextEx)
             .set("DrawTextPro", ::DrawTextPro)
             .set("MeasureText", ::MeasureText)
-            .set("MeasureTextEx", ::MeasureTextEx);
+            .set("MeasureTextEx", ::MeasureTextEx)
+            .set("SetTextLineSpacing", ::SetTextLineSpacing);
         module.add("Text", text_obj);
 
         // Texture functions
@@ -104,8 +105,7 @@ namespace RaylibModule {
             .set("DrawTexture", ::DrawTexture)
             .set("DrawTextureEx", ::DrawTextureEx)
             .set("DrawTextureRec", ::DrawTextureRec)
-            .set("DrawTexturePro", ::DrawTexturePro)
-            .set("SetTextLineSpacing", ::SetTextLineSpacing);
+            .set("DrawTexturePro", ::DrawTexturePro);
         module.add("Texture", texture_obj);
 
     }
