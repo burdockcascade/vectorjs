@@ -23,7 +23,7 @@ int main(const int argc, char** argv) {
 
     // Unified level setting
     if (verbose) {
-        Log::SetLevel(spdlog::level::debug);
+        Log::SetLevel(Log::Level::Trace);
     }
 
     if (scriptPath.empty()) {

@@ -7,24 +7,25 @@ namespace HostApi {
     static void register_console_object(qjs::Engine& engine) {
         auto global = engine.global();
 
-        // Create a global 'console' object
-        auto console = engine.make_object();
-
-        // Basic logging functions
-        console.set_function("log", [](std::string msg) {
-            Log::Info("{}", msg);
-        });
-
-        // Error logging
-        console.set_function("error", [](std::string msg) {
-            Log::Error("{}", msg);
-        });
-
-        // Warning logging
-        console.set_function("warn", [](std::string msg) {
-            Log::Warn("{}", msg);
-        });
-
+        auto console = engine.make_object()
+            .set_function("log", [](std::string msg) {
+                Log::Info("{}", msg);
+            })
+            .set_function("error", [](std::string msg) {
+                Log::Error("{}", msg);
+            })
+            .set_function("warn", [](std::string msg) {
+                Log::Warn("{}", msg);
+            })
+            .set_function("debug", [](std::string msg) {
+                Log::Debug("{}", msg);
+            })
+            .set_function("critical", [](std::string msg) {
+                Log::Critical("{}", msg);
+            })
+            .set_function("trace", [](std::string msg) {
+                Log::Trace("{}", msg);
+            });
         global.set_constant("console", std::move(console));
 
     }

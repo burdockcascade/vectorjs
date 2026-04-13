@@ -16,6 +16,8 @@ Runner::Runner(std::string path) : scriptPath(std::move(path)) {
 
 void Runner::Run() const {
 
+    Log::Info("Running script: {}", scriptPath);
+
     auto result = engine.eval_file(scriptPath.c_str(), qjs::EvalMode::Module);
 
     // Check if the script evaluation returned an error
