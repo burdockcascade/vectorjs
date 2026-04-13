@@ -99,7 +99,7 @@ namespace RaylibModule {
         module.add("Text", text_obj);
 
         // Texture functions
-         auto texture_obj = engine.make_object()
+        auto texture_obj = engine.make_object()
             .set_function("LoadTexture", ::LoadTexture)
             .set_function("UnloadTexture", ::UnloadTexture)
             .set_function("DrawTexture", ::DrawTexture)
