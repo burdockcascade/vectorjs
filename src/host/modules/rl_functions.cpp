@@ -107,6 +107,21 @@ namespace RaylibModule {
             .set_function("DrawTextureRec", ::DrawTextureRec)
             .set_function("DrawTexturePro", ::DrawTexturePro);
         module.add("Texture", texture_obj);
+        // Audio
+        auto audio_obj = engine.make_object()
+            .set_function("InitAudioDevice", InitAudioDevice)
+            .set_function("CloseAudioDevice", CloseAudioDevice)
+            .set_function("IsAudioDeviceReady", IsAudioDeviceReady)
+            .set_function("SetMasterVolume", SetMasterVolume)
+            .set_function("GetMasterVolume", GetMasterVolume)
+            .set_function("LoadSound", ::LoadSound)
+            .set_function("UnloadSound", ::UnloadSound)
+            .set_function("PlaySound", PlaySound)
+            .set_function("StopSound", StopSound)
+            .set_function("PauseSound", PauseSound)
+            .set_function("ResumeSound", ResumeSound)
+            .set_function("IsSoundPlaying", IsSoundPlaying);
+        module.add("Audio", audio_obj);
 
     }
 
