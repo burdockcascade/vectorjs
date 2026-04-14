@@ -13,8 +13,7 @@ int main(const int argc, char** argv) {
     CLI::App args{"VectorJS"};
 
     std::string scriptPath;
-    args.add_option("script", scriptPath, "Path to the JS game script")
-        ->check(CLI::ExistingFile);
+    args.add_option("script", scriptPath, "Path to the JS game script");
 
     bool verbose = false;
     args.add_flag("-d,--debug", verbose, "Enable debug logging");
