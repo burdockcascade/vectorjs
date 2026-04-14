@@ -2,16 +2,17 @@
 #include "runner.hpp"
 #include "qjs_wrapper.hpp"
 #include "modules/rl_module.hpp"
+#include "runtime.hpp"
 #include "screens.hpp"
+#include "hostapi.hpp"
 
 Runner::Runner(std::string path) : scriptPath(std::move(path)) {
     HostApi::register_host_api(engine);
     RaylibModule::register_raylib_module(engine);
 
-    // todo: runtime for future release
     // Load runtime bytecode
-    //TraceLog(LOG_DEBUG, "Loading runtime");
-    //engine.register_module_bytecode("vectorjs", qjsc_runtime, qjsc_runtime_size);
+    TraceLog(LOG_DEBUG, "Loading runtime");
+    engine.register_module_bytecode("vectorjs", qjsc_runtime, qjsc_runtime_size);
 }
 
 void Runner::Run() const {
