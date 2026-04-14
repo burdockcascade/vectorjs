@@ -64,6 +64,10 @@ namespace RaylibModule {
             .set_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV)
             .set_function("BeginDrawing", ::BeginDrawing)
             .set_function("EndDrawing", ::EndDrawing)
+            .set_function("BeginMode2D", ::BeginMode2D)
+            .set_function("EndMode2D", ::EndMode2D)
+            .set_function("BeginMode3D", ::BeginMode3D)
+            .set_function("BeginMode3D", ::BeginMode3D)
             .set_function("SetTargetFPS", ::SetTargetFPS)
             .set_function("GetFrameTime", ::GetFrameTime)
             .set_function("ClearBackground", ::ClearBackground);
