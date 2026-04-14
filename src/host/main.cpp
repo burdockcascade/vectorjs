@@ -2,7 +2,7 @@
 #include <string>
 #include <print>
 #include <exception> 
-#include "runner.hpp"
+#include "application.hpp"
 #include "logger.hpp"
 #include "screens.hpp"
 
@@ -31,7 +31,7 @@ int main(const int argc, char** argv) {
     }
 
     try {
-        const Runner runner(scriptPath);
+        const Application runner(scriptPath);
         runner.Run();
     } catch (const std::exception& e) {
         Log::Error("{}", e.what());

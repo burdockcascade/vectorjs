@@ -1,14 +1,14 @@
 #pragma once
 #include "qjs_wrapper.hpp"
 
-class Runner {
+class Application {
 public:
     // Lifecycle
-    explicit Runner(std::string path);
+    explicit Application(std::string path);
 
     // Deleted Copy/Assignment
-    Runner(const Runner&) = delete;
-    Runner& operator=(const Runner&) = delete;
+    Application(const Application&) = delete;
+    Application& operator=(const Application&) = delete;
 
     // Execution
     void Run() const;
