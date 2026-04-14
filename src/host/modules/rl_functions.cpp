@@ -42,6 +42,19 @@ namespace RaylibModule {
             .set_function("GetMonitorPhysicalHeight", ::GetMonitorPhysicalHeight)
             .set_function("GetMonitorRefreshRate", ::GetMonitorRefreshRate)
             .set_function("GetCurrentMonitor", ::GetCurrentMonitor)
+            .set_function("BeginDrawing", ::BeginDrawing)
+            .set_function("EndDrawing", ::EndDrawing)
+            .set_function("BeginMode2D", ::BeginMode2D)
+            .set_function("EndMode2D", ::EndMode2D)
+            .set_function("BeginMode3D", ::BeginMode3D)
+            .set_function("BeginMode3D", ::BeginMode3D)
+            .set_function("SetTargetFPS", ::SetTargetFPS)
+            .set_function("GetFrameTime", ::GetFrameTime)
+            .set_function("ClearBackground", ::ClearBackground);
+        module.add("Core", core_obj);
+
+        // Input functions
+        auto input_obj = engine.make_object()
             .set_function("IsKeyPressed", ::IsKeyPressed)
             .set_function("IsKeyPressedRepeat", ::IsKeyPressedRepeat)
             .set_function("IsKeyDown", ::IsKeyDown)
@@ -61,17 +74,8 @@ namespace RaylibModule {
             .set_function("SetMouseOffset", ::SetMouseOffset)
             .set_function("SetMouseScale", ::SetMouseScale)
             .set_function("GetMouseWheelMove", ::GetMouseWheelMove)
-            .set_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV)
-            .set_function("BeginDrawing", ::BeginDrawing)
-            .set_function("EndDrawing", ::EndDrawing)
-            .set_function("BeginMode2D", ::BeginMode2D)
-            .set_function("EndMode2D", ::EndMode2D)
-            .set_function("BeginMode3D", ::BeginMode3D)
-            .set_function("BeginMode3D", ::BeginMode3D)
-            .set_function("SetTargetFPS", ::SetTargetFPS)
-            .set_function("GetFrameTime", ::GetFrameTime)
-            .set_function("ClearBackground", ::ClearBackground);
-        module.add("Core", core_obj);
+            .set_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV);
+        module.add("Input", input_obj);
 
         // Shape functions
         auto shapes_obj = engine.make_object()
