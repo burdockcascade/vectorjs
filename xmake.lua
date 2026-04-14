@@ -32,6 +32,7 @@ task("compile-runtime")
             "-o", "src/host/runtime.hpp",
             "src/runtime/dist.js"
         })
+        os.rm("src/runtime/dist.js")
         print("JavaScript runtime compiled to src/app/runtime.h")
     end)
     set_menu {
