@@ -134,10 +134,6 @@ namespace RaylibModule {
             .set_function("IsSoundPlaying", IsSoundPlaying);
         module.add("Audio", audio_obj);
 
-
-
-
-
     }
 
 }
