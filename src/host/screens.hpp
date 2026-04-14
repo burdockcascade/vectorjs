@@ -3,9 +3,14 @@
 #include "raylib.h"
 
 namespace VectorJS {
+
+    constexpr int DEFAULT_FPS = 60;
+    constexpr int WIN_HEIGHT = 600;
+    constexpr int WIN_WIDTH = 800;
+
     inline void show_welcome() {
-        InitWindow(800, 600, "VectorJS - Welcome");
-        SetTargetFPS(60);
+        InitWindow(WIN_WIDTH, WIN_HEIGHT, "VectorJS - Welcome");
+        SetTargetFPS(DEFAULT_FPS);
 
         while (!WindowShouldClose()) {
             BeginDrawing();
@@ -28,8 +33,8 @@ namespace VectorJS {
 
     inline void show_bsod(const std::string &errStr) {
         if (!IsWindowReady()) {
-            InitWindow(800, 600, "VectorJS - Fatal Error");
-            SetTargetFPS(60);
+            InitWindow(WIN_WIDTH, WIN_HEIGHT, "VectorJS - Fatal Error");
+            SetTargetFPS(DEFAULT_FPS);
         }
 
         while (!WindowShouldClose()) {
