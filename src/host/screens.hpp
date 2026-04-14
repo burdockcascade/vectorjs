@@ -38,7 +38,7 @@ namespace VectorJS {
             DrawText(":(", 40, 40, 80, WHITE);
             DrawText("Your VectorJS script ran into a problem and crashed.", 40, 140, 20, WHITE);
             DrawText(errStr.c_str(), 40, 190, 20, LIGHTGRAY);
-            DrawText("Press ESC to exit.", 40, GetScreenHeight() - 40, 20, WHITE);
+            DrawText("Press ESC to exit.", 40, GetScreenHeight() - 40, 20, LIGHTGRAY);
             EndDrawing();
         }
 
