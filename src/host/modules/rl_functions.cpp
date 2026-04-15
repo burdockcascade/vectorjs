@@ -8,6 +8,7 @@ namespace RaylibModule {
 
         // Core functions
         auto core_obj = engine.make_object()
+            // Winddow
             .set_function("InitWindow", ::InitWindow)
             .set_function("CloseWindow", ::CloseWindow)
             .set_function("WindowShouldClose", ::WindowShouldClose)
@@ -33,6 +34,7 @@ namespace RaylibModule {
             .set_function("IsWindowState", ::IsWindowState)
             .set_function("SetWindowState", ::SetWindowState)
             .set_function("ClearWindowState", ::ClearWindowState)
+            // Screen
             .set_function("GetScreenWidth", ::GetScreenWidth)
             .set_function("GetScreenHeight", ::GetScreenHeight)
             .set_function("GetMonitorCount", ::GetMonitorCount)
@@ -42,15 +44,17 @@ namespace RaylibModule {
             .set_function("GetMonitorPhysicalHeight", ::GetMonitorPhysicalHeight)
             .set_function("GetMonitorRefreshRate", ::GetMonitorRefreshRate)
             .set_function("GetCurrentMonitor", ::GetCurrentMonitor)
+            // Drawing
             .set_function("BeginDrawing", ::BeginDrawing)
             .set_function("EndDrawing", ::EndDrawing)
             .set_function("BeginMode2D", ::BeginMode2D)
             .set_function("EndMode2D", ::EndMode2D)
             .set_function("BeginMode3D", ::BeginMode3D)
-            .set_function("BeginMode3D", ::BeginMode3D)
+            .set_function("EndMode3D", ::EndMode3D)
             .set_function("SetTargetFPS", ::SetTargetFPS)
             .set_function("GetFrameTime", ::GetFrameTime)
             .set_function("ClearBackground", ::ClearBackground)
+            // Misc
             .set_function("SetExitKey", ::SetExitKey);
         module.add("Core", core_obj);
 
