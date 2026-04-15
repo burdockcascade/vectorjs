@@ -8,7 +8,7 @@ namespace RaylibModule {
 
         // Core functions
         auto core_obj = engine.make_object()
-            // Winddow
+            // Window
             .set_function("InitWindow", ::InitWindow)
             .set_function("CloseWindow", ::CloseWindow)
             .set_function("WindowShouldClose", ::WindowShouldClose)
@@ -90,7 +90,21 @@ namespace RaylibModule {
             .set_function("IsGamepadButtonUp", ::IsGamepadButtonUp)
             .set_function("GetGamepadButtonPressed", ::GetGamepadButtonPressed)
             .set_function("GetGamepadAxisCount", ::GetGamepadAxisCount)
-            .set_function("GetGamepadAxisMovement", ::GetGamepadAxisMovement);
+            .set_function("GetGamepadAxisMovement", ::GetGamepadAxisMovement)
+            // Gesture & Touch
+            .set_function("GetTouchX", ::GetTouchX)
+            .set_function("GetTouchY", ::GetTouchY)
+            .set_function("GetTouchPosition", ::GetTouchPosition)
+            .set_function("GetTouchPointId", ::GetTouchPointId)
+            .set_function("GetTouchPointCount", ::GetTouchPointCount)
+            .set_function("SetGestureEnabled", ::SetGesturesEnabled)
+            .set_function("IsGestureDetected", ::IsGestureDetected)
+            .set_function("GetGestureDetected", ::GetGestureDetected)
+            .set_function("GetGestureHoldDuration", ::GetGestureHoldDuration)
+            .set_function("GetGestureDragVector", ::GetGestureDragVector)
+            .set_function("GetGestureDragAngle", ::GetGestureDragAngle)
+            .set_function("GetGesturePinchVector", ::GetGesturePinchVector)
+            .set_function("GetGesturePinchAngle", ::GetGesturePinchAngle);
         module.add("Input", input_obj);
 
         // Shape functions
