@@ -44,3 +44,8 @@ target("vectorjs")
     set_kind("binary")
     add_files("src/host/**.cpp")
     add_packages("cli11", "raylib", "quickjs-ng")
+
+    if is_plat("windows") then
+        add_rules("win.sdk.application")
+        add_ldflags("/entry:mainCRTStartup", {force = true})
+    end
