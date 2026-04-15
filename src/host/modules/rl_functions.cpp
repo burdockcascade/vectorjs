@@ -50,18 +50,20 @@ namespace RaylibModule {
             .set_function("BeginMode3D", ::BeginMode3D)
             .set_function("SetTargetFPS", ::SetTargetFPS)
             .set_function("GetFrameTime", ::GetFrameTime)
-            .set_function("ClearBackground", ::ClearBackground);
+            .set_function("ClearBackground", ::ClearBackground)
+            .set_function("SetExitKey", ::SetExitKey);
         module.add("Core", core_obj);
 
         // Input functions
         auto input_obj = engine.make_object()
+            // Keyboard
             .set_function("IsKeyPressed", ::IsKeyPressed)
             .set_function("IsKeyPressedRepeat", ::IsKeyPressedRepeat)
             .set_function("IsKeyDown", ::IsKeyDown)
             .set_function("IsKeyReleased", ::IsKeyReleased)
             .set_function("IsKeyUp", ::IsKeyUp)
             .set_function("GetKeyPressed", ::GetKeyPressed)
-            .set_function("SetExitKey", ::SetExitKey)
+            // Mouse
             .set_function("IsMouseButtonPressed", ::IsMouseButtonPressed)
             .set_function("IsMouseButtonDown", ::IsMouseButtonDown)
             .set_function("IsMouseButtonReleased", ::IsMouseButtonReleased)
@@ -74,7 +76,17 @@ namespace RaylibModule {
             .set_function("SetMouseOffset", ::SetMouseOffset)
             .set_function("SetMouseScale", ::SetMouseScale)
             .set_function("GetMouseWheelMove", ::GetMouseWheelMove)
-            .set_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV);
+            .set_function("GetMouseWheelMoveV", ::GetMouseWheelMoveV)
+            // Gamepad
+            .set_function("IsGamepadAvailable", ::IsGamepadAvailable)
+            .set_function("GetGamepadName", ::GetGamepadName)
+            .set_function("IsGamepadButtonPressed", ::IsGamepadButtonPressed)
+            .set_function("IsGamepadButtonDown", ::IsGamepadButtonDown)
+            .set_function("IsGamepadButtonReleased", ::IsGamepadButtonReleased)
+            .set_function("IsGamepadButtonUp", ::IsGamepadButtonUp)
+            .set_function("GetGamepadButtonPressed", ::GetGamepadButtonPressed)
+            .set_function("GetGamepadAxisCount", ::GetGamepadAxisCount)
+            .set_function("GetGamepadAxisMovement", ::GetGamepadAxisMovement);
         module.add("Input", input_obj);
 
         // Shape functions
