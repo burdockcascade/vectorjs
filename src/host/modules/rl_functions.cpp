@@ -44,6 +44,7 @@ namespace RaylibModule {
             .set_function("GetMonitorPhysicalHeight", ::GetMonitorPhysicalHeight)
             .set_function("GetMonitorRefreshRate", ::GetMonitorRefreshRate)
             .set_function("GetCurrentMonitor", ::GetCurrentMonitor)
+            .set_function("TakeScreenshot", ::TakeScreenshot)
             // Drawing
             .set_function("BeginDrawing", ::BeginDrawing)
             .set_function("EndDrawing", ::EndDrawing)
