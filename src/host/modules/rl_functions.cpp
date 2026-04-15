@@ -95,16 +95,19 @@ namespace RaylibModule {
 
         // Shape functions
         auto shapes_obj = engine.make_object()
+            // Rectangle
             .set_function("DrawRectangle", ::DrawRectangle)
             .set_function("DrawRectangleLines", ::DrawRectangleLines)
             .set_function("DrawRectangleV", ::DrawRectangleV)
             .set_function("DrawRectangleLinesEx", ::DrawRectangleLinesEx)
             .set_function("DrawRectangleLinesEx", ::DrawRectangleLinesEx)
             .set_function("DrawRectangleGradientV", ::DrawRectangleGradientV)
+            // Circle
             .set_function("DrawCircle", ::DrawCircle)
             .set_function("DrawCircleLines", ::DrawCircleLines)
             .set_function("DrawCircleV", ::DrawCircleV)
             .set_function("DrawCircleGradient", ::DrawCircleGradient)
+            // Line
             .set_function("DrawLine", ::DrawLine)
             .set_function("DrawLineEx", ::DrawLineEx)
             .set_function("DrawLineV", ::DrawLineV)
