@@ -30,6 +30,7 @@ int main(const int argc, char** argv) {
 
     if (app.get_subcommands().empty()) {
         VectorJS::show_welcome();
+        VectorJS::show_help();
         return 0;
     }
 

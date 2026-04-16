@@ -8,7 +8,7 @@ namespace VectorJS {
     constexpr int WIN_HEIGHT = 600;
     constexpr int WIN_WIDTH = 800;
 
-    inline void show_welcome() {
+    inline void show_help() {
         InitWindow(WIN_WIDTH, WIN_HEIGHT, "VectorJS - Welcome");
         SetTargetFPS(DEFAULT_FPS);
 
