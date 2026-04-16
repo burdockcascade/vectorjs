@@ -1,7 +1,7 @@
 #include <CLI/CLI.hpp>
 #include <string>
 #include <print>
-#include <exception> 
+#include <exception>
 #include "application.hpp"
 #include "logger.hpp"
 #include "screens.hpp"
@@ -10,32 +10,42 @@ int main(const int argc, char** argv) {
 
     Log::Init();
 
-    CLI::App args{"VectorJS"};
+    CLI::App app{"VectorJS"};
 
-    std::string scriptPath;
-    args.add_option("script", scriptPath, "Path to the JS game script");
+    // Run (Subcommand)
+    bool debug_mode = false;
+    std::string scriptInput;
+    const auto run_cmd = app.add_subcommand("run", "Run a JS game script");
+    run_cmd->add_option("script", scriptInput, "Path to the JS game script")->required();
+    run_cmd->add_flag("-d,--debug", debug_mode, "Enable debug logging");
 
-    bool verbose = false;
-    args.add_flag("-d,--debug", verbose, "Enable debug logging");
+    // Run (argument)
+    app.add_option("script", scriptInput, "Path to the JS game script");
 
-    CLI11_PARSE(args, argc, argv);
-
-    // Unified level setting
-    if (verbose) {
-        Log::SetLevel(Log::Level::Trace);
+    try {
+        app.parse(argc, argv);
+    } catch (const CLI::ParseError &e) {
+        return app.exit(e);
     }
 
-    if (scriptPath.empty()) {
+    if (app.get_subcommands().empty()) {
         VectorJS::show_welcome();
         return 0;
     }
 
-    try {
-        const Application runner(scriptPath);
-        runner.Run();
-    } catch (const std::exception& e) {
-        Log::Error("{}", e.what());
-        return 1;
+    if (debug_mode) {
+        Log::SetLevel(Log::Level::Trace);
+    }
+
+    // Run Script
+    if (run_cmd->parsed() || !scriptInput.empty()) {
+        try {
+            const Application runner(scriptInput);
+            runner.Run();
+        } catch (const std::exception& e) {
+            Log::Error("{}", e.what());
+            return 1;
+        }
     }
 
     return 0;
