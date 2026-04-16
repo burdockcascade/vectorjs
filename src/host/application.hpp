@@ -4,17 +4,16 @@
 class Application {
 public:
     // Lifecycle
-    explicit Application(std::string path);
+    explicit Application();
 
     // Deleted Copy/Assignment
     Application(const Application&) = delete;
     Application& operator=(const Application&) = delete;
 
     // Execution
-    void Run() const;
+    void Run(std::string scriptPath) const;
 
 private:
-    std::string scriptPath;
     qjs::Engine engine;
 
 };

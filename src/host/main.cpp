@@ -44,11 +44,14 @@ int main(const int argc, char** argv) {
         Log::SetLevel(Log::Level::Trace);
     }
 
+    // Start App
+    const Application app{};
+
+
     // Run Script
     if (run_cmd->parsed() || !scriptInput.empty()) {
         try {
-            const Application runner(scriptInput);
-            runner.Run();
+            app.Run(scriptInput);
         } catch (const std::exception& e) {
             Log::Error("{}", e.what());
             return 1;

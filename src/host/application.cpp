@@ -6,7 +6,7 @@
 #include "screens.hpp"
 #include "hostapi.hpp"
 
-Application::Application(std::string path) : scriptPath(std::move(path)) {
+Application::Application() {
     HostApi::register_host_api(engine);
     RaylibModule::register_raylib_module(engine);
 
@@ -15,7 +15,7 @@ Application::Application(std::string path) : scriptPath(std::move(path)) {
     engine.register_module_bytecode("vectorjs", qjsc_runtime, qjsc_runtime_size);
 }
 
-void Application::Run() const {
+void Application::Run(std::string scriptPath) const {
 
     Log::Info("Running script: {}", scriptPath);
 
