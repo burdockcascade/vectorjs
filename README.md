@@ -35,7 +35,6 @@ const isTicking = true;
 Core.InitWindow(screenWidth, screenHeight, "Raylib JS - Analog Clock");
 Core.SetTargetFPS(60);
 
-// Colors (Using Object format as required)
 const colors = {
     bg: Palette.DARKGRAY,
     face: Palette.WHITE,
