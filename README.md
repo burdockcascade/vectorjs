@@ -18,7 +18,6 @@ This project is current work-in-progress and the API will change without warning
 * Cross-Platform: Runs on Windows, Linux, and macOS.
 
 ## Example
-### Simple
 
 ### Analog Clock
 ```js
