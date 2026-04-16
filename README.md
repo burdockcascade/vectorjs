@@ -19,26 +19,12 @@ This project is current work-in-progress and the API will change without warning
 
 ## Example
 ### Simple
-```js
-import { Core, Text, Shapes } from "Raylib";
-
-Core.InitWindow(800, 600, "Hello Raylib Module!");
-
-while (!Core.WindowShouldClose()) {
-    Core.BeginDrawing();
-    Core.ClearBackground({ r: 255, g: 255, b: 255, a: 255 });
-    Shapes.DrawRectangle(100, 100, 200, 200, { r: 0, g: 255, b: 0, a: 255 });
-    Text.DrawText("Hello Raylib Module!", 190, 200, 20, { r: 255, g: 0, b: 0, a: 255 });
-    Core.EndDrawing();
-}
-Core.CloseWindow();
-```
 
 ### Analog Clock
 ```js
-import { Core, Shapes, Text, Info } from "Raylib";
+import { Core, Shapes, Text, Info, Palette } from "Raylib";
 
-// Setup
+// 1. Setup
 const screenWidth = 600;
 const screenHeight = 600;
 const centerX = screenWidth / 2;
@@ -49,14 +35,14 @@ const isTicking = true;
 Core.InitWindow(screenWidth, screenHeight, "Raylib JS - Analog Clock");
 Core.SetTargetFPS(60);
 
-// Colors
+// Colors (Using Object format as required)
 const colors = {
-    bg: { r: 30, g: 30, b: 30, a: 255 },
-    face: { r: 240, g: 240, b: 240, a: 255 },
-    hourHand: { r: 50, g: 50, b: 50, a: 255 },
-    minuteHand: { r: 80, g: 80, b: 80, a: 255 },
-    secondHand: { r: 230, g: 30, b: 30, a: 255 }, // Red
-    ticks: { r: 100, g: 100, b: 100, a: 255 }
+    bg: Palette.DARKGRAY,
+    face: Palette.WHITE,
+    hourHand: Palette.BLACK,
+    minuteHand: Palette.BLACK,
+    secondHand: Palette.RED,
+    ticks: Palette.BLACK
 };
 
 function drawHand(value, max, length, thickness, color) {
@@ -71,7 +57,7 @@ function drawHand(value, max, length, thickness, color) {
     );
 }
 
-// Main Loop
+// 2. Main Loop
 while (!Core.WindowShouldClose()) {
     // Get Current Time
     const now = new Date();
@@ -116,6 +102,6 @@ while (!Core.WindowShouldClose()) {
     Core.EndDrawing();
 }
 
-// Cleanup
+// 3. Cleanup
 Core.CloseWindow();
 ```
