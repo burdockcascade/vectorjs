@@ -6,6 +6,8 @@
 #include "logger.hpp"
 #include "screens.hpp"
 
+constexpr std::string_view COMPILED_BYTECODE_EXT = ".vjsc";
+
 int main(const int argc, char** argv) {
 
     Log::Init();
@@ -45,13 +47,34 @@ int main(const int argc, char** argv) {
     }
 
     // Start App
-    const Application app{};
+    Application app{};
 
+    // Compile
+    if (compile_cmd->parsed()) {
+        try {
+            // Default output filename if not provided
+            if (outputFile.empty()) {
+                outputFile = std::filesystem::path(compileInput).replace_extension( COMPILED_BYTECODE_EXT).string();
+            }
+
+            Log::Info("Compiling {} to {}...", compileInput, outputFile);
+
+            app.compile_file_to_file(compileInput, outputFile);
+
+        } catch (const std::exception& e) {
+            Log::Error("Error during compilation: {}", e.what());
+            return 1;
+        }
+    }
 
     // Run Script
     if (run_cmd->parsed() || !scriptInput.empty()) {
         try {
-            app.Run(scriptInput);
+            if (std::filesystem::path(scriptInput).extension() == COMPILED_BYTECODE_EXT) {
+                app.eval_bytecode(scriptInput);
+            } else {
+                app.eval_script(scriptInput);
+            }
         } catch (const std::exception& e) {
             Log::Error("{}", e.what());
             return 1;
