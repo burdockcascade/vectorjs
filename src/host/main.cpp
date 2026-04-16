@@ -10,26 +10,32 @@ int main(const int argc, char** argv) {
 
     Log::Init();
 
-    CLI::App app{"VectorJS"};
+    CLI::App cli{"VectorJS"};
 
     // Run (Subcommand)
     bool debug_mode = false;
     std::string scriptInput;
-    const auto run_cmd = app.add_subcommand("run", "Run a JS game script");
+    const auto run_cmd = cli.add_subcommand("run", "Run a JS game script");
     run_cmd->add_option("script", scriptInput, "Path to the JS game script")->required();
     run_cmd->add_flag("-d,--debug", debug_mode, "Enable debug logging");
 
+    // Compile
+    std::string compileInput;
+    std::string outputFile;
+    const auto compile_cmd = cli.add_subcommand("compile", "Compile a JS script into bytecode");
+    compile_cmd->add_option("script", compileInput, "Path to the JS script")->required();
+    compile_cmd->add_option("-o,--output", outputFile, "Output bytecode file path");
+
     // Run (argument)
-    app.add_option("script", scriptInput, "Path to the JS game script");
+    cli.add_option("script", scriptInput, "Path to the JS game script");
 
     try {
-        app.parse(argc, argv);
+        cli.parse(argc, argv);
     } catch (const CLI::ParseError &e) {
-        return app.exit(e);
+        return cli.exit(e);
     }
 
-    if (app.get_subcommands().empty()) {
-        VectorJS::show_welcome();
+    if (cli.get_subcommands().empty() && scriptInput.empty()) {
         VectorJS::show_help();
         return 0;
     }
