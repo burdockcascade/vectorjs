@@ -3,31 +3,40 @@
 
 namespace qjs {
 
+    template <typename T>
+    T get_prop(JSContext* ctx, const JSValue obj, const char* prop_name) {
+        JSValue val = JS_GetPropertyStr(ctx, obj, prop_name);
+        T result = converter<T>::get(ctx, val);
+        JS_FreeValue(ctx, val);
+        return result;
+    }
+
+    template <typename T>
+    void set_prop(JSContext* ctx, JSValue obj, const char* prop_name, T&& val) {
+        // Convert the C++ value to a managed Value
+        const Value js_val = converter<std::decay_t<T>>::put(ctx, std::forward<T>(val));
+
+        // JS_SetPropertyStr "steals" a reference, meaning it takes ownership.
+        // Because Value's destructor also calls JS_FreeValue, we MUST duplicate
+        // the reference here to prevent a double-free crash.
+        JS_SetPropertyStr(ctx, obj, prop_name, JS_DupValue(ctx, js_val.get()));
+    }
+
     template<>
     struct converter<Color> {
         static Color get(JSContext* ctx, const JSValue v) {
-            uint32_t r, g, b, a;
-            const JSValue r_val = JS_GetPropertyStr(ctx, v, "r");
-            const JSValue g_val = JS_GetPropertyStr(ctx, v, "g");
-            const JSValue b_val = JS_GetPropertyStr(ctx, v, "b");
-            const JSValue a_val = JS_GetPropertyStr(ctx, v, "a");
-
-            JS_ToUint32(ctx, &r, r_val);
-            JS_ToUint32(ctx, &g, g_val);
-            JS_ToUint32(ctx, &b, b_val);
-            JS_ToUint32(ctx, &a, a_val);
-
-            JS_FreeValue(ctx, r_val); JS_FreeValue(ctx, g_val);
-            JS_FreeValue(ctx, b_val); JS_FreeValue(ctx, a_val);
-
-            return Color{static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a)};
+            const auto r = get_prop<unsigned char>(ctx, v, "r");
+            const auto g = get_prop<unsigned char>(ctx, v, "g");
+            const auto b = get_prop<unsigned char>(ctx, v, "b");
+            const auto a = get_prop<unsigned char>(ctx, v, "a");
+            return Color{r, g, b, a};
         }
         static Value put(JSContext* ctx, const Color val) {
             const JSValue obj = JS_NewObject(ctx);
-            JS_SetPropertyStr(ctx, obj, "r", JS_NewInt32(ctx, val.r));
-            JS_SetPropertyStr(ctx, obj, "g", JS_NewInt32(ctx, val.g));
-            JS_SetPropertyStr(ctx, obj, "b", JS_NewInt32(ctx, val.b));
-            JS_SetPropertyStr(ctx, obj, "a", JS_NewInt32(ctx, val.a));
+            set_prop(ctx, obj, "r", val.r);
+            set_prop(ctx, obj, "g", val.g);
+            set_prop(ctx, obj, "b", val.b);
+            set_prop(ctx, obj, "a", val.a);
             return { ctx, obj };
         }
     };
@@ -35,18 +44,14 @@ namespace qjs {
     template<>
     struct converter<Vector2> {
         static Vector2 get(JSContext* ctx, const JSValue v) {
-            double x, y;
-            const JSValue x_val = JS_GetPropertyStr(ctx, v, "x");
-            const JSValue y_val = JS_GetPropertyStr(ctx, v, "y");
-            JS_ToFloat64(ctx, &x, x_val);
-            JS_ToFloat64(ctx, &y, y_val);
-            JS_FreeValue(ctx, x_val); JS_FreeValue(ctx, y_val);
-            return Vector2{static_cast<float>(x), static_cast<float>(y)};
+            const auto x = get_prop<float>(ctx, v, "x");
+            const auto y = get_prop<float>(ctx, v, "y");
+            return Vector2{x, y};
         }
         static Value put(JSContext* ctx, const Vector2 val) {
             const JSValue obj = JS_NewObject(ctx);
-            JS_SetPropertyStr(ctx, obj, "x", JS_NewFloat64(ctx, val.x));
-            JS_SetPropertyStr(ctx, obj, "y", JS_NewFloat64(ctx, val.y));
+            set_prop(ctx, obj, "x", val.x);
+            set_prop(ctx, obj, "y", val.y);
             return { ctx, obj };
         }
     };
@@ -54,39 +59,21 @@ namespace qjs {
     template<>
     struct converter<Texture> {
         static Texture get(JSContext* ctx, const JSValue v) {
-            uint32_t id;
-            int32_t width;
-            int32_t height;
-            int32_t mipmaps;
-            int32_t format;
-
-            const JSValue id_val = JS_GetPropertyStr(ctx, v, "id");
-            const JSValue width_val = JS_GetPropertyStr(ctx, v, "width");
-            const JSValue height_val = JS_GetPropertyStr(ctx, v, "height");
-            const JSValue mipmaps_val = JS_GetPropertyStr(ctx, v, "mipmaps");
-            const JSValue format_val = JS_GetPropertyStr(ctx, v, "format");
-
-            JS_ToUint32(ctx, &id, id_val);
-            JS_ToInt32(ctx, &width, width_val);
-            JS_ToInt32(ctx, &height, height_val);
-            JS_ToInt32(ctx, &mipmaps, mipmaps_val);
-            JS_ToInt32(ctx, &format, format_val);
-
-            JS_FreeValue(ctx, id_val);
-            JS_FreeValue(ctx, width_val);
-            JS_FreeValue(ctx, height_val);
-            JS_FreeValue(ctx, mipmaps_val);
-            JS_FreeValue(ctx, format_val);
+            const auto id = get_prop<uint32_t>(ctx, v, "id");
+            const auto width = get_prop<int32_t>(ctx, v, "width");
+            const auto height = get_prop<int32_t>(ctx, v, "height");
+            const auto mipmaps = get_prop<int32_t>(ctx, v, "mipmaps");
+            const auto format = get_prop<int32_t>(ctx, v, "format");
             return Texture{id, width, height, mipmaps, format};
         }
 
         static Value put(JSContext* ctx, const Texture &val) {
             const JSValue obj = JS_NewObject(ctx);
-            JS_SetPropertyStr(ctx, obj, "id", JS_NewUint32(ctx, val.id));
-            JS_SetPropertyStr(ctx, obj, "width", JS_NewInt32(ctx, val.width));
-            JS_SetPropertyStr(ctx, obj, "height", JS_NewInt32(ctx, val.height));
-            JS_SetPropertyStr(ctx, obj, "mipmaps", JS_NewInt32(ctx, val.mipmaps));
-            JS_SetPropertyStr(ctx, obj, "format", JS_NewInt32(ctx, val.format));
+            set_prop(ctx, obj, "id", val.id);
+            set_prop(ctx, obj, "width", val.width);
+            set_prop(ctx, obj, "height", val.height);
+            set_prop(ctx, obj, "mipmaps", val.mipmaps);
+            set_prop(ctx, obj, "format", val.format);
             return { ctx, obj };
         }
     };
@@ -94,34 +81,12 @@ namespace qjs {
     template<>
     struct converter<AudioStream> {
         static AudioStream get(JSContext* ctx, const JSValue v) {
-            int64_t buffer_ptr = 0, processor_ptr = 0;
-            uint32_t sampleRate = 0, sampleSize = 0, channels = 0;
-
-            const JSValue b_val = JS_GetPropertyStr(ctx, v, "buffer");
-            const JSValue p_val = JS_GetPropertyStr(ctx, v, "processor");
-            const JSValue sr_val = JS_GetPropertyStr(ctx, v, "sampleRate");
-            const JSValue ss_val = JS_GetPropertyStr(ctx, v, "sampleSize");
-            const JSValue c_val = JS_GetPropertyStr(ctx, v, "channels");
-
-            JS_ToInt64(ctx, &buffer_ptr, b_val);
-            JS_ToInt64(ctx, &processor_ptr, p_val);
-            JS_ToUint32(ctx, &sampleRate, sr_val);
-            JS_ToUint32(ctx, &sampleSize, ss_val);
-            JS_ToUint32(ctx, &channels, c_val);
-
-            JS_FreeValue(ctx, b_val);
-            JS_FreeValue(ctx, p_val);
-            JS_FreeValue(ctx, sr_val);
-            JS_FreeValue(ctx, ss_val);
-            JS_FreeValue(ctx, c_val);
-
-            return AudioStream{
-                reinterpret_cast<rAudioBuffer*>(buffer_ptr),
-                reinterpret_cast<rAudioProcessor*>(processor_ptr),
-                sampleRate,
-                sampleSize,
-                channels
-            };
+            const auto buffer_ptr = reinterpret_cast<rAudioBuffer*>(get_prop<int64_t>(ctx, v, "buffer"));
+            const auto processor_ptr = reinterpret_cast<rAudioProcessor*>(get_prop<int64_t>(ctx, v, "processor"));
+            const auto sampleRate = get_prop<uint32_t>(ctx, v, "sampleRate");
+            const auto sampleSize = get_prop<uint32_t>(ctx, v, "sampleSize");
+            const auto channels = get_prop<uint32_t>(ctx, v, "channels");
+            return AudioStream{buffer_ptr, processor_ptr, sampleRate, sampleSize, channels};
         }
 
         static Value put(JSContext* ctx, const AudioStream &val) {
@@ -138,28 +103,15 @@ namespace qjs {
     template<>
     struct converter<Sound> {
         static Sound get(JSContext* ctx, const JSValue v) {
-            uint32_t frameCount = 0;
-
-            const JSValue stream_val = JS_GetPropertyStr(ctx, v, "stream");
-            const JSValue fc_val = JS_GetPropertyStr(ctx, v, "frameCount");
-
-            const AudioStream stream = converter<AudioStream>::get(ctx, stream_val);
-            JS_ToUint32(ctx, &frameCount, fc_val);
-
-            JS_FreeValue(ctx, stream_val);
-            JS_FreeValue(ctx, fc_val);
-
+            const auto frameCount = get_prop<uint32_t>(ctx, v, "frameCount");
+            const auto stream = get_prop<AudioStream>(ctx, v, "stream");
             return Sound{stream, frameCount};
         }
 
         static Value put(JSContext* ctx, const Sound &val) {
-            const JSValue obj = JS_NewObject(ctx);
-            Value stream_val = converter<AudioStream>::put(ctx, val.stream);
-
-            // Duplicate the stream_val because JS_SetPropertyStr steals one reference
-            // and the qjs::Value wrapper will try to free it on destruction.
-            JS_SetPropertyStr(ctx, obj, "stream", JS_DupValue(ctx, stream_val.get()));
-            JS_SetPropertyStr(ctx, obj, "frameCount", JS_NewUint32(ctx, val.frameCount));
+            JSValue obj = JS_NewObject(ctx);
+            set_prop(ctx, obj, "stream", val.stream);
+            set_prop(ctx, obj, "frameCount", val.frameCount);
             return { ctx, obj };
         }
     };
