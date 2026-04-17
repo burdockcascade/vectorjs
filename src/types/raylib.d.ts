@@ -365,4 +365,32 @@ declare module "src/types/raylib" {
         function DrawTextureRec(texture: Texture, source: { x: number, y: number, width: number, height: number }, position: Vector2, tint: Color): void;
         function DrawTexturePro(texture: Texture, source: { x: number, y: number, width: number, height: number }, dest: { x: number, y: number, width: number, height: number }, origin: Vector2, rotation: number, tint: Color): void;
     }
+
+    export interface AudioStream {
+        buffer: number;      // Pointer (int64)
+        processor: number;   // Pointer (int64)
+        sampleRate: number;
+        sampleSize: number;
+        channels: number;
+    }
+
+    export interface Sound {
+        stream: AudioStream;
+        frameCount: number;
+    }
+
+    export namespace Audio {
+        function InitAudioDevice(): void;
+        function CloseAudioDevice(): void;
+        function IsAudioDeviceReady(): boolean;
+        function SetMasterVolume(volume: number): void;
+        function GetMasterVolume(): number;
+        function LoadSound(fileName: string): Sound;
+        function UnloadSound(sound: Sound): void;
+        function PlaySound(sound: Sound): void;
+        function StopSound(sound: Sound): void;
+        function PauseSound(sound: Sound): void;
+        function ResumeSound(sound: Sound): void;
+        function IsSoundPlaying(sound: Sound): boolean;
+    }
 }
