@@ -5,7 +5,7 @@ const screenHeight = 800;
 const fpsPos = new Vector2(10, 10);
 const origin = new Vector2(0, 0);
 
-const app = new Application(screenHeight, screenWidth,"Window");
+const app = new Application(screenWidth, screenHeight,"Window");
 app.run({
 
     onInit() {
