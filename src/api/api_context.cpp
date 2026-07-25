@@ -9,6 +9,9 @@ namespace HostApi {
         JSDrawOptions options;
         if (JS_IsObject(optionsObj)) {
             Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
+            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_color_class_id, options.origin);
+            Utils::try_get_opaque_property<float>(ctx, optionsObj, "rotation", js_color_class_id, options.rotation);
+            Utils::try_get_opaque_property<bool>(ctx, optionsObj, "wireframe", js_color_class_id, options.wireframe);
         }
         return options;
     }
