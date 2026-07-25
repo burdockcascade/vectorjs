@@ -67,17 +67,19 @@ namespace HostApi {
             if (JS_IsFunction(ctx, on_update_func)) {
                 JSValue u = update_obj.get();
                 Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_update_func, user_app, 1, &u));
-                if (JS_IsException(ret)) {
+                if (JS_IsException(ret.get())) {
                     EndDrawing();
-                    break;
+                    if (IsWindowReady()) CloseWindow();
+                    return JS_EXCEPTION;
                 }
             }
             if (JS_IsFunction(ctx, on_draw_func)) {
                 JSValue r = render_obj.get();
                 Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_draw_func, user_app, 1, &r));
-                if (JS_IsException(ret)) {
+                if (JS_IsException(ret.get())) {
                     EndDrawing();
-                    break;
+                    if (IsWindowReady()) CloseWindow();
+                    return JS_EXCEPTION;
                 }
             }
             EndDrawing();
