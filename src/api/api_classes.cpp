@@ -2,7 +2,6 @@
 #include "js_types.hpp"
 #include "js_utils.hpp"
 #include "js_context.hpp"
-#include "../config.hpp"
 
 #define JS_BIND_PROP(ClassType, ClassIDPtr, name, Member) \
     JS_CGETSET_DEF( \
@@ -182,80 +181,11 @@ namespace HostApi {
         });
     }
 
-    static void register_font_class(JSContext* ctx, JSModuleDef* m) {
-        Utils::register_js_class(ctx, m, {
-            .name = "Font",
-            .class_id = js_font_class_id,
-            .finalizer = [](auto, JSValue val) {
-                delete Utils::get_opaque<JSFont>(val, js_font_class_id);
-            },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                if (argc < 1) return JS_ThrowTypeError(c, "Font requires at least a path argument");
-
-                auto font_path = Utils::js_to_std_string(c, argv[0]);
-                if (font_path.empty()) return JS_EXCEPTION;
-
-                if (argc >= 2) {
-                    int32_t size = 0;
-                    JS_ToInt32(c, &size, argv[1]);
-                    return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path, size);
-                }
-
-                return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path);
-            }
-        });
-    }
-
-    static void register_image_class(JSContext* ctx, JSModuleDef* m) {
-        static constexpr JSCFunctionListEntry proto_funcs[] = {
-            JS_CGETSET_DEF(
-                "width",
-                ([](JSContext* c, JSValueConst this_val) -> JSValue {
-                    const auto* img = Utils::get_opaque<JSImage>(this_val, js_image_class_id);
-                    return img ? JS_NewInt32(c, img->get_width()) : JS_UNDEFINED;
-                }),
-                nullptr
-            ),
-            JS_CGETSET_DEF(
-                "height",
-                ([](JSContext* c, JSValueConst this_val) -> JSValue {
-                    const auto* img = Utils::get_opaque<JSImage>(this_val, js_image_class_id);
-                    return img ? JS_NewInt32(c, img->get_height()) : JS_UNDEFINED;
-                }),
-                nullptr
-            )
-        };
-
-        Utils::register_js_class(ctx, m, {
-            .name = "Image",
-            .class_id = js_image_class_id,
-            .finalizer = [](auto, JSValue val) {
-                delete Utils::get_opaque<JSImage>(val, js_image_class_id);
-            },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                if (argc < 1) return JS_ThrowTypeError(c, "Image constructor requires a file path argument");
-
-                auto image_path = Utils::js_to_std_string(c, argv[0]);
-                if (image_path.empty()) return JS_EXCEPTION;
-
-                return Utils::create_js_instance<JSImage>(c, new_target, js_image_class_id, image_path);
-            },
-            .proto_funcs = proto_funcs
-        });
-    }
-
     void register_hapi_classes(JSContext* ctx, JSModuleDef* m) {
-
         register_application_class(ctx, m);
-
         register_color_class(ctx, m);
         register_vector2_class(ctx, m);
         register_rectangle_class(ctx, m);
-        register_image_class(ctx, m);
-
-        if constexpr (config::features::enable_fonts) {
-            register_font_class(ctx, m);
-        }
     }
 
 } // namespace HostApi
