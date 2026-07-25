@@ -1,4 +1,4 @@
-import {Application, Rectangle, Vector2, Palette, Font} from "vectorjs";
+import {Application, Vector2, Palette, Font} from "vectorjs";
 
 const screenWidth = 800;
 const screenHeight = 600;
