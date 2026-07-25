@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "js_engine.hpp"
 
 namespace VectorJS {
