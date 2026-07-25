@@ -85,18 +85,6 @@ declare module "vectorjs" {
     }
 
     /**
-     * Custom options configuring text rendering layout and styling.
-     */
-    export interface TextOptions {
-        readonly font?: Font;
-        readonly color?: Color;
-        readonly rotation?: number;
-        readonly fontSize?: number;
-        readonly spacing?: number;
-        readonly origin?: Vector2;
-    }
-
-    /**
      * Exposes individual primitive 2D structural rendering mechanisms.
      */
     export interface Render2DShapes {
@@ -108,17 +96,12 @@ declare module "vectorjs" {
         drawEllipse(center: Vector2, radiusH: number, radiusV: number, options: DrawOptions): void;
     }
 
-    export interface Render2DText {
-        drawText(position: Vector2, text: string, options?: TextOptions): void;
-    }
-
     /**
      * Context parameter exposed to the `onDraw` hook loop.
      */
     export interface RenderContext {
         drawFPS(position: Vector2): void;
         readonly shapes: Render2DShapes;
-        readonly text: Render2DText;
         withLayer2D(callback: (layer: RenderContext) => void): void;
     }
 
@@ -142,7 +125,7 @@ declare module "vectorjs" {
      * Core Application wrapper executing the rendering pipeline.
      */
     export class Application {
-        constructor(width: number, height: number, title: string);
+        constructor(height: number, width: number, title: string);
         run(userApp: UserApplication): void;
     }
 
