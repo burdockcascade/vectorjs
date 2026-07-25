@@ -16,7 +16,7 @@ const point1 = new Vector2(400, 150);
 const point2 = new Vector2(300, 350);
 const point3 = new Vector2(500, 350);
 
-const app = new Application(screenHeight, screenWidth, "Window");
+const app = new Application(screenWidth, screenHeight, "Window");
 app.run({
 
     onDraw(render) {
