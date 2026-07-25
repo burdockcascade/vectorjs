@@ -101,6 +101,17 @@ namespace HostApi::Utils {
         return false;
     }
 
+    inline bool try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name, bool& out_val) {
+        if (!JS_IsObject(obj)) return false;
+
+        ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
+        if (!JS_IsUndefined(prop.get()) && JS_IsBool(prop.get())) {
+            out_val = static_cast<bool>(JS_ToBool(ctx, prop.get()));
+            return true;
+        }
+        return false;
+    }
+
     // --- 1. Generic Getters and Setters ---
 
     template <typename ClassType, typename FieldType, FieldType ClassType::*Member, JSClassID* ClassID>
