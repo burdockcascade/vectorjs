@@ -14,7 +14,7 @@ const planets = [
     { name: "Jupiter", radius: 320, size: 22, speed: 0.5, color: Palette.BROWN }
 ];
 
-const app = new Application(screenHeight, screenWidth, "Solar System Simulation");
+const app = new Application(screenWidth, screenHeight, "Solar System Simulation");
 
 app.run({
     onDraw(render) {
