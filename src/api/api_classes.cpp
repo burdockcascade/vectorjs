@@ -195,11 +195,12 @@ namespace HostApi {
                 if (argc < 1) return JS_ThrowTypeError(c, "Font requires at least a path argument");
 
                 auto font_path = Utils::js_to_std_string(c, argv[0]);
-                if (font_path.empty()) return JS_EXCEPTION;
+                if (font_path.empty()) return JS_ThrowTypeError(c, "Font path must be a non-empty string");
 
                 if (argc >= 2) {
                     int32_t size = 0;
-                    JS_ToInt32(c, &size, argv[1]);
+                    if (JS_ToInt32(c, &size, argv[1]) < 0) return JS_EXCEPTION;
+                    if (size <= 0) return JS_ThrowRangeError(c, "Font size must be a positive integer");
                     return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path, size);
                 }
 
