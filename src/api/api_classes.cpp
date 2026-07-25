@@ -29,8 +29,8 @@ namespace HostApi {
             },
             .constructor = [](auto c, auto new_target, const int argc, auto argv) -> JSValue {
                 int32_t h = 0, w = 0;
-                if (argc > 0) JS_ToInt32(c, &h, argv[0]);
-                if (argc > 1) JS_ToInt32(c, &w, argv[1]);
+                if (argc > 0 && JS_ToInt32(c, &h, argv[0]) < 0) return JS_EXCEPTION;
+                if (argc > 1 && JS_ToInt32(c, &w, argv[1]) < 0) return JS_EXCEPTION;
                 std::string title = argc > 2 ? Utils::js_to_std_string(c, argv[2]) : "VectorJS Application";
                 return Utils::create_js_instance<JSApplication>(c, new_target, js_application_class_id, h, w, std::move(title));
             },
@@ -107,10 +107,10 @@ namespace HostApi {
             .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
                 if (argc >= 4) {
                     int32_t r = 0, g = 0, b = 0, a = 255;
-                    JS_ToInt32(c, &r, argv[0]);
-                    JS_ToInt32(c, &g, argv[1]);
-                    JS_ToInt32(c, &b, argv[2]);
-                    JS_ToInt32(c, &a, argv[3]);
+                    if (argc > 0 && JS_ToInt32(c, &r, argv[0]) < 0) return JS_EXCEPTION;
+                    if (argc > 1 && JS_ToInt32(c, &g, argv[1]) < 0) return JS_EXCEPTION;
+                    if (argc > 2 && JS_ToInt32(c, &b, argv[2]) < 0) return JS_EXCEPTION;
+                    if (argc > 2 && JS_ToInt32(c, &a, argv[2]) < 0) return JS_EXCEPTION;
 
                     return Utils::create_js_instance<JSColor>(
                         c, new_target, js_color_class_id,
@@ -138,8 +138,8 @@ namespace HostApi {
             },
             .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
                 int32_t x = 0, y = 0;
-                if (argc > 0) JS_ToInt32(c, &x, argv[0]);
-                if (argc > 1) JS_ToInt32(c, &y, argv[1]);
+                if (argc > 0 && JS_ToInt32(c, &x, argv[0]) < 0) return JS_EXCEPTION;
+                if (argc > 1 && JS_ToInt32(c, &y, argv[1]) < 0) return JS_EXCEPTION;
 
                 return Utils::create_js_instance<JSVector2>(
                     c, new_target, js_vector2_class_id,
@@ -166,10 +166,10 @@ namespace HostApi {
             },
             .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
                 double x = 0, y = 0, w = 0, h = 0;
-                if (argc > 0) JS_ToFloat64(c, &x, argv[0]);
-                if (argc > 1) JS_ToFloat64(c, &y, argv[1]);
-                if (argc > 2) JS_ToFloat64(c, &w, argv[2]);
-                if (argc > 3) JS_ToFloat64(c, &h, argv[3]);
+                if (argc > 0 && JS_ToFloat64(c, &x, argv[0]) < 0) return JS_EXCEPTION;
+                if (argc > 1 && JS_ToFloat64(c, &y, argv[1]) < 0) return JS_EXCEPTION;
+                if (argc > 2 && JS_ToFloat64(c, &w, argv[2]) < 0) return JS_EXCEPTION;
+                if (argc > 3 && JS_ToFloat64(c, &h, argv[3]) < 0) return JS_EXCEPTION;
 
                 return Utils::create_js_instance<JSRectangle>(
                     c, new_target, js_rectangle_class_id,
