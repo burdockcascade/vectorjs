@@ -5,7 +5,7 @@ const screenHeight = 600;
 const center = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
 
-const app = new Application(screenHeight, screenWidth, "Animated Shapes");
+const app = new Application(screenWidth, screenHeight, "Animated Shapes");
 
 app.run({
     onDraw(render) {
