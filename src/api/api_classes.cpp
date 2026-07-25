@@ -139,9 +139,9 @@ namespace HostApi {
                 delete Utils::get_opaque<JSVector2>(val, js_vector2_class_id);
             },
             .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                int32_t x = 0, y = 0;
-                if (argc > 0 && JS_ToInt32(c, &x, argv[0]) < 0) return JS_EXCEPTION;
-                if (argc > 1 && JS_ToInt32(c, &y, argv[1]) < 0) return JS_EXCEPTION;
+                double x = 0, y = 0;
+                if (argc > 0 && JS_ToFloat64(c, &x, argv[0]) < 0) return JS_EXCEPTION;
+                if (argc > 1 && JS_ToFloat64(c, &y, argv[1]) < 0) return JS_EXCEPTION;
 
                 return Utils::create_js_instance<JSVector2>(
                     c, new_target, js_vector2_class_id,
