@@ -1,10 +1,9 @@
 #pragma once
 
 #include <string>
-#include <vector>
-#include <memory>
 #include <cstdint>
 #include <raylib.h>
+#include "quickjs.h"
 
 namespace HostApi {
 
