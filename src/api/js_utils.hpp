@@ -3,6 +3,7 @@
 #include <utility>
 #include <span>
 #include <string_view>
+#include <memory>
 #include "js_types.hpp"
 
 namespace HostApi::Utils {
