@@ -110,7 +110,7 @@ namespace HostApi {
                     if (argc > 0 && JS_ToInt32(c, &r, argv[0]) < 0) return JS_EXCEPTION;
                     if (argc > 1 && JS_ToInt32(c, &g, argv[1]) < 0) return JS_EXCEPTION;
                     if (argc > 2 && JS_ToInt32(c, &b, argv[2]) < 0) return JS_EXCEPTION;
-                    if (argc > 2 && JS_ToInt32(c, &a, argv[2]) < 0) return JS_EXCEPTION;
+                    if (argc > 3 && JS_ToInt32(c, &a, argv[3]) < 0) return JS_EXCEPTION;
 
                     return Utils::create_js_instance<JSColor>(
                         c, new_target, js_color_class_id,
