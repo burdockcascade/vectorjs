@@ -1,15 +1,17 @@
 #pragma once
 
 #include <string>
+#include <vector>
+#include <memory>
 #include <cstdint>
 #include <raylib.h>
-#include "quickjs.h"
 
 namespace HostApi {
 
     inline JSClassID js_color_class_id;
     inline JSClassID js_vector2_class_id;
     inline JSClassID js_rectangle_class_id;
+    inline JSClassID js_font_class_id;
     inline JSClassID js_application_class_id;
 
     struct JSApplication {
@@ -48,10 +50,36 @@ namespace HostApi {
         [[nodiscard]] constexpr operator Rectangle() const { return Rectangle { x, y, width, height }; }
     };
 
+    struct JSFont {
+        std::shared_ptr<Font> font_ptr;
+        JSFont() = default;
+        explicit JSFont(const std::string& path, const int baseSize = 64) {
+            const Font f = LoadFontEx(path.c_str(), baseSize, nullptr, 0);
+            if (f.texture.id != 0) {
+                SetTextureFilter(f.texture, TEXTURE_FILTER_BILINEAR);
+            }
+            font_ptr = std::shared_ptr<Font>(new Font(f), [](const Font* pf) {
+                if (pf->texture.id != 0) {
+                    UnloadFont(*pf);
+                }
+                delete pf;
+            });
+        }
+    };
+
     struct JSDrawOptions {
         JSColor color = JSColor(BLACK);
         float rotation = 0.0f;
         bool wireframe = false;
+        JSVector2 origin = JSVector2(0, 0);
+    };
+
+    struct JSTextOptions {
+        JSFont font;
+        JSColor color = JSColor(BLACK);
+        float rotation = 0.0f;
+        float fontSize = 24.0f;
+        float spacing = 1.0f;
         JSVector2 origin = JSVector2(0, 0);
     };
 

@@ -20,18 +20,7 @@ namespace HostApi {
         return JS_NewObject(ctx);
     }
 
-    JSValue create_draw_render_object(JSContext* ctx) {
-        Utils::ScopedJSValue render2d_obj(ctx, JS_NewObject(ctx));
-
-        // --- FPS Binding ---
-        JS_SetPropertyStr(ctx, render2d_obj, "drawFPS", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            if (argc < 1) return JS_ThrowTypeError(c, "drawFPS requires a Vector2 position argument");
-            const auto pos = Utils::get_opaque_or<JSVector2>(c, argv[0], js_vector2_class_id, {0, 0});
-            ::DrawFPS(static_cast<int>(pos.x), static_cast<int>(pos.y));
-            return JS_UNDEFINED;
-        }, "drawFPS", 1));
-
-        // --- Shapes Sub-Object ---
+    static JSValue create_shapes_object(JSContext* ctx) {
         Utils::ScopedJSValue shape_obj(ctx, JS_NewObject(ctx));
 
         JS_SetPropertyStr(ctx, shape_obj, "drawPixel", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
@@ -93,7 +82,56 @@ namespace HostApi {
             return JS_UNDEFINED;
         }, "drawEllipse", 4));
 
-        JS_SetPropertyStr(ctx, render2d_obj, "shapes", shape_obj.release());
+        return shape_obj.release();
+    }
+
+    static JSTextOptions parse_text_options(JSContext* ctx, JSValueConst optionsObj) {
+        JSTextOptions options;
+        if (JS_IsObject(optionsObj)) {
+            Utils::try_get_opaque_property<JSFont>(ctx, optionsObj, "font", js_font_class_id, options.font);
+            Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
+            Utils::try_get_float_property(ctx, optionsObj, "rotation", options.rotation);
+            Utils::try_get_float_property(ctx, optionsObj, "fontSize", options.fontSize);
+            Utils::try_get_float_property(ctx, optionsObj, "spacing", options.spacing);
+            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id, options.origin);
+        }
+        return options;
+    }
+
+    static JSValue create_text_object(JSContext* ctx) {
+        Utils::ScopedJSValue text_obj(ctx, JS_NewObject(ctx));
+        JS_SetPropertyStr(ctx, text_obj, "drawText", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 2) return JS_ThrowTypeError(c, "drawText requires position and text string arguments");
+            const auto pos = Utils::get_opaque_or<JSVector2>(c, argv[0], js_vector2_class_id, {0, 0});
+
+            const std::string txt_str = Utils::js_to_std_string(c, argv[1]);
+            JSTextOptions options = parse_text_options(c, argc > 2 ? argv[2] : JS_UNDEFINED);
+            Font fontToUse = GetFontDefault();
+            if (options.font.font_ptr && options.font.font_ptr->texture.id != 0) {
+                fontToUse = *options.font.font_ptr;
+            }
+            ::DrawTextPro(fontToUse, txt_str.c_str(), pos, options.origin, options.rotation, options.fontSize, options.spacing, options.color);
+            return JS_UNDEFINED;
+        }, "drawText", 3));
+
+        return text_obj.release();
+    }
+
+    JSValue create_draw_render_object(JSContext* ctx) {
+
+        Utils::ScopedJSValue render2d_obj(ctx, JS_NewObject(ctx));
+
+        // Add FPS
+        JS_SetPropertyStr(ctx, render2d_obj, "drawFPS", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "drawFPS requires a Vector2 position argument");
+            const auto pos = Utils::get_opaque_or<JSVector2>(c, argv[0], js_vector2_class_id, {0, 0});
+            ::DrawFPS(static_cast<int>(pos.x), static_cast<int>(pos.y));
+            return JS_UNDEFINED;
+        }, "drawFPS", 1));
+
+        // Add Sub Objects
+        JS_SetPropertyStr(ctx, render2d_obj, "shapes", create_shapes_object(ctx));
+        JS_SetPropertyStr(ctx, render2d_obj, "text", create_text_object(ctx));
 
         // --- Layer Wrappers ---
         const JSValue render_obj = JS_NewObject(ctx);

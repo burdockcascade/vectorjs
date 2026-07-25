@@ -56,8 +56,9 @@ namespace HostApi {
         Utils::ScopedJSValue render_obj(ctx, create_draw_render_object(ctx));
 
         if (JS_IsFunction(ctx, on_init_func)) {
-            Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr));
-            if (JS_IsException(ret)) return JS_EXCEPTION;
+            if (Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr)); JS_IsException(ret)) {
+                return JS_EXCEPTION;
+            }
         }
 
         while (!WindowShouldClose()) {
@@ -183,11 +184,36 @@ namespace HostApi {
         });
     }
 
+    static void register_font_class(JSContext* ctx, JSModuleDef* m) {
+        Utils::register_js_class(ctx, m, {
+            .name = "Font",
+            .class_id = js_font_class_id,
+            .finalizer = [](auto, JSValue val) {
+                delete Utils::get_opaque<JSFont>(val, js_font_class_id);
+            },
+            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
+                if (argc < 1) return JS_ThrowTypeError(c, "Font requires at least a path argument");
+
+                auto font_path = Utils::js_to_std_string(c, argv[0]);
+                if (font_path.empty()) return JS_EXCEPTION;
+
+                if (argc >= 2) {
+                    int32_t size = 0;
+                    JS_ToInt32(c, &size, argv[1]);
+                    return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path, size);
+                }
+
+                return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path);
+            }
+        });
+    }
+
     void register_hapi_classes(JSContext* ctx, JSModuleDef* m) {
         register_application_class(ctx, m);
         register_color_class(ctx, m);
         register_vector2_class(ctx, m);
         register_rectangle_class(ctx, m);
+        register_font_class(ctx, m);
     }
 
 } // namespace HostApi
