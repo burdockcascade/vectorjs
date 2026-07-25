@@ -1,0 +1,10 @@
+# MacOS Cache
+.DS_Store
+
+# Idea
+.idea
+
+# cmake
+build*/
+cmake-build*/
+
