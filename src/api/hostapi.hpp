@@ -22,7 +22,6 @@ namespace HostApi {
             JS_AddModuleExport(ctx, m, "Color");
             JS_AddModuleExport(ctx, m, "Vector2");
             JS_AddModuleExport(ctx, m, "Rectangle");
-            JS_AddModuleExport(ctx, m, "Font");
             JS_AddModuleExport(ctx, m, "Palette");
             JS_AddModuleExport(ctx, m, "Info");
             JS_AddModuleExport(ctx, m, "ConfigFlags");
