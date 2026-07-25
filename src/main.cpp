@@ -10,7 +10,6 @@ int main(const int argc, char** argv) {
     cli.add_option("script", scriptInput, "Path to the JS game script");
 
     try {
-        std::cout << scriptInput << std::endl;
         cli.parse(argc, argv);
     } catch (const CLI::ParseError &e) {
         std::cerr << e.what() << std::endl;
