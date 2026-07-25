@@ -35,14 +35,6 @@ declare module "vectorjs" {
     }
 
     /**
-     * Custom font resource loaded from a path.
-     */
-    export class Font {
-        constructor(path: string);
-        constructor(path: string, baseSize: number);
-    }
-
-    /**
      * Built-in color palette options matching Raylib defaults.
      */
     export const Palette: {
@@ -88,7 +80,7 @@ declare module "vectorjs" {
      * Exposes individual primitive 2D structural rendering mechanisms.
      */
     export interface Render2DShapes {
-        drawPixel(position: Vector2, options: DrawOptions): void;
+        drawPixel(position: Vector2, color: Color): void;
         drawLine(startPosition: Vector2, endPosition: Vector2, options: DrawOptions): void;
         drawRectangle(rect: Rectangle, options: DrawOptions): void;
         drawCircle(centre: Vector2, radius: number, options: DrawOptions): void;
