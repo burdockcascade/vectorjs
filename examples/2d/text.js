@@ -1,7 +1,7 @@
 import {Application, Rectangle, Vector2, Palette, Font} from "vectorjs";
 
-const screenWidth = 600;
-const screenHeight = 800;
+const screenWidth = 800;
+const screenHeight = 600;
 const fpsPos = new Vector2(10, 10);
 const origin = new Vector2(0, 0);
 
@@ -9,7 +9,7 @@ const app = new Application(screenWidth, screenHeight,"Window");
 app.run({
 
     onInit() {
-        this.customFont = new Font("C:\\workspace\\c\\vectorjs\\examples\\assets\\AnonymousPro-Regular.ttf");
+        this.customFont = new Font("examples/assets/AnonymousPro-Regular.ttf");
     },
 
     onDraw(render) {
