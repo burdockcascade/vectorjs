@@ -125,7 +125,7 @@ declare module "vectorjs" {
      * Core Application wrapper executing the rendering pipeline.
      */
     export class Application {
-        constructor(height: number, width: number, title: string);
+        constructor(width: number, height: number, title: string);
         run(userApp: UserApplication): void;
     }
 

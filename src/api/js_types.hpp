@@ -13,7 +13,7 @@ namespace HostApi {
     inline JSClassID js_application_class_id;
 
     struct JSApplication {
-        JSApplication(int h, int w, const std::string& title);
+        JSApplication(int w, int h, const std::string& title);
         static JSValue Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
     };
 

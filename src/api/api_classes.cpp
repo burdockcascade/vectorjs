@@ -38,7 +38,7 @@ namespace HostApi {
         });
     }
 
-    JSApplication::JSApplication(const int h, const int w, const std::string& title) {
+    JSApplication::JSApplication(const int w, const int h, const std::string& title) {
         InitWindow(w, h, title.c_str());
         SetTargetFPS(60);
     }
