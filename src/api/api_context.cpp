@@ -106,15 +106,14 @@ namespace HostApi {
 
             const char* txt_cstr = JS_ToCString(c, argv[1]);
             if (!txt_cstr) return JS_EXCEPTION;
-            const std::string txt_str(txt_cstr);
-            JS_FreeCString(c, txt_cstr);
 
             JSTextOptions options = parse_text_options(c, argc > 2 ? argv[2] : JS_UNDEFINED);
             Font fontToUse = GetFontDefault();
             if (options.font.font_ptr && options.font.font_ptr->texture.id != 0) {
                 fontToUse = *options.font.font_ptr;
             }
-            ::DrawTextPro(fontToUse, txt_str.c_str(), pos, options.origin, options.rotation, options.fontSize, options.spacing, options.color);
+            ::DrawTextPro(fontToUse, txt_cstr, pos, options.origin, options.rotation, options.fontSize, options.spacing, options.color);
+            JS_FreeCString(c, txt_cstr);
             return JS_UNDEFINED;
         }, "drawText", 3));
 
