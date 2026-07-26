@@ -98,6 +98,26 @@ declare module "vectorjs" {
     }
 
     /**
+     * Custom font resource loaded from a path.
+     */
+    export class Font {
+        constructor(path: string);
+        constructor(path: string, baseSize: number);
+    }
+
+    /**
+     * Custom options configuring text rendering layout and styling.
+     */
+    export interface TextOptions {
+        readonly font?: Font;
+        readonly color?: Color;
+        readonly rotation?: number;
+        readonly fontSize?: number;
+        readonly spacing?: number;
+        readonly origin?: Vector2;
+    }
+
+    /**
      * Context parameter exposed to the `onUpdate` hook loop.
      */
     export interface UpdateContext {
