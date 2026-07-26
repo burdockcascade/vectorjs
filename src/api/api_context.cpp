@@ -17,7 +17,74 @@ namespace HostApi {
     }
 
     JSValue create_update_context_object(JSContext* ctx) {
-        return JS_NewObject(ctx);
+        Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int key;
+            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyPressed requires a Keyboard key enum");
+            return JS_NewBool(c, ::IsKeyPressed(key));
+        }, "isKeyPressed", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int key;
+            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyDown requires a Keyboard key enum");
+            return JS_NewBool(c, ::IsKeyDown(key));
+        }, "isKeyDown", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int key;
+            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyReleased requires a Keyboard key enum");
+            return JS_NewBool(c, ::IsKeyReleased(key));
+        }, "isKeyReleased", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int key;
+            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyUp requires a Keyboard key enum");
+            return JS_NewBool(c, ::IsKeyUp(key));
+        }, "isKeyUp", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int button;
+            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonPressed requires a MouseButton enum");
+            return JS_NewBool(c, ::IsMouseButtonPressed(button));
+        }, "isMouseButtonPressed", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int button;
+            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonDown requires a MouseButton enum");
+            return JS_NewBool(c, ::IsMouseButtonDown(button));
+        }, "isMouseButtonDown", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int button;
+            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonReleased requires a MouseButton enum");
+            return JS_NewBool(c, ::IsMouseButtonReleased(button));
+        }, "isMouseButtonReleased", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            int button;
+            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonUp requires a MouseButton enum");
+            return JS_NewBool(c, ::IsMouseButtonUp(button));
+        }, "isMouseButtonUp", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMousePosition", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            Vector2 pos = ::GetMousePosition();
+            return Utils::create_class_instance<JSVector2>(c, js_vector2_class_id, pos.x, pos.y);
+        }, "getMousePosition", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMouseX", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetMouseX());
+        }, "getMouseX", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMouseY", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetMouseY());
+        }, "getMouseY", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMouseWheelMove", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewFloat64(c, ::GetMouseWheelMove());
+        }, "getMouseWheelMove", 0));
+
+        return update_obj.release();
     }
 
     static JSValue create_shapes_object(JSContext* ctx) {

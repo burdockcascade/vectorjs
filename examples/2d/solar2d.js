@@ -1,4 +1,4 @@
-import { Application, Vector2, Palette } from "vectorjs";
+import { Application, Vector2, Palette, Keyboard } from "vectorjs";
 
 const screenWidth = 800;
 const screenHeight = 800;
@@ -16,12 +16,32 @@ const planets = [
 
 const app = new Application(screenWidth, screenHeight, "Solar System Simulation");
 
+// Simulation State
+let isRunning = true;
+let time = 0;
+
 app.run({
+
+    onUpdate(ctx) {
+        // Toggle running state when Spacebar is pressed (fires once per press)
+        if (ctx.isKeyPressed(Keyboard.KEY_SPACE)) {
+            isRunning = !isRunning;
+        }
+
+        // Reset the animation
+        if (ctx.isKeyPressed(Keyboard.KEY_R)) {
+            time = 0;
+        }
+
+        // Advance simulation time only while running (assuming ~60 FPS)
+        if (isRunning) {
+            time += 1 / 60;
+        }
+    },
+
     onDraw(render) {
         render.withLayer2D((ctx) => {
             ctx.drawFPS(fpsPos);
-
-            const time = Date.now() * 0.001;
 
             // 1. Draw the central Sun
             ctx.shapes.drawCircle(sunPos, 35, {
