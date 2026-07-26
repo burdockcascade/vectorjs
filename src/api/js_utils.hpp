@@ -181,10 +181,10 @@ namespace HostApi::Utils {
     // --- Property & Object Setter Helpers ---
 
     template <typename T>
-    void set_object_property(JSContext* ctx, JSValueConst obj, const char* name, const T& val) {
+        void set_object_property(JSContext* ctx, JSValueConst obj, const char* name, const T& val) {
         constexpr int flags = JS_PROP_ENUMERABLE | JS_PROP_CONFIGURABLE;
 
-        if constexpr (std::is_integral_v<T>) {
+        if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
             JS_DefinePropertyValueStr(ctx, obj, name, JS_NewInt32(ctx, static_cast<int32_t>(val)), flags);
         } else if constexpr (std::is_floating_point_v<T>) {
             JS_DefinePropertyValueStr(ctx, obj, name, JS_NewFloat64(ctx, static_cast<double>(val)), flags);
