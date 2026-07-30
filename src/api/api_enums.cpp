@@ -5,12 +5,9 @@
 
 namespace HostApi {
 
-    // Helper forward declaration / overload for JSColor initialization
     static JSValue create_js_color_instance(JSContext* ctx, const ::Color color) {
         return Utils::create_class_instance<JSColor>(ctx, js_color_class_id, color);
     }
-
-    // --- Property & Object Setter Helpers ---
 
     template <typename T>
     static void set_object_property(JSContext* ctx, const JSValue obj, const char* name, const T& val) {
