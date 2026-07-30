@@ -1,7 +1,7 @@
 #include "hostapi.hpp"
 #include "js_types.hpp"
 #include "js_utils.hpp"
-#include "js_context.hpp"
+#include "api_context.hpp"
 
 #define JS_BIND_PROP(ClassType, ClassIDPtr, name, Member) \
     JS_CGETSET_DEF( \
