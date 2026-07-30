@@ -13,7 +13,7 @@ namespace HostApi {
     // --- Property & Object Setter Helpers ---
 
     template <typename T>
-    static void set_object_property(JSContext* ctx, JSValueConst obj, const char* name, const T& val) {
+    static void set_object_property(JSContext* ctx, const JSValue obj, const char* name, const T& val) {
         constexpr int flags = JS_PROP_ENUMERABLE | JS_PROP_CONFIGURABLE;
 
         if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
@@ -28,7 +28,7 @@ namespace HostApi {
     }
 
     template <typename... Args>
-    static void set_object_properties(JSContext* ctx, JSValueConst obj, Args&&... entries) {
+    static void set_object_properties(JSContext* ctx, const JSValue obj, Args&&... entries) {
         (set_object_property(ctx, obj, entries.first, entries.second), ...);
     }
 

@@ -45,7 +45,7 @@ namespace HostApi::Utils {
         JSValue val_{JS_UNDEFINED};
     };
 
-    inline std::string js_to_std_string(JSContext* ctx, JSValueConst val, const std::string& fallback = "") {
+    inline std::string js_to_std_string(JSContext* ctx, const JSValue val, const std::string& fallback = "") {
         const char* str = JS_ToCString(ctx, val);
         if (!str) return fallback;
         std::string result(str);
@@ -54,18 +54,18 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    T* get_opaque(JSContext* ctx, JSValueConst val, JSClassID class_id) {
+    T* get_opaque(JSContext* ctx, const JSValue val, JSClassID class_id) {
         if (JS_IsUndefined(val) || JS_IsNull(val)) return nullptr;
         return static_cast<T*>(JS_GetOpaque2(ctx, val, class_id));
     }
 
     template <typename T>
-    T* get_opaque(JSValueConst val, JSClassID class_id) {
+    T* get_opaque(const JSValue val, JSClassID class_id) {
         return static_cast<T*>(JS_GetOpaque(val, class_id));
     }
 
     template <typename T>
-    T get_opaque_or(JSContext* ctx, JSValueConst val, JSClassID class_id, const T& default_val) {
+    T get_opaque_or(JSContext* ctx, const JSValue val, JSClassID class_id, const T& default_val) {
         if (auto* ptr = get_opaque<T>(ctx, val, class_id)) {
             return *ptr;
         }
@@ -73,7 +73,7 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    bool try_get_opaque_property(JSContext* ctx, JSValueConst obj, const char* prop_name, JSClassID class_id, T& out_val) {
+    bool try_get_opaque_property(JSContext* ctx, const JSValue obj, const char* prop_name, JSClassID class_id, T& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -86,7 +86,7 @@ namespace HostApi::Utils {
         return false;
     }
 
-    inline bool try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name, float& out_val) {
+    inline bool try_get_float_property(JSContext* ctx, const JSValue obj, const char* prop_name, float& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -100,7 +100,7 @@ namespace HostApi::Utils {
         return false;
     }
 
-    inline bool try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name, bool& out_val) {
+    inline bool try_get_bool_property(JSContext* ctx, const JSValue obj, const char* prop_name, bool& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -114,7 +114,7 @@ namespace HostApi::Utils {
     // --- 1. Generic Getters and Setters ---
 
     template <typename ClassType, typename FieldType, FieldType ClassType::*Member, JSClassID* ClassID>
-    JSValue js_generic_getter(JSContext* ctx, JSValueConst this_val) {
+    JSValue js_generic_getter(JSContext* ctx, const JSValue this_val) {
         auto* instance = get_opaque<ClassType>(ctx, this_val, *ClassID);
         if (!instance) return JS_EXCEPTION;
 
@@ -128,7 +128,7 @@ namespace HostApi::Utils {
     }
 
     template <typename ClassType, typename FieldType, FieldType ClassType::*Member, JSClassID* ClassID>
-    JSValue js_generic_setter(JSContext* ctx, JSValueConst this_val, JSValueConst val) {
+    JSValue js_generic_setter(JSContext* ctx, const JSValue this_val, const JSValue val) {
         auto* instance = get_opaque<ClassType>(ctx, this_val, *ClassID);
         if (!instance) return JS_EXCEPTION;
 
@@ -147,7 +147,7 @@ namespace HostApi::Utils {
     // --- 2. Exception-Safe Instance Creation ---
 
     template <typename T, typename... Args>
-    JSValue create_js_instance(JSContext* ctx, JSValueConst new_target, JSClassID class_id, Args&&... args) {
+    JSValue create_js_instance(JSContext* ctx, const JSValue new_target, JSClassID class_id, Args&&... args) {
         ScopedJSValue proto(ctx, JS_GetPropertyStr(ctx, new_target, "prototype"));
         if (JS_IsException(proto.get())) return JS_EXCEPTION;
 
