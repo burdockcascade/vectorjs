@@ -1,13 +1,41 @@
 #include "hostapi.hpp"
 #include "js_utils.hpp"
+#include "js_types.hpp"
 #include <utility>
 
 namespace HostApi {
 
+    // Helper forward declaration / overload for JSColor initialization
+    static JSValue create_js_color_instance(JSContext* ctx, const ::Color color) {
+        return Utils::create_class_instance<JSColor>(ctx, js_color_class_id, color);
+    }
+
+    // --- Property & Object Setter Helpers ---
+
+    template <typename T>
+    static void set_object_property(JSContext* ctx, JSValueConst obj, const char* name, const T& val) {
+        constexpr int flags = JS_PROP_ENUMERABLE | JS_PROP_CONFIGURABLE;
+
+        if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
+            JS_DefinePropertyValueStr(ctx, obj, name, JS_NewInt32(ctx, static_cast<int32_t>(val)), flags);
+        } else if constexpr (std::is_floating_point_v<T>) {
+            JS_DefinePropertyValueStr(ctx, obj, name, JS_NewFloat64(ctx, static_cast<double>(val)), flags);
+        } else if constexpr (std::is_convertible_v<T, std::string> || std::is_same_v<T, const char*>) {
+            JS_DefinePropertyValueStr(ctx, obj, name, JS_NewString(ctx, std::string(val).c_str()), flags);
+        } else if constexpr (std::is_same_v<T, ::Color>) {
+            JS_DefinePropertyValueStr(ctx, obj, name, create_js_color_instance(ctx, val), flags);
+        }
+    }
+
+    template <typename... Args>
+    static void set_object_properties(JSContext* ctx, JSValueConst obj, Args&&... entries) {
+        (set_object_property(ctx, obj, entries.first, entries.second), ...);
+    }
+
     template <typename... Pairs>
     static void export_object(JSContext* js_context, JSModuleDef* js_module_def, const char* obj_name, Pairs&&... pairs) {
         const JSValue obj = JS_NewObject(js_context);
-        Utils::set_object_properties(js_context, obj, std::forward<Pairs>(pairs)...);
+        set_object_properties(js_context, obj, std::forward<Pairs>(pairs)...);
         JS_SetModuleExport(js_context, js_module_def, obj_name, obj);
     }
 
