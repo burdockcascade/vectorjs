@@ -1,4 +1,3 @@
-#include "hostapi.hpp"
 #include "js_types.hpp"
 #include "js_utils.hpp"
 #include <iostream>
@@ -16,73 +15,46 @@ namespace HostApi {
         return options;
     }
 
-    JSValue create_update_context_object(JSContext* ctx) {
+    static JSValue create_update_context_object(JSContext* ctx) {
         Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
 
-        JS_SetPropertyStr(ctx, update_obj, "isKeyPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int key;
-            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyPressed requires a Keyboard key enum");
-            return JS_NewBool(c, ::IsKeyPressed(key));
-        }, "isKeyPressed", 1));
+        // Macro for single-int/enum argument functions (IsKeyPressed, IsMouseButtonDown, etc.)
+        #define BIND_INT_ARG_FUNC(js_name, raylib_func, err_string) \
+        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue { \
+            int val; \
+            if (argc < 1 || JS_ToInt32(c, &val, argv[0]) < 0) \
+                return JS_ThrowTypeError(c, err_string); \
+            return JS_NewBool(c, ::raylib_func(val)); \
+        }, js_name, 1))
 
-        JS_SetPropertyStr(ctx, update_obj, "isKeyDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int key;
-            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyDown requires a Keyboard key enum");
-            return JS_NewBool(c, ::IsKeyDown(key));
-        }, "isKeyDown", 1));
+        // Macro for zero-argument getter functions
+        #define BIND_GETTER_FUNC(js_name, raylib_func, js_type_ctor) \
+        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
+            return js_type_ctor(c, ::raylib_func()); \
+        }, js_name, 0))
 
-        JS_SetPropertyStr(ctx, update_obj, "isKeyReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int key;
-            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyReleased requires a Keyboard key enum");
-            return JS_NewBool(c, ::IsKeyReleased(key));
-        }, "isKeyReleased", 1));
+        // --- Keyboard Checks ---
+        BIND_INT_ARG_FUNC("isKeyPressed",  IsKeyPressed,  "Requires a keyboard key enum");
+        BIND_INT_ARG_FUNC("isKeyDown",     IsKeyDown,     "Requires a keyboard key enum");
+        BIND_INT_ARG_FUNC("isKeyReleased", IsKeyReleased, "Requires a keyboard key enum");
+        BIND_INT_ARG_FUNC("isKeyUp",       IsKeyUp,       "Requires a keyboard key enum");
 
-        JS_SetPropertyStr(ctx, update_obj, "isKeyUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int key;
-            if (argc < 1 || JS_ToInt32(c, &key, argv[0]) < 0) return JS_ThrowTypeError(c, "isKeyUp requires a Keyboard key enum");
-            return JS_NewBool(c, ::IsKeyUp(key));
-        }, "isKeyUp", 1));
+        // --- Mouse Button Checks ---
+        BIND_INT_ARG_FUNC("isMouseButtonPressed",  IsMouseButtonPressed,  "MouseButton");
+        BIND_INT_ARG_FUNC("isMouseButtonDown",     IsMouseButtonDown,     "MouseButton");
+        BIND_INT_ARG_FUNC("isMouseButtonReleased", IsMouseButtonReleased, "MouseButton");
+        BIND_INT_ARG_FUNC("isMouseButtonUp",       IsMouseButtonUp,       "MouseButton");
 
-        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int button;
-            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonPressed requires a MouseButton enum");
-            return JS_NewBool(c, ::IsMouseButtonPressed(button));
-        }, "isMouseButtonPressed", 1));
-
-        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int button;
-            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonDown requires a MouseButton enum");
-            return JS_NewBool(c, ::IsMouseButtonDown(button));
-        }, "isMouseButtonDown", 1));
-
-        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int button;
-            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonReleased requires a MouseButton enum");
-            return JS_NewBool(c, ::IsMouseButtonReleased(button));
-        }, "isMouseButtonReleased", 1));
-
-        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
-            int button;
-            if (argc < 1 || JS_ToInt32(c, &button, argv[0]) < 0) return JS_ThrowTypeError(c, "isMouseButtonUp requires a MouseButton enum");
-            return JS_NewBool(c, ::IsMouseButtonUp(button));
-        }, "isMouseButtonUp", 1));
+        // --- Mouse State Getters ---
+        BIND_GETTER_FUNC("getMouseWheelMove", GetMouseWheelMove, JS_NewFloat64);
 
         JS_SetPropertyStr(ctx, update_obj, "getMousePosition", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
             Vector2 pos = ::GetMousePosition();
             return Utils::create_class_instance<JSVector2>(c, js_vector2_class_id, pos.x, pos.y);
         }, "getMousePosition", 0));
 
-        JS_SetPropertyStr(ctx, update_obj, "getMouseX", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
-            return JS_NewInt32(c, ::GetMouseX());
-        }, "getMouseX", 0));
-
-        JS_SetPropertyStr(ctx, update_obj, "getMouseY", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
-            return JS_NewInt32(c, ::GetMouseY());
-        }, "getMouseY", 0));
-
-        JS_SetPropertyStr(ctx, update_obj, "getMouseWheelMove", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
-            return JS_NewFloat64(c, ::GetMouseWheelMove());
-        }, "getMouseWheelMove", 0));
+        #undef BIND_INT_ARG_FUNC
+        #undef BIND_GETTER_FUNC
 
         return update_obj.release();
     }
@@ -187,7 +159,7 @@ namespace HostApi {
         return text_obj.release();
     }
 
-    JSValue create_draw_render_object(JSContext* ctx) {
+    static JSValue create_draw_render_object(JSContext* ctx) {
 
         Utils::ScopedJSValue render2d_obj(ctx, JS_NewObject(ctx));
 
@@ -217,6 +189,61 @@ namespace HostApi {
 
         JS_FreeValue(ctx, r2d_val);
         return render_obj;
+    }
+
+    JSApplication::JSApplication(const int w, const int h, const std::string& title) {
+        InitWindow(w, h, title.c_str());
+        SetTargetFPS(60);
+    }
+
+    JSValue JSApplication::Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
+        if (argc < 1) return JS_ThrowTypeError(ctx, "Expected a user application config object");
+        JSValueConst user_app = argv[0];
+
+        Utils::ScopedJSValue on_init_func(ctx, JS_GetPropertyStr(ctx, user_app, "onInit"));
+        Utils::ScopedJSValue on_update_func(ctx, JS_GetPropertyStr(ctx, user_app, "onUpdate"));
+        Utils::ScopedJSValue on_draw_func(ctx, JS_GetPropertyStr(ctx, user_app, "onDraw"));
+
+        // Instantiate rendering and context objects ONCE outside the frame loop
+        Utils::ScopedJSValue update_obj(ctx, create_update_context_object(ctx));
+        Utils::ScopedJSValue render_obj(ctx, create_draw_render_object(ctx));
+
+        if (JS_IsFunction(ctx, on_init_func)) {
+            if (Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr)); JS_IsException(ret)) {
+                return JS_EXCEPTION;
+            }
+        }
+
+        while (!WindowShouldClose()) {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+
+            if (JS_IsFunction(ctx, on_update_func)) {
+                JSValue u = update_obj.get();
+                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_update_func, user_app, 1, &u));
+                if (JS_IsException(ret.get())) {
+                    EndDrawing();
+                    if (IsWindowReady()) CloseWindow();
+                    return JS_EXCEPTION;
+                }
+            }
+            if (JS_IsFunction(ctx, on_draw_func)) {
+                JSValue r = render_obj.get();
+                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_draw_func, user_app, 1, &r));
+                if (JS_IsException(ret.get())) {
+                    EndDrawing();
+                    if (IsWindowReady()) CloseWindow();
+                    return JS_EXCEPTION;
+                }
+            }
+            EndDrawing();
+        }
+
+        if (IsWindowReady()) {
+            CloseWindow();
+        }
+
+        return JS_UNDEFINED;
     }
 
 } // namespace HostApi

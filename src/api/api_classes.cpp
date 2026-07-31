@@ -1,7 +1,6 @@
 #include "hostapi.hpp"
 #include "js_types.hpp"
 #include "js_utils.hpp"
-#include "api_context.hpp"
 
 #define JS_BIND_PROP(ClassType, ClassIDPtr, name, Member) \
     JS_CGETSET_DEF( \
@@ -36,61 +35,6 @@ namespace HostApi {
             },
             .proto_funcs = proto_funcs
         });
-    }
-
-    JSApplication::JSApplication(const int w, const int h, const std::string& title) {
-        InitWindow(w, h, title.c_str());
-        SetTargetFPS(60);
-    }
-
-    JSValue JSApplication::Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
-        if (argc < 1) return JS_ThrowTypeError(ctx, "Expected a user application config object");
-        JSValueConst user_app = argv[0];
-
-        Utils::ScopedJSValue on_init_func(ctx, JS_GetPropertyStr(ctx, user_app, "onInit"));
-        Utils::ScopedJSValue on_update_func(ctx, JS_GetPropertyStr(ctx, user_app, "onUpdate"));
-        Utils::ScopedJSValue on_draw_func(ctx, JS_GetPropertyStr(ctx, user_app, "onDraw"));
-
-        // Instantiate rendering and context objects ONCE outside the frame loop
-        Utils::ScopedJSValue update_obj(ctx, create_update_context_object(ctx));
-        Utils::ScopedJSValue render_obj(ctx, create_draw_render_object(ctx));
-
-        if (JS_IsFunction(ctx, on_init_func)) {
-            if (Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr)); JS_IsException(ret)) {
-                return JS_EXCEPTION;
-            }
-        }
-
-        while (!WindowShouldClose()) {
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-
-            if (JS_IsFunction(ctx, on_update_func)) {
-                JSValue u = update_obj.get();
-                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_update_func, user_app, 1, &u));
-                if (JS_IsException(ret.get())) {
-                    EndDrawing();
-                    if (IsWindowReady()) CloseWindow();
-                    return JS_EXCEPTION;
-                }
-            }
-            if (JS_IsFunction(ctx, on_draw_func)) {
-                JSValue r = render_obj.get();
-                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_draw_func, user_app, 1, &r));
-                if (JS_IsException(ret.get())) {
-                    EndDrawing();
-                    if (IsWindowReady()) CloseWindow();
-                    return JS_EXCEPTION;
-                }
-            }
-            EndDrawing();
-        }
-
-        if (IsWindowReady()) {
-            CloseWindow();
-        }
-
-        return JS_UNDEFINED;
     }
 
     static void register_color_class(JSContext* ctx, JSModuleDef* m) {

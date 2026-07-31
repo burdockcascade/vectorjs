@@ -54,7 +54,7 @@ target_sources(vectorjs PRIVATE
         "src/main.cpp"
         "src/js_engine.cpp"
         "src/core.cpp"
-        "src/api/api_context.cpp"
+        "src/api/api_application.cpp"
         "src/api/api_classes.cpp"
         "src/api/api_enums.cpp"
 )
