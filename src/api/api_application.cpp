@@ -15,6 +15,19 @@ namespace HostApi {
         return options;
     }
 
+    static JSTextOptions parse_text_options(JSContext* ctx, JSValueConst optionsObj) {
+        JSTextOptions options;
+        if (JS_IsObject(optionsObj)) {
+            Utils::try_get_opaque_property<JSFont>(ctx, optionsObj, "font", js_font_class_id, options.font);
+            Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
+            Utils::try_get_float_property(ctx, optionsObj, "rotation", options.rotation);
+            Utils::try_get_float_property(ctx, optionsObj, "fontSize", options.fontSize);
+            Utils::try_get_float_property(ctx, optionsObj, "spacing", options.spacing);
+            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id, options.origin);
+        }
+        return options;
+    }
+
     static JSValue create_update_context_object(JSContext* ctx) {
         Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
 
@@ -122,19 +135,6 @@ namespace HostApi {
         }, "drawEllipse", 4));
 
         return shape_obj.release();
-    }
-
-    static JSTextOptions parse_text_options(JSContext* ctx, JSValueConst optionsObj) {
-        JSTextOptions options;
-        if (JS_IsObject(optionsObj)) {
-            Utils::try_get_opaque_property<JSFont>(ctx, optionsObj, "font", js_font_class_id, options.font);
-            Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
-            Utils::try_get_float_property(ctx, optionsObj, "rotation", options.rotation);
-            Utils::try_get_float_property(ctx, optionsObj, "fontSize", options.fontSize);
-            Utils::try_get_float_property(ctx, optionsObj, "spacing", options.spacing);
-            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id, options.origin);
-        }
-        return options;
     }
 
     static JSValue create_text_object(JSContext* ctx) {
