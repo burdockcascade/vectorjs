@@ -32,7 +32,7 @@ namespace HostApi {
         Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
 
         // Macro for single-int/enum argument functions (IsKeyPressed, IsMouseButtonDown, etc.)
-        #define BIND_INT_ARG_FUNC(js_name, raylib_func, err_string) \
+        #define BIND_INT_1ARG_FUNC(js_name, raylib_func, err_string) \
         JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue { \
             int val; \
             if (argc < 1 || JS_ToInt32(c, &val, argv[0]) < 0) \
@@ -47,16 +47,16 @@ namespace HostApi {
         }, js_name, 0))
 
         // --- Keyboard Checks ---
-        BIND_INT_ARG_FUNC("isKeyPressed",  IsKeyPressed,  "Requires a keyboard key enum");
-        BIND_INT_ARG_FUNC("isKeyDown",     IsKeyDown,     "Requires a keyboard key enum");
-        BIND_INT_ARG_FUNC("isKeyReleased", IsKeyReleased, "Requires a keyboard key enum");
-        BIND_INT_ARG_FUNC("isKeyUp",       IsKeyUp,       "Requires a keyboard key enum");
+        BIND_INT_1ARG_FUNC("isKeyPressed",  IsKeyPressed,  "Requires a keyboard key enum");
+        BIND_INT_1ARG_FUNC("isKeyDown",     IsKeyDown,     "Requires a keyboard key enum");
+        BIND_INT_1ARG_FUNC("isKeyReleased", IsKeyReleased, "Requires a keyboard key enum");
+        BIND_INT_1ARG_FUNC("isKeyUp",       IsKeyUp,       "Requires a keyboard key enum");
 
         // --- Mouse Button Checks ---
-        BIND_INT_ARG_FUNC("isMouseButtonPressed",  IsMouseButtonPressed,  "MouseButton");
-        BIND_INT_ARG_FUNC("isMouseButtonDown",     IsMouseButtonDown,     "MouseButton");
-        BIND_INT_ARG_FUNC("isMouseButtonReleased", IsMouseButtonReleased, "MouseButton");
-        BIND_INT_ARG_FUNC("isMouseButtonUp",       IsMouseButtonUp,       "MouseButton");
+        BIND_INT_1ARG_FUNC("isMouseButtonPressed",  IsMouseButtonPressed,  "MouseButton");
+        BIND_INT_1ARG_FUNC("isMouseButtonDown",     IsMouseButtonDown,     "MouseButton");
+        BIND_INT_1ARG_FUNC("isMouseButtonReleased", IsMouseButtonReleased, "MouseButton");
+        BIND_INT_1ARG_FUNC("isMouseButtonUp",       IsMouseButtonUp,       "MouseButton");
 
         // --- Mouse State Getters ---
         BIND_GETTER_FUNC("getMouseWheelMove", GetMouseWheelMove, JS_NewFloat64);
@@ -66,7 +66,7 @@ namespace HostApi {
             return Utils::create_class_instance<JSVector2>(c, js_vector2_class_id, pos.x, pos.y);
         }, "getMousePosition", 0));
 
-        #undef BIND_INT_ARG_FUNC
+        #undef BIND_INT_1ARG_FUNC
         #undef BIND_GETTER_FUNC
 
         return update_obj.release();
