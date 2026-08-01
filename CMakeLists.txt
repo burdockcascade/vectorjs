@@ -36,7 +36,7 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
         qjs
         GIT_REPOSITORY https://github.com/quickjs-ng/quickjs
-        GIT_TAG v0.15.1
+        GIT_TAG v0.16.0
 )
 
 # Bring all dependencies into the build tree automatically
