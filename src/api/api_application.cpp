@@ -33,7 +33,7 @@ namespace HostApi {
 
         // Macro for single-int/enum argument functions (IsKeyPressed, IsMouseButtonDown, etc.)
         #define BIND_INPUT_FUNC(js_name, raylib_func, err_string) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue { \
+        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { \
             int val; \
             if (argc < 1 || JS_ToInt32(c, &val, argv[0]) < 0) \
                 return JS_ThrowTypeError(c, err_string); \
@@ -41,10 +41,14 @@ namespace HostApi {
         }, js_name, 1))
 
         // Macro for zero-argument getter functions
-        #define BIND_GETTER_FUNC(js_name, raylib_func, js_type_ctor) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
+        #define BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, js_type_ctor) \
+        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { \
             return js_type_ctor(c, ::raylib_func()); \
         }, js_name, 0))
+
+        #define BIND_GETTER_AS_INT(js_name, raylib_func)   BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewInt64)
+        #define BIND_GETTER_AS_FLOAT(js_name, raylib_func) BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewFloat64)
+        #define BIND_GETTER_AS_BOOL(js_name, raylib_func)  BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewBool)
 
         #define BIND_CLASS_GETTER_FUNC(js_name, raylib_func, js_class_type, class_id) \
         JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
@@ -52,24 +56,55 @@ namespace HostApi {
             return Utils::create_class_instance<js_class_type>(c, class_id, pos.x, pos.y); \
         }, js_name, 0))
 
-        // --- Keyboard Checks ---
+        #define BIND_VOID_FUNCTION_CALL(js_name, raylib_func) \
+        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
+            ::raylib_func(); \
+            return JS_UNDEFINED; \
+        }, js_name, 0))
+
+        // Window Actions
+        BIND_VOID_FUNCTION_CALL("minimizeWindow", MinimizeWindow);
+        BIND_VOID_FUNCTION_CALL("maximizeWindow", MaximizeWindow);
+
+        // Window Properties
+        BIND_GETTER_AS_BOOL("isWindowFullscreen", IsWindowFullscreen);
+        BIND_GETTER_AS_BOOL("isWindowHidden", IsWindowHidden);
+        BIND_GETTER_AS_BOOL("isWindowResized", IsWindowResized);
+        BIND_GETTER_AS_BOOL("isWindowMinimized", IsWindowMinimized);
+        BIND_GETTER_AS_BOOL("isWindowMaximized", IsWindowMaximized);
+        BIND_GETTER_AS_BOOL("isWindowFocused", IsWindowFocused);
+
+        // Monitor
+        BIND_GETTER_AS_INT("getScreenWidth", GetScreenWidth);
+        BIND_GETTER_AS_INT("getScreenHeight", GetScreenHeight);
+        BIND_GETTER_AS_INT("getRenderWidth", GetRenderWidth);
+        BIND_GETTER_AS_INT("getRenderHeight", GetRenderHeight);
+        BIND_GETTER_AS_INT("getMonitorCount", GetMonitorCount);
+        BIND_GETTER_AS_INT("getCurrentMonitor", GetCurrentMonitor);
+
+        // Keyboard Checks
         BIND_INPUT_FUNC("isKeyPressed",  IsKeyPressed,  "Requires a keyboard key enum");
         BIND_INPUT_FUNC("isKeyDown",     IsKeyDown,     "Requires a keyboard key enum");
         BIND_INPUT_FUNC("isKeyReleased", IsKeyReleased, "Requires a keyboard key enum");
         BIND_INPUT_FUNC("isKeyUp",       IsKeyUp,       "Requires a keyboard key enum");
 
-        // --- Mouse Button Checks ---
+        // Mouse Button Checks
         BIND_INPUT_FUNC("isMouseButtonPressed",  IsMouseButtonPressed,  "MouseButton");
         BIND_INPUT_FUNC("isMouseButtonDown",     IsMouseButtonDown,     "MouseButton");
         BIND_INPUT_FUNC("isMouseButtonReleased", IsMouseButtonReleased, "MouseButton");
         BIND_INPUT_FUNC("isMouseButtonUp",       IsMouseButtonUp,       "MouseButton");
 
-        // --- Mouse State Getters ---
-        BIND_GETTER_FUNC("getMouseWheelMove", GetMouseWheelMove, JS_NewFloat64);
+        // Mouse State Getters
+        BIND_GETTER_FUNC_AS_TYPE("getMouseWheelMove", GetMouseWheelMove, JS_NewFloat64);
         BIND_CLASS_GETTER_FUNC("getMousePosition", GetMousePosition, JSVector2, js_vector2_class_id);
 
         #undef BIND_INPUT_FUNC
-        #undef BIND_GETTER_FUNC
+        #undef BIND_GETTER_FUNC_AS_TYPE
+        #undef BIND_GETTER_AS_INT
+        #undef BIND_GETTER_AS_FLOAT
+        #undef BIND_GETTER_AS_BOOL
+        #undef BIND_CLASS_GETTER_FUNC
+        #undef BIND_VOID_FUNCTION_CALL
 
         return update_obj.release();
     }
