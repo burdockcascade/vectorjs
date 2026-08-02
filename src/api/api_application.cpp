@@ -1,5 +1,4 @@
 #include "js_types.hpp"
-#include "js_bind.hpp"
 #include "js_utils.hpp"
 #include <iostream>
 
@@ -33,40 +32,133 @@ namespace HostApi {
         Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
 
         // Window Actions
-        bind_fn<MinimizeWindow>(ctx, update_obj, "minimizeWindow");
-        bind_fn<MaximizeWindow>(ctx, update_obj, "maximizeWindow");
+        JS_SetPropertyStr(ctx, update_obj, "minimizeWindow", JS_NewCFunction(ctx, [](JSContext*, JSValueConst, int, JSValueConst*) -> JSValue {
+            ::MinimizeWindow();
+            return JS_UNDEFINED;
+        }, "minimizeWindow", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "maximizeWindow", JS_NewCFunction(ctx, [](JSContext*, JSValueConst, int, JSValueConst*) -> JSValue {
+            ::MaximizeWindow();
+            return JS_UNDEFINED;
+        }, "maximizeWindow", 0));
 
         // Window Properties
-        bind_fn<IsWindowFullscreen>(ctx, update_obj, "isWindowFullscreen");
-        bind_fn<IsWindowHidden>(ctx, update_obj, "isWindowHidden");
-        bind_fn<IsWindowResized>(ctx, update_obj, "isWindowResized");
-        bind_fn<IsWindowMinimized>(ctx, update_obj, "isWindowMinimized");
-        bind_fn<IsWindowMaximized>(ctx, update_obj, "isWindowMaximized");
-        bind_fn<IsWindowFocused>(ctx, update_obj, "isWindowFocused");
+        JS_SetPropertyStr(ctx, update_obj, "isWindowFullscreen", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowFullscreen());
+        }, "isWindowFullscreen", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "isWindowHidden", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowHidden());
+        }, "isWindowHidden", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "isWindowResized", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowResized());
+        }, "isWindowResized", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "isWindowMinimized", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowMinimized());
+        }, "isWindowMinimized", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "isWindowMaximized", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowMaximized());
+        }, "isWindowMaximized", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "isWindowFocused", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewBool(c, ::IsWindowFocused());
+        }, "isWindowFocused", 0));
 
         // Monitor
-        bind_fn<GetScreenWidth>(ctx, update_obj, "getScreenWidth");
-        bind_fn<GetScreenHeight>(ctx, update_obj, "getScreenHeight");
-        bind_fn<GetRenderWidth>(ctx, update_obj, "getRenderWidth");
-        bind_fn<GetRenderHeight>(ctx, update_obj, "getRenderHeight");
-        bind_fn<GetMonitorCount>(ctx, update_obj, "getMonitorCount");
-        bind_fn<GetCurrentMonitor>(ctx, update_obj, "getCurrentMonitor");
+        JS_SetPropertyStr(ctx, update_obj, "getScreenWidth", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetScreenWidth());
+        }, "getScreenWidth", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getScreenHeight", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetScreenHeight());
+        }, "getScreenHeight", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getRenderWidth", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetRenderWidth());
+        }, "getRenderWidth", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getRenderHeight", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetRenderHeight());
+        }, "getRenderHeight", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMonitorCount", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetMonitorCount());
+        }, "getMonitorCount", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getCurrentMonitor", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewInt32(c, ::GetCurrentMonitor());
+        }, "getCurrentMonitor", 0));
 
         // Keyboard Checks
-        bind_fn<IsKeyPressed>(ctx, update_obj, "isKeyPressed");
-        bind_fn<IsKeyDown>(ctx, update_obj, "isKeyDown");
-        bind_fn<IsKeyReleased>(ctx, update_obj, "isKeyReleased");
-        bind_fn<IsKeyUp>(ctx, update_obj, "isKeyUp");
+        JS_SetPropertyStr(ctx, update_obj, "isKeyPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isKeyPressed requires a key code argument");
+            int key = 0;
+            if (JS_ToInt32(c, &key, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsKeyPressed(key));
+        }, "isKeyPressed", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isKeyDown requires a key code argument");
+            int key = 0;
+            if (JS_ToInt32(c, &key, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsKeyDown(key));
+        }, "isKeyDown", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isKeyReleased requires a key code argument");
+            int key = 0;
+            if (JS_ToInt32(c, &key, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsKeyReleased(key));
+        }, "isKeyReleased", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isKeyUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isKeyUp requires a key code argument");
+            int key = 0;
+            if (JS_ToInt32(c, &key, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsKeyUp(key));
+        }, "isKeyUp", 1));
 
         // Mouse Button Checks
-        bind_fn<IsMouseButtonPressed>(ctx, update_obj, "isMouseButtonPressed");
-        bind_fn<IsMouseButtonDown>(ctx, update_obj, "isMouseButtonDown");
-        bind_fn<IsMouseButtonReleased>(ctx, update_obj, "isMouseButtonReleased");
-        bind_fn<IsMouseButtonUp>(ctx, update_obj, "isMouseButtonUp");
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonPressed", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isMouseButtonPressed requires a button argument");
+            int button = 0;
+            if (JS_ToInt32(c, &button, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsMouseButtonPressed(button));
+        }, "isMouseButtonPressed", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonDown", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isMouseButtonDown requires a button argument");
+            int button = 0;
+            if (JS_ToInt32(c, &button, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsMouseButtonDown(button));
+        }, "isMouseButtonDown", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonReleased", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isMouseButtonReleased requires a button argument");
+            int button = 0;
+            if (JS_ToInt32(c, &button, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsMouseButtonReleased(button));
+        }, "isMouseButtonReleased", 1));
+
+        JS_SetPropertyStr(ctx, update_obj, "isMouseButtonUp", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            if (argc < 1) return JS_ThrowTypeError(c, "isMouseButtonUp requires a button argument");
+            int button = 0;
+            if (JS_ToInt32(c, &button, argv[0]) < 0) return JS_EXCEPTION;
+            return JS_NewBool(c, ::IsMouseButtonUp(button));
+        }, "isMouseButtonUp", 1));
 
         // Mouse State Getters
-        bind_fn<GetMouseWheelMove>(ctx, update_obj, "getMouseWheelMove");
-        bind_fn<GetMousePosition>(ctx, update_obj, "getMousePosition");
+        JS_SetPropertyStr(ctx, update_obj, "getMouseWheelMove", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            return JS_NewFloat64(c, static_cast<double>(::GetMouseWheelMove()));
+        }, "getMouseWheelMove", 0));
+
+        JS_SetPropertyStr(ctx, update_obj, "getMousePosition", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue {
+            const ::Vector2 pos = ::GetMousePosition();
+            return Utils::create_class_instance<JSVector2>(c, js_vector2_class_id, pos.x, pos.y);
+        }, "getMousePosition", 0));
 
         return update_obj.release();
     }
