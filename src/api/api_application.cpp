@@ -1,4 +1,5 @@
 #include "js_types.hpp"
+#include "js_bind.hpp"
 #include "js_utils.hpp"
 #include <iostream>
 
@@ -31,80 +32,41 @@ namespace HostApi {
     static JSValue create_update_context_object(JSContext* ctx) {
         Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
 
-        // Macro for single-int/enum argument functions (IsKeyPressed, IsMouseButtonDown, etc.)
-        #define BIND_INPUT_FUNC(js_name, raylib_func, err_string) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { \
-            int val; \
-            if (argc < 1 || JS_ToInt32(c, &val, argv[0]) < 0) \
-                return JS_ThrowTypeError(c, err_string); \
-            return JS_NewBool(c, ::raylib_func(val)); \
-        }, js_name, 1))
-
-        // Macro for zero-argument getter functions
-        #define BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, js_type_ctor) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue { \
-            return js_type_ctor(c, ::raylib_func()); \
-        }, js_name, 0))
-
-        #define BIND_GETTER_AS_INT(js_name, raylib_func)   BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewInt64)
-        #define BIND_GETTER_AS_FLOAT(js_name, raylib_func) BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewFloat64)
-        #define BIND_GETTER_AS_BOOL(js_name, raylib_func)  BIND_GETTER_FUNC_AS_TYPE(js_name, raylib_func, JS_NewBool)
-
-        #define BIND_CLASS_GETTER_FUNC(js_name, raylib_func, js_class_type, class_id) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
-            const auto pos = ::raylib_func(); \
-            return Utils::create_class_instance<js_class_type>(c, class_id, pos.x, pos.y); \
-        }, js_name, 0))
-
-        #define BIND_VOID_FUNCTION_CALL(js_name, raylib_func) \
-        JS_SetPropertyStr(ctx, update_obj, js_name, JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int, JSValueConst*) -> JSValue { \
-            ::raylib_func(); \
-            return JS_UNDEFINED; \
-        }, js_name, 0))
-
         // Window Actions
-        BIND_VOID_FUNCTION_CALL("minimizeWindow", MinimizeWindow);
-        BIND_VOID_FUNCTION_CALL("maximizeWindow", MaximizeWindow);
+        bind_fn<MinimizeWindow>(ctx, update_obj, "minimizeWindow");
+        bind_fn<MaximizeWindow>(ctx, update_obj, "maximizeWindow");
 
         // Window Properties
-        BIND_GETTER_AS_BOOL("isWindowFullscreen", IsWindowFullscreen);
-        BIND_GETTER_AS_BOOL("isWindowHidden", IsWindowHidden);
-        BIND_GETTER_AS_BOOL("isWindowResized", IsWindowResized);
-        BIND_GETTER_AS_BOOL("isWindowMinimized", IsWindowMinimized);
-        BIND_GETTER_AS_BOOL("isWindowMaximized", IsWindowMaximized);
-        BIND_GETTER_AS_BOOL("isWindowFocused", IsWindowFocused);
+        bind_fn<IsWindowFullscreen>(ctx, update_obj, "isWindowFullscreen");
+        bind_fn<IsWindowHidden>(ctx, update_obj, "isWindowHidden");
+        bind_fn<IsWindowResized>(ctx, update_obj, "isWindowResized");
+        bind_fn<IsWindowMinimized>(ctx, update_obj, "isWindowMinimized");
+        bind_fn<IsWindowMaximized>(ctx, update_obj, "isWindowMaximized");
+        bind_fn<IsWindowFocused>(ctx, update_obj, "isWindowFocused");
 
         // Monitor
-        BIND_GETTER_AS_INT("getScreenWidth", GetScreenWidth);
-        BIND_GETTER_AS_INT("getScreenHeight", GetScreenHeight);
-        BIND_GETTER_AS_INT("getRenderWidth", GetRenderWidth);
-        BIND_GETTER_AS_INT("getRenderHeight", GetRenderHeight);
-        BIND_GETTER_AS_INT("getMonitorCount", GetMonitorCount);
-        BIND_GETTER_AS_INT("getCurrentMonitor", GetCurrentMonitor);
+        bind_fn<GetScreenWidth>(ctx, update_obj, "getScreenWidth");
+        bind_fn<GetScreenHeight>(ctx, update_obj, "getScreenHeight");
+        bind_fn<GetRenderWidth>(ctx, update_obj, "getRenderWidth");
+        bind_fn<GetRenderHeight>(ctx, update_obj, "getRenderHeight");
+        bind_fn<GetMonitorCount>(ctx, update_obj, "getMonitorCount");
+        bind_fn<GetCurrentMonitor>(ctx, update_obj, "getCurrentMonitor");
 
         // Keyboard Checks
-        BIND_INPUT_FUNC("isKeyPressed",  IsKeyPressed,  "Requires a keyboard key enum");
-        BIND_INPUT_FUNC("isKeyDown",     IsKeyDown,     "Requires a keyboard key enum");
-        BIND_INPUT_FUNC("isKeyReleased", IsKeyReleased, "Requires a keyboard key enum");
-        BIND_INPUT_FUNC("isKeyUp",       IsKeyUp,       "Requires a keyboard key enum");
+        bind_fn<IsKeyPressed>(ctx, update_obj, "isKeyPressed");
+        bind_fn<IsKeyDown>(ctx, update_obj, "isKeyDown");
+        bind_fn<IsKeyReleased>(ctx, update_obj, "isKeyReleased");
+        bind_fn<IsKeyUp>(ctx, update_obj, "isKeyUp");
 
         // Mouse Button Checks
-        BIND_INPUT_FUNC("isMouseButtonPressed",  IsMouseButtonPressed,  "MouseButton");
-        BIND_INPUT_FUNC("isMouseButtonDown",     IsMouseButtonDown,     "MouseButton");
-        BIND_INPUT_FUNC("isMouseButtonReleased", IsMouseButtonReleased, "MouseButton");
-        BIND_INPUT_FUNC("isMouseButtonUp",       IsMouseButtonUp,       "MouseButton");
+        bind_fn<IsMouseButtonPressed>(ctx, update_obj, "isMouseButtonPressed");
+        bind_fn<IsMouseButtonDown>(ctx, update_obj, "isMouseButtonDown");
+        bind_fn<IsMouseButtonReleased>(ctx, update_obj, "isMouseButtonReleased");
+        bind_fn<IsMouseButtonUp>(ctx, update_obj, "isMouseButtonUp");
 
         // Mouse State Getters
-        BIND_GETTER_FUNC_AS_TYPE("getMouseWheelMove", GetMouseWheelMove, JS_NewFloat64);
-        BIND_CLASS_GETTER_FUNC("getMousePosition", GetMousePosition, JSVector2, js_vector2_class_id);
-
-        #undef BIND_INPUT_FUNC
-        #undef BIND_GETTER_FUNC_AS_TYPE
-        #undef BIND_GETTER_AS_INT
-        #undef BIND_GETTER_AS_FLOAT
-        #undef BIND_GETTER_AS_BOOL
-        #undef BIND_CLASS_GETTER_FUNC
-        #undef BIND_VOID_FUNCTION_CALL
+        bind_fn<GetMouseWheelMove>(ctx, update_obj, "getMouseWheelMove");
+        bind_fn<GetMousePosition>(ctx, update_obj, "getMousePosition");
 
         return update_obj.release();
     }
