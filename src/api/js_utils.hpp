@@ -11,33 +11,43 @@ namespace HostApi::Utils {
     class ScopedJSValue {
     public:
         ScopedJSValue(JSContext* ctx, JSValue val) : ctx_(ctx), val_(val) {}
+
         ~ScopedJSValue() {
-            if (ctx_ && !JS_IsUndefined(val_)) {
-                JS_FreeValue(ctx_, val_);
-            }
+            reset();
         }
 
         ScopedJSValue(const ScopedJSValue&) = delete;
         ScopedJSValue& operator=(const ScopedJSValue&) = delete;
 
         ScopedJSValue(ScopedJSValue&& other) noexcept
-            : ctx_(std::exchange(other.ctx_, nullptr)), val_(std::exchange(other.val_, JS_UNDEFINED)) {}
+            : ctx_(std::exchange(other.ctx_, nullptr)),
+              val_(std::exchange(other.val_, JS_UNDEFINED)) {}
 
         ScopedJSValue& operator=(ScopedJSValue&& other) noexcept {
             if (this != &other) {
-                if (ctx_ && !JS_IsUndefined(val_)) JS_FreeValue(ctx_, val_);
+                reset(); // Safely release existing JSValue before overwriting
                 ctx_ = std::exchange(other.ctx_, nullptr);
                 val_ = std::exchange(other.val_, JS_UNDEFINED);
             }
             return *this;
         }
 
+        void reset() noexcept {
+            if (ctx_ && !JS_IsUndefined(val_)) {
+                JS_FreeValue(ctx_, val_);
+                val_ = JS_UNDEFINED;
+            }
+        }
+
         [[nodiscard]] JSValue get() const { return val_; }
-        [[nodiscard]] JSValue release() {
+
+        [[nodiscard]] JSValue release() noexcept {
             JSValue temp = val_;
             val_ = JS_UNDEFINED;
+            ctx_ = nullptr;
             return temp;
         }
+
         operator JSValue() const { return val_; }
 
     private:
@@ -45,7 +55,7 @@ namespace HostApi::Utils {
         JSValue val_{JS_UNDEFINED};
     };
 
-    inline std::string js_to_std_string(JSContext* ctx, const JSValue val, const std::string& fallback = "") {
+    inline std::string js_to_std_string(JSContext* ctx, JSValueConst val, const std::string& fallback = "") {
         const char* str = JS_ToCString(ctx, val);
         if (!str) return fallback;
         std::string result(str);
@@ -54,18 +64,18 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    T* get_opaque(JSContext* ctx, const JSValue val, JSClassID class_id) {
+    T* get_opaque(JSContext* ctx, JSValueConst val, JSClassID class_id) {
         if (JS_IsUndefined(val) || JS_IsNull(val)) return nullptr;
         return static_cast<T*>(JS_GetOpaque2(ctx, val, class_id));
     }
 
     template <typename T>
-    T* get_opaque(const JSValue val, JSClassID class_id) {
+    T* get_opaque(JSValueConst val, JSClassID class_id) {
         return static_cast<T*>(JS_GetOpaque(val, class_id));
     }
 
     template <typename T>
-    T get_opaque_or(JSContext* ctx, const JSValue val, JSClassID class_id, const T& default_val) {
+    T get_opaque_or(JSContext* ctx, JSValueConst val, JSClassID class_id, const T& default_val) {
         if (auto* ptr = get_opaque<T>(ctx, val, class_id)) {
             return *ptr;
         }
@@ -73,7 +83,7 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    bool try_get_opaque_property(JSContext* ctx, const JSValue obj, const char* prop_name, JSClassID class_id, T& out_val) {
+    bool try_get_opaque_property(JSContext* ctx, JSValueConst obj, const char* prop_name, JSClassID class_id, T& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -86,7 +96,7 @@ namespace HostApi::Utils {
         return false;
     }
 
-    inline bool try_get_float_property(JSContext* ctx, const JSValue obj, const char* prop_name, float& out_val) {
+    inline bool try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name, float& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -100,7 +110,7 @@ namespace HostApi::Utils {
         return false;
     }
 
-    inline bool try_get_bool_property(JSContext* ctx, const JSValue obj, const char* prop_name, bool& out_val) {
+    inline bool try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name, bool& out_val) {
         if (!JS_IsObject(obj)) return false;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
@@ -114,7 +124,7 @@ namespace HostApi::Utils {
     // --- 1. Generic Getters and Setters ---
 
     template <typename ClassType, typename FieldType, FieldType ClassType::*Member, JSClassID* ClassID>
-    JSValue js_generic_getter(JSContext* ctx, const JSValue this_val) {
+    JSValue js_generic_getter(JSContext* ctx, JSValueConst this_val) {
         auto* instance = get_opaque<ClassType>(ctx, this_val, *ClassID);
         if (!instance) return JS_EXCEPTION;
 
@@ -128,7 +138,7 @@ namespace HostApi::Utils {
     }
 
     template <typename ClassType, typename FieldType, FieldType ClassType::*Member, JSClassID* ClassID>
-    JSValue js_generic_setter(JSContext* ctx, const JSValue this_val, const JSValue val) {
+    JSValue js_generic_setter(JSContext* ctx, JSValueConst this_val, JSValueConst val) {
         auto* instance = get_opaque<ClassType>(ctx, this_val, *ClassID);
         if (!instance) return JS_EXCEPTION;
 
@@ -147,7 +157,7 @@ namespace HostApi::Utils {
     // --- 2. Exception-Safe Instance Creation ---
 
     template <typename T, typename... Args>
-    JSValue create_js_instance(JSContext* ctx, const JSValue new_target, JSClassID class_id, Args&&... args) {
+    JSValue create_js_instance(JSContext* ctx, JSValueConst new_target, JSClassID class_id, Args&&... args) {
         ScopedJSValue proto(ctx, JS_GetPropertyStr(ctx, new_target, "prototype"));
         if (JS_IsException(proto.get())) return JS_EXCEPTION;
 
@@ -189,28 +199,30 @@ namespace HostApi::Utils {
             JS_NewClassID(rt, &config.class_id);
         }
 
+        const std::string name_str{config.name};
+
         const JSClassDef class_def{
-            .class_name = config.name.data(),
+            .class_name = name_str.c_str(),
             .finalizer = config.finalizer
         };
         JS_NewClass(rt, config.class_id, &class_def);
 
-        const ScopedJSValue proto(ctx, JS_NewObject(ctx));
+        JSValue proto = JS_NewObject(ctx);
 
         if (!config.proto_funcs.empty()) {
             JS_SetPropertyFunctionList(
                 ctx,
-                proto.get(),
+                proto,
                 config.proto_funcs.data(),
                 static_cast<int>(config.proto_funcs.size())
             );
         }
-        JS_SetClassProto(ctx, config.class_id, proto.get());
 
-        const JSValue ctor = JS_NewCFunction2(ctx, config.constructor, config.name.data(), 0, JS_CFUNC_constructor, 0);
-        JS_SetConstructor(ctx, ctor, proto.get());
+        JS_SetClassProto(ctx, config.class_id, proto);
 
-        JS_SetModuleExport(ctx, m, config.name.data(), ctor);
+        const JSValue ctor = JS_NewCFunction2(ctx, config.constructor, name_str.c_str(), 0, JS_CFUNC_constructor, 0);
+        JS_SetConstructor(ctx, ctor, proto);
+        JS_SetModuleExport(ctx, m, name_str.c_str(), ctor);
     }
 
 } // namespace HostApi::Utils
