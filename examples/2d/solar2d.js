@@ -5,13 +5,43 @@ const screenHeight = 800;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
 
-// Define planets with varied speeds and orbital radii
+// Define planets with varied speeds, orbital radii, and attached moons
 const planets = [
-    { name: "Mercury", radius: 70,  size: 6,  speed: 2.5, color: Palette.GRAY },
-    { name: "Venus",   radius: 110, size: 10, speed: 1.8, color: Palette.ORANGE },
-    { name: "Earth",   radius: 170, size: 12, speed: 1.2, color: Palette.BLUE },
-    { name: "Mars",    radius: 240, size: 9,  speed: 0.9, color: Palette.RED },
-    { name: "Jupiter", radius: 320, size: 22, speed: 0.5, color: Palette.BROWN }
+    { name: "Mercury", radius: 70,  size: 6,  speed: 2.5, color: Palette.GRAY, moons: [] },
+    { name: "Venus",   radius: 110, size: 10, speed: 1.8, color: Palette.ORANGE, moons: [] },
+    {
+        name: "Earth",
+        radius: 170,
+        size: 12,
+        speed: 1.2,
+        color: Palette.BLUE,
+        moons: [
+            { radius: 22, size: 3, speed: 4.0, color: Palette.LIGHT_GRAY }
+        ]
+    },
+    {
+        name: "Mars",
+        radius: 240,
+        size: 9,
+        speed: 0.9,
+        color: Palette.RED,
+        moons: [
+            { radius: 16, size: 2, speed: 5.0, color: Palette.LIGHT_GRAY },
+            { radius: 22, size: 2, speed: 3.5, color: Palette.GRAY }
+        ]
+    },
+    {
+        name: "Jupiter",
+        radius: 320,
+        size: 22,
+        speed: 0.5,
+        color: Palette.BROWN,
+        moons: [
+            { radius: 30, size: 3, speed: 6.0, color: Palette.LIGHT_GRAY },
+            { radius: 38, size: 4, speed: 4.2, color: Palette.WHITE },
+            { radius: 46, size: 3, speed: 3.0, color: Palette.LIGHT_GRAY }
+        ]
+    }
 ];
 
 const app = new Application(screenWidth, screenHeight, "Solar System Simulation");
@@ -48,7 +78,7 @@ app.run({
                 color: Palette.YELLOW
             });
 
-            // 2. Render each planet along its orbital path
+            // 2. Render each planet and its moons
             planets.forEach((planet) => {
 
                 // Calculate planet position based on its distinct speed
@@ -61,6 +91,19 @@ app.run({
                 // Draw planet
                 ctx.shapes.drawCircle(planetPos, planet.size, {
                     color: planet.color
+                });
+
+                // Draw moons orbiting around the planet
+                planet.moons.forEach((moon) => {
+                    const moonAngle = time * moon.speed;
+                    const moonPos = new Vector2(
+                        planetPos.x + Math.cos(moonAngle) * moon.radius,
+                        planetPos.y + Math.sin(moonAngle) * moon.radius
+                    );
+
+                    ctx.shapes.drawCircle(moonPos, moon.size, {
+                        color: moon.color
+                    });
                 });
             });
         });
