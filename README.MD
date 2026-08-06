@@ -1,5 +1,12 @@
 # VectorJS
 
+| Feature   | Status   |
+|-----------|----------|
+| Shapes 2D | &#10004; |
+| Audio     |          |
+| Text      | &#10004; |
+| Fonts     | &#10004; |
+
 ## Dependencies
 * Raylib
 * Quickjs-ng
