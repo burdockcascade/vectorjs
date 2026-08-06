@@ -2,31 +2,34 @@
 #include "js_utils.hpp"
 #include "js_types.hpp"
 #include <utility>
+#include <string_view>
+#include <concepts>
 
 namespace HostApi {
 
-    static JSValue create_js_color_instance(JSContext* ctx, const ::Color color) {
+    static JSValue create_js_color_instance(JSContext* ctx, ::Color color) noexcept {
         return Utils::create_class_instance<JSColor>(ctx, js_color_class_id, color);
     }
 
     template <typename T>
-    static void set_object_property(JSContext* ctx, const JSValue obj, const char* name, const T& val) {
+    static void set_object_property(JSContext* ctx, JSValue obj, const char* name, T&& val) {
         constexpr int flags = JS_PROP_ENUMERABLE | JS_PROP_CONFIGURABLE;
 
-        if constexpr (std::is_integral_v<T> || std::is_enum_v<T>) {
+        if constexpr (std::integral<std::decay_t<T>> || std::is_enum_v<std::decay_t<T>>) {
             JS_DefinePropertyValueStr(ctx, obj, name, JS_NewInt32(ctx, static_cast<int32_t>(val)), flags);
-        } else if constexpr (std::is_floating_point_v<T>) {
+        } else if constexpr (std::floating_point<std::decay_t<T>>) {
             JS_DefinePropertyValueStr(ctx, obj, name, JS_NewFloat64(ctx, static_cast<double>(val)), flags);
-        } else if constexpr (std::is_convertible_v<T, std::string> || std::is_same_v<T, const char*>) {
-            JS_DefinePropertyValueStr(ctx, obj, name, JS_NewString(ctx, std::string(val).c_str()), flags);
-        } else if constexpr (std::is_same_v<T, ::Color>) {
+        } else if constexpr (std::convertible_to<T, std::string_view>) {
+            std::string_view sv{val};
+            JS_DefinePropertyValueStr(ctx, obj, name, JS_NewStringLen(ctx, sv.data(), sv.size()), flags);
+        } else if constexpr (std::same_as<std::decay_t<T>, ::Color>) {
             JS_DefinePropertyValueStr(ctx, obj, name, create_js_color_instance(ctx, val), flags);
         }
     }
 
     template <typename... Args>
-    static void set_object_properties(JSContext* ctx, const JSValue obj, Args&&... entries) {
-        (set_object_property(ctx, obj, entries.first, entries.second), ...);
+    static void set_object_properties(JSContext* ctx, JSValue obj, Args&&... entries) {
+        (set_object_property(ctx, obj, entries.first, std::forward<decltype(entries.second)>(entries.second)), ...);
     }
 
     template <typename... Pairs>
