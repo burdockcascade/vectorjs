@@ -5,12 +5,14 @@
 #include <string_view>
 #include <memory>
 #include <type_traits>
+#include <optional>
 
 namespace HostApi::Utils {
 
     class ScopedJSValue {
     public:
-        ScopedJSValue(JSContext* ctx, JSValue val) : ctx_(ctx), val_(val) {}
+        constexpr ScopedJSValue() noexcept = default;
+        ScopedJSValue(JSContext* ctx, JSValue val) noexcept : ctx_(ctx), val_(val) {}
 
         ~ScopedJSValue() {
             reset();
@@ -25,7 +27,7 @@ namespace HostApi::Utils {
 
         ScopedJSValue& operator=(ScopedJSValue&& other) noexcept {
             if (this != &other) {
-                reset(); // Safely release existing JSValue before overwriting
+                reset();
                 ctx_ = std::exchange(other.ctx_, nullptr);
                 val_ = std::exchange(other.val_, JS_UNDEFINED);
             }
@@ -39,7 +41,10 @@ namespace HostApi::Utils {
             }
         }
 
-        [[nodiscard]] JSValue get() const { return val_; }
+        // C++23: Explicit object parameter (Deducing This)
+        [[nodiscard]] JSValue get(this const ScopedJSValue& self) noexcept {
+            return self.val_;
+        }
 
         [[nodiscard]] JSValue release() noexcept {
             JSValue temp = val_;
@@ -48,16 +53,18 @@ namespace HostApi::Utils {
             return temp;
         }
 
-        operator JSValue() const { return val_; }
+        explicit(false) operator JSValue(this const ScopedJSValue& self) noexcept {
+            return self.val_;
+        }
 
     private:
         JSContext* ctx_{nullptr};
         JSValue val_{JS_UNDEFINED};
     };
 
-    inline std::string js_to_std_string(JSContext* ctx, JSValueConst val, const std::string& fallback = "") {
+    inline std::string js_to_std_string(JSContext* ctx, JSValueConst val, std::string_view fallback = "") {
         const char* str = JS_ToCString(ctx, val);
-        if (!str) return fallback;
+        if (!str) return std::string(fallback);
         std::string result(str);
         JS_FreeCString(ctx, str);
         return result;
@@ -83,42 +90,39 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    bool try_get_opaque_property(JSContext* ctx, JSValueConst obj, const char* prop_name, JSClassID class_id, T& out_val) {
-        if (!JS_IsObject(obj)) return false;
+    std::optional<T> try_get_opaque_property(JSContext* ctx, JSValueConst obj, const char* prop_name, JSClassID class_id) {
+        if (!JS_IsObject(obj)) return std::nullopt;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && !JS_IsNull(prop.get())) {
             if (auto* ptr = get_opaque<T>(ctx, prop.get(), class_id)) {
-                out_val = *ptr;
-                return true;
+                return *ptr;
             }
         }
-        return false;
+        return std::nullopt;
     }
 
-    inline bool try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name, float& out_val) {
-        if (!JS_IsObject(obj)) return false;
+    inline std::optional<float> try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name) {
+        if (!JS_IsObject(obj)) return std::nullopt;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && JS_IsNumber(prop.get())) {
             double temp = 0;
             if (JS_ToFloat64(ctx, &temp, prop.get()) == 0) {
-                out_val = static_cast<float>(temp);
-                return true;
+                return static_cast<float>(temp);
             }
         }
-        return false;
+        return std::nullopt;
     }
 
-    inline bool try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name, bool& out_val) {
-        if (!JS_IsObject(obj)) return false;
+    inline std::optional<bool> try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name) {
+        if (!JS_IsObject(obj)) return std::nullopt;
 
         ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && JS_IsBool(prop.get())) {
-            out_val = static_cast<bool>(JS_ToBool(ctx, prop.get()));
-            return true;
+            return static_cast<bool>(JS_ToBool(ctx, prop.get()));
         }
-        return false;
+        return std::nullopt;
     }
 
     // --- 1. Generic Getters and Setters ---

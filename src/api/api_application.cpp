@@ -7,10 +7,10 @@ namespace HostApi {
     static JSDrawOptions parse_draw_options(JSContext* ctx, JSValueConst optionsObj) {
         JSDrawOptions options;
         if (JS_IsObject(optionsObj)) {
-            Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
-            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id, options.origin);
-            Utils::try_get_float_property(ctx, optionsObj, "rotation", options.rotation);
-            Utils::try_get_bool_property(ctx, optionsObj, "wireframe", options.wireframe);
+            options.color = Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id).value_or(options.color);
+            options.origin = Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id).value_or(options.origin);
+            options.rotation = Utils::try_get_float_property(ctx, optionsObj, "rotation").value_or(options.rotation);
+            options.wireframe = Utils::try_get_bool_property(ctx, optionsObj, "wireframe").value_or(options.wireframe);
         }
         return options;
     }
@@ -18,12 +18,12 @@ namespace HostApi {
     static JSTextOptions parse_text_options(JSContext* ctx, JSValueConst optionsObj) {
         JSTextOptions options;
         if (JS_IsObject(optionsObj)) {
-            Utils::try_get_opaque_property<JSFont>(ctx, optionsObj, "font", js_font_class_id, options.font);
-            Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id, options.color);
-            Utils::try_get_float_property(ctx, optionsObj, "rotation", options.rotation);
-            Utils::try_get_float_property(ctx, optionsObj, "fontSize", options.fontSize);
-            Utils::try_get_float_property(ctx, optionsObj, "spacing", options.spacing);
-            Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id, options.origin);
+            options.font = Utils::try_get_opaque_property<JSFont>(ctx, optionsObj, "font", js_font_class_id).value_or(options.font);
+            options.color = Utils::try_get_opaque_property<JSColor>(ctx, optionsObj, "color", js_color_class_id).value_or(options.color);
+            options.rotation = Utils::try_get_float_property(ctx, optionsObj, "rotation").value_or(options.rotation);
+            options.fontSize = Utils::try_get_float_property(ctx, optionsObj, "fontSize").value_or(options.fontSize);
+            options.spacing = Utils::try_get_float_property(ctx, optionsObj, "spacing").value_or(options.spacing);
+            options.origin = Utils::try_get_opaque_property<JSVector2>(ctx, optionsObj, "origin", js_vector2_class_id).value_or(options.origin);
         }
         return options;
     }
