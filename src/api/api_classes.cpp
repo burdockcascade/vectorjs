@@ -1,6 +1,8 @@
 #include "hostapi.hpp"
 #include "js_types.hpp"
 #include "js_utils.hpp"
+#include <span>
+#include <string_view>
 
 #define JS_BIND_PROP(ClassType, ClassIDPtr, name, Member) \
     JS_CGETSET_DEF( \
@@ -23,15 +25,19 @@ namespace HostApi {
         Utils::register_js_class(ctx, m, {
             .name = "Application",
             .class_id = js_application_class_id,
-            .finalizer = [](auto*, JSValue val) {
+            .finalizer = [](JSRuntime*, JSValue val) {
                 delete Utils::get_opaque<JSApplication>(val, js_application_class_id);
             },
-            .constructor = [](auto c, auto new_target, const int argc, auto argv) -> JSValue {
-                int32_t h = 0, w = 0;
-                if (argc > 0 && JS_ToInt32(c, &h, argv[0]) < 0) return JS_EXCEPTION;
-                if (argc > 1 && JS_ToInt32(c, &w, argv[1]) < 0) return JS_EXCEPTION;
-                std::string title = argc > 2 ? Utils::js_to_std_string(c, argv[2]) : "VectorJS Application";
-                return Utils::create_js_instance<JSApplication>(c, new_target, js_application_class_id, h, w, std::move(title));
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
+
+                int32_t w = 0;
+                int32_t h = 0;
+                if (args.size() > 0 && JS_ToInt32(c, &w, args[0]) < 0) return JS_EXCEPTION;
+                if (args.size() > 1 && JS_ToInt32(c, &h, args[1]) < 0) return JS_EXCEPTION;
+
+                std::string title = args.size() > 2 ? Utils::js_to_std_string(c, args[2]) : "VectorJS Application";
+                return Utils::create_js_instance<JSApplication>(c, new_target, js_application_class_id, w, h, std::move(title));
             },
             .proto_funcs = proto_funcs
         });
@@ -48,16 +54,21 @@ namespace HostApi {
         Utils::register_js_class(ctx, m, {
             .name = "Color",
             .class_id = js_color_class_id,
-            .finalizer = [](auto, JSValue val) {
+            .finalizer = [](JSRuntime*, JSValue val) {
                 delete Utils::get_opaque<JSColor>(val, js_color_class_id);
             },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                if (argc >= 4) {
-                    int32_t r = 0, g = 0, b = 0, a = 255;
-                    if (argc > 0 && JS_ToInt32(c, &r, argv[0]) < 0) return JS_EXCEPTION;
-                    if (argc > 1 && JS_ToInt32(c, &g, argv[1]) < 0) return JS_EXCEPTION;
-                    if (argc > 2 && JS_ToInt32(c, &b, argv[2]) < 0) return JS_EXCEPTION;
-                    if (argc > 3 && JS_ToInt32(c, &a, argv[3]) < 0) return JS_EXCEPTION;
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
+
+                if (args.size() >= 4) {
+                    int32_t r = 0;
+                    int32_t g = 0;
+                    int32_t b = 0;
+                    int32_t a = 255;
+                    if (args.size() > 0 && JS_ToInt32(c, &r, args[0]) < 0) return JS_EXCEPTION;
+                    if (args.size() > 1 && JS_ToInt32(c, &g, args[1]) < 0) return JS_EXCEPTION;
+                    if (args.size() > 2 && JS_ToInt32(c, &b, args[2]) < 0) return JS_EXCEPTION;
+                    if (args.size() > 3 && JS_ToInt32(c, &a, args[3]) < 0) return JS_EXCEPTION;
 
                     return Utils::create_js_instance<JSColor>(
                         c, new_target, js_color_class_id,
@@ -80,13 +91,16 @@ namespace HostApi {
         Utils::register_js_class(ctx, m, {
             .name = "Vector2",
             .class_id = js_vector2_class_id,
-            .finalizer = [](auto, JSValue val) {
+            .finalizer = [](JSRuntime*, JSValue val) {
                 delete Utils::get_opaque<JSVector2>(val, js_vector2_class_id);
             },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                double x = 0, y = 0;
-                if (argc > 0 && JS_ToFloat64(c, &x, argv[0]) < 0) return JS_EXCEPTION;
-                if (argc > 1 && JS_ToFloat64(c, &y, argv[1]) < 0) return JS_EXCEPTION;
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
+
+                double x = 0;
+                double y = 0;
+                if (args.size() > 0 && JS_ToFloat64(c, &x, args[0]) < 0) return JS_EXCEPTION;
+                if (args.size() > 1 && JS_ToFloat64(c, &y, args[1]) < 0) return JS_EXCEPTION;
 
                 return Utils::create_js_instance<JSVector2>(
                     c, new_target, js_vector2_class_id,
@@ -108,15 +122,20 @@ namespace HostApi {
         Utils::register_js_class(ctx, m, {
             .name = "Rectangle",
             .class_id = js_rectangle_class_id,
-            .finalizer = [](auto, JSValue val) {
+            .finalizer = [](JSRuntime*, JSValue val) {
                 delete Utils::get_opaque<JSRectangle>(val, js_rectangle_class_id);
             },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                double x = 0, y = 0, w = 0, h = 0;
-                if (argc > 0 && JS_ToFloat64(c, &x, argv[0]) < 0) return JS_EXCEPTION;
-                if (argc > 1 && JS_ToFloat64(c, &y, argv[1]) < 0) return JS_EXCEPTION;
-                if (argc > 2 && JS_ToFloat64(c, &w, argv[2]) < 0) return JS_EXCEPTION;
-                if (argc > 3 && JS_ToFloat64(c, &h, argv[3]) < 0) return JS_EXCEPTION;
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
+
+                double x = 0;
+                double y = 0;
+                double w = 0;
+                double h = 0;
+                if (args.size() > 0 && JS_ToFloat64(c, &x, args[0]) < 0) return JS_EXCEPTION;
+                if (args.size() > 1 && JS_ToFloat64(c, &y, args[1]) < 0) return JS_EXCEPTION;
+                if (args.size() > 2 && JS_ToFloat64(c, &w, args[2]) < 0) return JS_EXCEPTION;
+                if (args.size() > 3 && JS_ToFloat64(c, &h, args[3]) < 0) return JS_EXCEPTION;
 
                 return Utils::create_js_instance<JSRectangle>(
                     c, new_target, js_rectangle_class_id,
@@ -132,18 +151,20 @@ namespace HostApi {
         Utils::register_js_class(ctx, m, {
             .name = "Font",
             .class_id = js_font_class_id,
-            .finalizer = [](auto, JSValue val) {
+            .finalizer = [](JSRuntime*, JSValue val) {
                 delete Utils::get_opaque<JSFont>(val, js_font_class_id);
             },
-            .constructor = [](auto c, auto new_target, int argc, auto argv) -> JSValue {
-                if (argc < 1) return JS_ThrowTypeError(c, "Font requires at least a path argument");
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
 
-                auto font_path = Utils::js_to_std_string(c, argv[0]);
+                if (args.empty()) return JS_ThrowTypeError(c, "Font requires at least a path argument");
+
+                auto font_path = Utils::js_to_std_string(c, args[0]);
                 if (font_path.empty()) return JS_ThrowTypeError(c, "Font path must be a non-empty string");
 
-                if (argc >= 2) {
+                if (args.size() >= 2) {
                     int32_t size = 0;
-                    if (JS_ToInt32(c, &size, argv[1]) < 0) return JS_EXCEPTION;
+                    if (JS_ToInt32(c, &size, args[1]) < 0) return JS_EXCEPTION;
                     if (size <= 0) return JS_ThrowRangeError(c, "Font size must be a positive integer");
                     return Utils::create_js_instance<JSFont>(c, new_target, js_font_class_id, font_path, size);
                 }
