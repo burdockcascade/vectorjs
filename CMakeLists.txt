@@ -18,7 +18,7 @@ option(ENABLE_MSVC_WIN_MAIN "Hide the console window for MSVC builds" OFF)
 FetchContent_Declare(
         cli11
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
-        GIT_TAG v2.6.2
+        GIT_TAG v2.7.2
 )
 set(CLI11_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(CLI11_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -36,7 +36,7 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
         qjs
         GIT_REPOSITORY https://github.com/quickjs-ng/quickjs
-        GIT_TAG v0.16.0
+        GIT_TAG v0.16.1
 )
 
 # Bring all dependencies into the build tree automatically
