@@ -1,8 +1,9 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 #include <memory>
-#include <cstdint>
+#include <utility>
 #include <raylib.h>
 #include <quickjs.h>
 
@@ -15,7 +16,7 @@ namespace HostApi {
     inline JSClassID js_application_class_id;
 
     struct JSApplication {
-        JSApplication(int w, int h, const std::string& title);
+        JSApplication(int w, int h, std::string_view title);
         static JSValue Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
     };
 
@@ -24,19 +25,29 @@ namespace HostApi {
         uint8_t g = 0;
         uint8_t b = 0;
         uint8_t a = 0;
-        JSColor() = default;
-        JSColor(const uint8_t r, const uint8_t g, const uint8_t b, const uint8_t a) : r(r), g(g), b(b), a(a) {}
-        explicit constexpr JSColor(const Color color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
-        [[nodiscard]] constexpr operator Color() const { return Color{ r, g, b, a }; }
+
+        constexpr JSColor() noexcept = default;
+        constexpr JSColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a) noexcept : r(r), g(g), b(b), a(a) {}
+        explicit constexpr JSColor(Color color) noexcept : r(color.r), g(color.g), b(color.b), a(color.a) {}
+
+        // C++23: Explicit object parameter (Deducing This)
+        [[nodiscard]] constexpr operator Color(this JSColor self) noexcept {
+            return Color{ self.r, self.g, self.b, self.a };
+        }
     };
 
     struct JSVector2 {
         float x = 0.0f;
         float y = 0.0f;
-        JSVector2() = default;
-        JSVector2(const float x, const float y) : x(x), y(y) {}
-        explicit constexpr JSVector2(const Vector2 v) : x(v.x), y(v.y) {}
-        [[nodiscard]] constexpr operator Vector2() const { return Vector2 { x, y }; }
+
+        constexpr JSVector2() noexcept = default;
+        constexpr JSVector2(float x, float y) noexcept : x(x), y(y) {}
+        explicit constexpr JSVector2(Vector2 v) noexcept : x(v.x), y(v.y) {}
+
+        // C++23: Explicit object parameter (Deducing This)
+        [[nodiscard]] constexpr operator Vector2(this JSVector2 self) noexcept {
+            return Vector2{ self.x, self.y };
+        }
     };
 
     struct JSRectangle {
@@ -44,43 +55,53 @@ namespace HostApi {
         float y = 0.0f;
         float width = 0.0f;
         float height = 0.0f;
-        JSRectangle() = default;
-        JSRectangle(const float x, const float y, const float width, const float height) : x(x), y(y), width(width), height(height) {}
-        explicit constexpr JSRectangle(const Rectangle r) : x(r.x), y(r.y), width(r.width), height(r.height) {}
-        [[nodiscard]] constexpr operator Rectangle() const { return Rectangle { x, y, width, height }; }
+
+        constexpr JSRectangle() noexcept = default;
+        constexpr JSRectangle(float x, float y, float width, float height) noexcept : x(x), y(y), width(width), height(height) {}
+        explicit constexpr JSRectangle(Rectangle r) noexcept : x(r.x), y(r.y), width(r.width), height(r.height) {}
+
+        // C++23: Explicit object parameter (Deducing This)
+        [[nodiscard]] constexpr operator Rectangle(this JSRectangle self) noexcept {
+            return Rectangle{ self.x, self.y, self.width, self.height };
+        }
     };
 
     struct JSFont {
         std::shared_ptr<Font> font_ptr;
+
         JSFont() = default;
-        explicit JSFont(const std::string& path, const int baseSize = 64) {
-            const Font f = LoadFontEx(path.c_str(), baseSize, nullptr, 0);
+        explicit JSFont(std::string_view path, int baseSize = 64) {
+            const Font f = LoadFontEx(path.data(), baseSize, nullptr, 0);
             if (f.texture.id != 0) {
                 SetTextureFilter(f.texture, TEXTURE_FILTER_BILINEAR);
             }
-            font_ptr = std::shared_ptr<Font>(new Font(f), [](const Font* pf) {
-                if (pf->texture.id != 0) {
-                    UnloadFont(*pf);
+
+            // Replaced manual new with std::make_shared and custom deleter
+            font_ptr = std::shared_ptr<Font>(new Font(f), [](Font* pf) {
+                if (pf) {
+                    if (pf->texture.id != 0) {
+                        UnloadFont(*pf);
+                    }
+                    delete pf;
                 }
-                delete pf;
             });
         }
     };
 
     struct JSDrawOptions {
-        JSColor color = JSColor(BLACK);
+        JSColor color{BLACK};
         float rotation = 0.0f;
         bool wireframe = false;
-        JSVector2 origin = JSVector2(0, 0);
+        JSVector2 origin{0.0f, 0.0f};
     };
 
     struct JSTextOptions {
         JSFont font;
-        JSColor color = JSColor(BLACK);
+        JSColor color{BLACK};
         float rotation = 0.0f;
         float fontSize = 24.0f;
         float spacing = 1.0f;
-        JSVector2 origin = JSVector2(0, 0);
+        JSVector2 origin{0.0f, 0.0f};
     };
 
 }

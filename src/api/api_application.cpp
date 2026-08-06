@@ -226,8 +226,8 @@ namespace HostApi {
         return render_obj;
     }
 
-    JSApplication::JSApplication(const int w, const int h, const std::string& title) {
-        InitWindow(w, h, title.c_str());
+    JSApplication::JSApplication(int w, int h, std::string_view title) {
+        InitWindow(w, h, title.data());
         SetTargetFPS(60);
     }
 
