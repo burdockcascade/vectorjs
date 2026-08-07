@@ -82,11 +82,12 @@ namespace HostApi::Utils {
     }
 
     template <typename T>
-    T get_opaque_or(JSContext* ctx, JSValueConst val, JSClassID class_id, const T& default_val) {
+    std::optional<T> try_get_opaque(JSContext* ctx, JSValueConst val, JSClassID class_id) {
+        if (JS_IsUndefined(val) || JS_IsNull(val) || !JS_IsObject(val)) return std::nullopt;
         if (auto* ptr = get_opaque<T>(ctx, val, class_id)) {
             return *ptr;
         }
-        return default_val;
+        return std::nullopt;
     }
 
     template <typename T>
