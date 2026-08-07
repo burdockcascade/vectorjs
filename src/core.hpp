@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include "js_engine.hpp"
+#include "qjs.hpp"
 
 namespace VectorJS {
 
@@ -12,10 +12,10 @@ namespace VectorJS {
         ~Core() = default;
 
         // Execution
-        void eval_script(const std::string& scriptPath) const;
+        void eval_script(const std::string& scriptPath);
 
     private:
-        JSEngine js_engine;
+        qjs::Context ctx;
 
     };
 

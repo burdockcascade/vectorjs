@@ -52,7 +52,7 @@ add_executable(vectorjs)
 # Add source files to the target
 target_sources(vectorjs PRIVATE
         "src/main.cpp"
-        "src/js_engine.cpp"
+        "src/qjs.cpp"
         "src/core.cpp"
         "src/api/api_application.cpp"
         "src/api/api_classes.cpp"

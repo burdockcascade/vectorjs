@@ -7,61 +7,10 @@
 #include <type_traits>
 #include <optional>
 
+#include "qjs.hpp"
+
 namespace HostApi::Utils {
-
-    class ScopedJSValue {
-    public:
-        constexpr ScopedJSValue() noexcept = default;
-        ScopedJSValue(JSContext* ctx, JSValue val) noexcept : ctx_(ctx), val_(val) {}
-
-        ~ScopedJSValue() {
-            reset();
-        }
-
-        ScopedJSValue(const ScopedJSValue&) = delete;
-        ScopedJSValue& operator=(const ScopedJSValue&) = delete;
-
-        ScopedJSValue(ScopedJSValue&& other) noexcept
-            : ctx_(std::exchange(other.ctx_, nullptr)),
-              val_(std::exchange(other.val_, JS_UNDEFINED)) {}
-
-        ScopedJSValue& operator=(ScopedJSValue&& other) noexcept {
-            if (this != &other) {
-                reset();
-                ctx_ = std::exchange(other.ctx_, nullptr);
-                val_ = std::exchange(other.val_, JS_UNDEFINED);
-            }
-            return *this;
-        }
-
-        void reset() noexcept {
-            if (ctx_ && !JS_IsUndefined(val_)) {
-                JS_FreeValue(ctx_, val_);
-                val_ = JS_UNDEFINED;
-            }
-        }
-
-        // C++23: Explicit object parameter (Deducing This)
-        [[nodiscard]] JSValue get(this const ScopedJSValue& self) noexcept {
-            return self.val_;
-        }
-
-        [[nodiscard]] JSValue release() noexcept {
-            JSValue temp = val_;
-            val_ = JS_UNDEFINED;
-            ctx_ = nullptr;
-            return temp;
-        }
-
-        explicit(false) operator JSValue(this const ScopedJSValue& self) noexcept {
-            return self.val_;
-        }
-
-    private:
-        JSContext* ctx_{nullptr};
-        JSValue val_{JS_UNDEFINED};
-    };
-
+    
     inline std::string js_to_std_string(JSContext* ctx, JSValueConst val, std::string_view fallback = "") {
         const char* str = JS_ToCString(ctx, val);
         if (!str) return std::string(fallback);
@@ -94,7 +43,7 @@ namespace HostApi::Utils {
     std::optional<T> try_get_opaque_property(JSContext* ctx, JSValueConst obj, const char* prop_name, JSClassID class_id) {
         if (!JS_IsObject(obj)) return std::nullopt;
 
-        ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
+        qjs::Value prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && !JS_IsNull(prop.get())) {
             if (auto* ptr = get_opaque<T>(ctx, prop.get(), class_id)) {
                 return *ptr;
@@ -106,7 +55,7 @@ namespace HostApi::Utils {
     inline std::optional<float> try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name) {
         if (!JS_IsObject(obj)) return std::nullopt;
 
-        ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
+        qjs::Value prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && JS_IsNumber(prop.get())) {
             double temp = 0;
             if (JS_ToFloat64(ctx, &temp, prop.get()) == 0) {
@@ -119,7 +68,7 @@ namespace HostApi::Utils {
     inline std::optional<bool> try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name) {
         if (!JS_IsObject(obj)) return std::nullopt;
 
-        ScopedJSValue prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
+        qjs::Value prop(ctx, JS_GetPropertyStr(ctx, obj, prop_name));
         if (!JS_IsUndefined(prop.get()) && JS_IsBool(prop.get())) {
             return static_cast<bool>(JS_ToBool(ctx, prop.get()));
         }
@@ -163,7 +112,7 @@ namespace HostApi::Utils {
 
     template <typename T, typename... Args>
     JSValue create_js_instance(JSContext* ctx, JSValueConst new_target, JSClassID class_id, Args&&... args) {
-        ScopedJSValue proto(ctx, JS_GetPropertyStr(ctx, new_target, "prototype"));
+        qjs::Value proto(ctx, JS_GetPropertyStr(ctx, new_target, "prototype"));
         if (JS_IsException(proto.get())) return JS_EXCEPTION;
 
         JSValue obj = JS_NewObjectProtoClass(ctx, proto.get(), class_id);
@@ -176,7 +125,7 @@ namespace HostApi::Utils {
 
     template <typename T, typename... Args>
     JSValue create_class_instance(JSContext* ctx, JSClassID class_id, Args&&... args) {
-        ScopedJSValue proto(ctx, JS_GetClassProto(ctx, class_id));
+        qjs::Value proto(ctx, JS_GetClassProto(ctx, class_id));
         if (JS_IsException(proto.get())) return JS_EXCEPTION;
 
         JSValue obj = JS_NewObjectProtoClass(ctx, proto.get(), class_id);

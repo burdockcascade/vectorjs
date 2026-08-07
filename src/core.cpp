@@ -2,16 +2,15 @@
 #include "core.hpp"
 
 #include "api/hostapi.hpp"
-#include "js_engine.hpp"
 
 namespace VectorJS {
 
     Core::Core() {
-        HostApi::make_vectorjs_module(js_engine.get_context());
+        HostApi::make_vectorjs_module(ctx.raw_context());
     }
 
-    void Core::eval_script(const std::string& scriptPath) const {
-        js_engine.eval_file(scriptPath);
+    void Core::eval_script(const std::string& scriptPath) {
+        ctx.eval_file(scriptPath);
     }
 
     constexpr int DEFAULT_FPS = 60;

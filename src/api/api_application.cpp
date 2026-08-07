@@ -29,7 +29,7 @@ namespace HostApi {
     }
 
     static JSValue create_update_context_object(JSContext* ctx) {
-        Utils::ScopedJSValue update_obj(ctx, JS_NewObject(ctx));
+        qjs::Value update_obj(ctx, JS_NewObject(ctx));
 
         // Helper Macros (Scoped locally, undefined at the end)
         #define BIND_VOID_FN(js_name, cpp_fn) \
@@ -108,7 +108,7 @@ namespace HostApi {
     }
 
     static JSValue create_shapes_object(JSContext* ctx) {
-        Utils::ScopedJSValue shape_obj(ctx, JS_NewObject(ctx));
+        qjs::Value shape_obj(ctx, JS_NewObject(ctx));
 
         JS_SetPropertyStr(ctx, shape_obj, "drawPixel", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawPixel requires position and color arguments");
@@ -173,7 +173,7 @@ namespace HostApi {
     }
 
     static JSValue create_text_object(JSContext* ctx) {
-        Utils::ScopedJSValue text_obj(ctx, JS_NewObject(ctx));
+        qjs::Value text_obj(ctx, JS_NewObject(ctx));
         JS_SetPropertyStr(ctx, text_obj, "drawText", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawText requires position and text string arguments");
             const auto pos = Utils::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
@@ -196,7 +196,7 @@ namespace HostApi {
 
     static JSValue create_draw_render_object(JSContext* ctx) {
 
-        Utils::ScopedJSValue render2d_obj(ctx, JS_NewObject(ctx));
+        qjs::Value render2d_obj(ctx, JS_NewObject(ctx));
 
         // Add FPS
         JS_SetPropertyStr(ctx, render2d_obj, "drawFPS", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
@@ -216,7 +216,7 @@ namespace HostApi {
 
         JS_SetPropertyStr(ctx, render_obj, "withLayer2D", JS_NewCFunctionData(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv, int, JSValue* magic_argv) -> JSValue {
             if (argc > 0 && JS_IsFunction(c, argv[0])) {
-                const Utils::ScopedJSValue res(c, JS_Call(c, argv[0], JS_UNDEFINED, 1, &magic_argv[0]));
+                const qjs::Value res(c, JS_Call(c, argv[0], JS_UNDEFINED, 1, &magic_argv[0]));
                 if (JS_IsException(res.get())) return JS_EXCEPTION;
             }
             return JS_UNDEFINED;
@@ -242,16 +242,16 @@ namespace HostApi {
         if (argc < 1) return JS_ThrowTypeError(ctx, "Expected a user application config object");
         JSValueConst user_app = argv[0];
 
-        Utils::ScopedJSValue on_init_func(ctx, JS_GetPropertyStr(ctx, user_app, "onInit"));
-        Utils::ScopedJSValue on_update_func(ctx, JS_GetPropertyStr(ctx, user_app, "onUpdate"));
-        Utils::ScopedJSValue on_draw_func(ctx, JS_GetPropertyStr(ctx, user_app, "onDraw"));
+        qjs::Value on_init_func(ctx, JS_GetPropertyStr(ctx, user_app, "onInit"));
+        qjs::Value on_update_func(ctx, JS_GetPropertyStr(ctx, user_app, "onUpdate"));
+        qjs::Value on_draw_func(ctx, JS_GetPropertyStr(ctx, user_app, "onDraw"));
 
         // Instantiate rendering and context objects ONCE outside the frame loop
-        Utils::ScopedJSValue update_obj(ctx, create_update_context_object(ctx));
-        Utils::ScopedJSValue render_obj(ctx, create_draw_render_object(ctx));
+        qjs::Value update_obj(ctx, create_update_context_object(ctx));
+        qjs::Value render_obj(ctx, create_draw_render_object(ctx));
 
         if (JS_IsFunction(ctx, on_init_func)) {
-            if (Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr)); JS_IsException(ret)) {
+            if (qjs::Value ret(ctx, JS_Call(ctx, on_init_func, user_app, 0, nullptr)); JS_IsException(ret)) {
                 return JS_EXCEPTION;
             }
         }
@@ -260,8 +260,8 @@ namespace HostApi {
             BeginDrawing();
 
             if (JS_IsFunction(ctx, on_update_func)) {
-                JSValue u = update_obj.get();
-                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_update_func, user_app, 1, &u));
+                JSValue u = update_obj;
+                qjs::Value ret(ctx, JS_Call(ctx, on_update_func, user_app, 1, &u));
                 if (JS_IsException(ret.get())) {
                     EndDrawing();
                     if (IsWindowReady()) CloseWindow();
@@ -269,8 +269,8 @@ namespace HostApi {
                 }
             }
             if (JS_IsFunction(ctx, on_draw_func)) {
-                JSValue r = render_obj.get();
-                Utils::ScopedJSValue ret(ctx, JS_Call(ctx, on_draw_func, user_app, 1, &r));
+                JSValue r = render_obj;
+                qjs::Value ret(ctx, JS_Call(ctx, on_draw_func, user_app, 1, &r));
                 if (JS_IsException(ret.get())) {
                     EndDrawing();
                     if (IsWindowReady()) CloseWindow();
