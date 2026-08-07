@@ -136,47 +136,4 @@ namespace HostApi::Utils {
         return obj;
     }
 
-    // --- Class Registration Helper ---
-
-    struct ClassDefConfig {
-        std::string_view name;
-        JSClassID& class_id;
-        JSClassFinalizer* finalizer = nullptr;
-        JSCFunction* constructor = nullptr;
-        std::span<const JSCFunctionListEntry> proto_funcs{};
-    };
-
-    inline void register_js_class(JSContext* ctx, JSModuleDef* m, const ClassDefConfig& config) {
-        JSRuntime* const rt = JS_GetRuntime(ctx);
-
-        if (config.class_id == 0) {
-            JS_NewClassID(rt, &config.class_id);
-        }
-
-        const std::string name_str{config.name};
-
-        const JSClassDef class_def{
-            .class_name = name_str.c_str(),
-            .finalizer = config.finalizer
-        };
-        JS_NewClass(rt, config.class_id, &class_def);
-
-        JSValue proto = JS_NewObject(ctx);
-
-        if (!config.proto_funcs.empty()) {
-            JS_SetPropertyFunctionList(
-                ctx,
-                proto,
-                config.proto_funcs.data(),
-                static_cast<int>(config.proto_funcs.size())
-            );
-        }
-
-        JS_SetClassProto(ctx, config.class_id, proto);
-
-        const JSValue ctor = JS_NewCFunction2(ctx, config.constructor, name_str.c_str(), 0, JS_CFUNC_constructor, 0);
-        JS_SetConstructor(ctx, ctor, proto);
-        JS_SetModuleExport(ctx, m, name_str.c_str(), ctor);
-    }
-
 } // namespace HostApi::Utils

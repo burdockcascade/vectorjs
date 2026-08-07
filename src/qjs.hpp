@@ -6,6 +6,7 @@
 #include <string_view>
 #include <optional>
 #include <cstdint>
+#include <span>
 
 namespace qjs {
 
@@ -79,5 +80,17 @@ namespace qjs {
         JSContext* raw_context() const;
         JSRuntime* raw_runtime() const;
     };
+
+    // --- Class Registration Helper ---
+
+    struct ClassDefConfig {
+        std::string_view name;
+        JSClassID& class_id;
+        JSClassFinalizer* finalizer = nullptr;
+        JSCFunction* constructor = nullptr;
+        std::span<const JSCFunctionListEntry> proto_funcs{};
+    };
+
+    void register_js_class(JSContext* ctx, JSModuleDef* m, const ClassDefConfig& config);
 
 } // namespace qjs

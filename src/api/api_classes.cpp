@@ -1,6 +1,7 @@
 #include "hostapi.hpp"
 #include "js_types.hpp"
 #include "js_utils.hpp"
+#include "../qjs.hpp"
 #include <span>
 #include <string_view>
 
@@ -22,7 +23,7 @@ namespace HostApi {
             })
         };
 
-        Utils::register_js_class(ctx, m, {
+        qjs::register_js_class(ctx, m, {
             .name = "Application",
             .class_id = js_application_class_id,
             .finalizer = [](JSRuntime*, JSValue val) {
@@ -51,7 +52,7 @@ namespace HostApi {
             JS_BIND_PROP(JSColor, &js_color_class_id, "a", a),
         };
 
-        Utils::register_js_class(ctx, m, {
+        qjs::register_js_class(ctx, m, {
             .name = "Color",
             .class_id = js_color_class_id,
             .finalizer = [](JSRuntime*, JSValue val) {
@@ -88,7 +89,7 @@ namespace HostApi {
             JS_BIND_PROP(JSVector2, &js_vector2_class_id, "y", y),
         };
 
-        Utils::register_js_class(ctx, m, {
+        qjs::register_js_class(ctx, m, {
             .name = "Vector2",
             .class_id = js_vector2_class_id,
             .finalizer = [](JSRuntime*, JSValue val) {
@@ -119,7 +120,7 @@ namespace HostApi {
             JS_BIND_PROP(JSRectangle, &js_rectangle_class_id, "height", height),
         };
 
-        Utils::register_js_class(ctx, m, {
+        qjs::register_js_class(ctx, m, {
             .name = "Rectangle",
             .class_id = js_rectangle_class_id,
             .finalizer = [](JSRuntime*, JSValue val) {
@@ -148,7 +149,7 @@ namespace HostApi {
     }
 
     static void register_font_class(JSContext* ctx, JSModuleDef* m) {
-        Utils::register_js_class(ctx, m, {
+        qjs::register_js_class(ctx, m, {
             .name = "Font",
             .class_id = js_font_class_id,
             .finalizer = [](JSRuntime*, JSValue val) {
