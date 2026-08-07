@@ -1,7 +1,7 @@
 import { Application, Vector2, Palette, Keyboard } from "vectorjs";
 
-const screenWidth = 800;
-const screenHeight = 800;
+const screenWidth = 1200;
+const screenHeight = 1200;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
 
@@ -16,7 +16,7 @@ const planets = [
         speed: 1.2,
         color: Palette.BLUE,
         moons: [
-            { radius: 22, size: 3, speed: 4.0, color: Palette.LIGHT_GRAY }
+            { radius: 22, size: 3, speed: 4.0, color: Palette.LIGHTGRAY }
         ]
     },
     {
@@ -26,7 +26,7 @@ const planets = [
         speed: 0.9,
         color: Palette.RED,
         moons: [
-            { radius: 16, size: 2, speed: 5.0, color: Palette.LIGHT_GRAY },
+            { radius: 16, size: 2, speed: 5.0, color: Palette.LIGHTGRAY },
             { radius: 22, size: 2, speed: 3.5, color: Palette.GRAY }
         ]
     },
@@ -37,9 +37,43 @@ const planets = [
         speed: 0.5,
         color: Palette.BROWN,
         moons: [
-            { radius: 30, size: 3, speed: 6.0, color: Palette.LIGHT_GRAY },
+            { radius: 30, size: 3, speed: 6.0, color: Palette.LIGHTGRAY },
             { radius: 38, size: 4, speed: 4.2, color: Palette.WHITE },
-            { radius: 46, size: 3, speed: 3.0, color: Palette.LIGHT_GRAY }
+            { radius: 46, size: 3, speed: 3.0, color: Palette.LIGHTGRAY },
+            { radius: 54, size: 3, speed: 2.1, color: Palette.GRAY }
+        ]
+    },
+    {
+        name: "Saturn",
+        radius: 410,
+        size: 18,
+        speed: 0.35,
+        color: Palette.GOLD || Palette.YELLOW,
+        moons: [
+            { radius: 28, size: 4, speed: 3.8, color: Palette.LIGHTGRAY },
+            { radius: 36, size: 3, speed: 2.7, color: Palette.WHITE },
+            { radius: 44, size: 2, speed: 2.0, color: Palette.GRAY }
+        ]
+    },
+    {
+        name: "Uranus",
+        radius: 490,
+        size: 15,
+        speed: 0.25,
+        color: Palette.SKYBLUE,
+        moons: [
+            { radius: 24, size: 3, speed: 3.2, color: Palette.LIGHTGRAY },
+            { radius: 30, size: 2, speed: 2.3, color: Palette.WHITE }
+        ]
+    },
+    {
+        name: "Neptune",
+        radius: 550,
+        size: 14,
+        speed: 0.18,
+        color: Palette.DARKBLUE || Palette.BLUE,
+        moons: [
+            { radius: 22, size: 3, speed: -2.5, color: Palette.LIGHTGRAY }
         ]
     }
 ];
@@ -70,15 +104,35 @@ app.run({
     },
 
     onDraw(render) {
+
+        render.clearBackground(Palette.BLACK);
+
+        // Solar Simulator
         render.withLayer2D((ctx) => {
             ctx.drawFPS(fpsPos);
 
-            // 1. Draw the central Sun
+            // 1. Draw orbital paths for each planet (dotted circles)
+            planets.forEach((planet) => {
+                const totalDots = 64; // Number of dots along the orbit path
+                for (let i = 0; i < totalDots; i++) {
+                    const dotAngle = (i / totalDots) * Math.PI * 2;
+                    const dotPos = new Vector2(
+                        sunPos.x + Math.cos(dotAngle) * planet.radius,
+                        sunPos.y + Math.sin(dotAngle) * planet.radius
+                    );
+
+                    ctx.shapes.drawCircle(dotPos, 1.5, {
+                        color: Palette.GRAY
+                    });
+                }
+            });
+
+            // 2. Draw the central Sun
             ctx.shapes.drawCircle(sunPos, 35, {
                 color: Palette.YELLOW
             });
 
-            // 2. Render each planet and its moons
+            // 3. Render each planet and its moons
             planets.forEach((planet) => {
 
                 // Calculate planet position based on its distinct speed

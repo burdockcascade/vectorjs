@@ -222,6 +222,13 @@ namespace HostApi {
             return JS_UNDEFINED;
         }, 1, 0, 1, &r2d_val));
 
+        // Add ClearBackground
+        JS_SetPropertyStr(ctx, render_obj, "clearBackground", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
+            auto color = Utils::try_get_opaque<JSColor>(c, argv[0], js_color_class_id).value_or(JSColor(BLACK));
+            ::ClearBackground(color);
+            return JS_UNDEFINED;
+        }, "clearBackground", 1));
+
         JS_FreeValue(ctx, r2d_val);
         return render_obj;
     }
@@ -251,7 +258,6 @@ namespace HostApi {
 
         while (!WindowShouldClose()) {
             BeginDrawing();
-            ClearBackground(RAYWHITE);
 
             if (JS_IsFunction(ctx, on_update_func)) {
                 JSValue u = update_obj.get();
