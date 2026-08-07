@@ -1,11 +1,22 @@
 import { Application, Vector2, Palette, Keyboard } from "vectorjs";
 
+const enable_orbit_paths = false;
+const enable_starfield = true;
+
+
 const screenWidth = 1200;
 const screenHeight = 1200;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
 
-// Define planets with varied speeds, orbital radii, and attached moons
+// 1. Generate a static background starfield
+const starCount = 200;
+const stars = Array.from({ length: starCount }, () => ({
+    pos: new Vector2(Math.random() * screenWidth, Math.random() * screenHeight),
+    size: Math.random() < 0.8 ? 1 : 2, // Most stars are 1px, some are 2px
+    color: Math.random() < 0.2 ? Palette.LIGHTGRAY : Palette.WHITE // Slight variety
+}));
+
 const planets = [
     { name: "Mercury", radius: 70,  size: 6,  speed: 2.5, color: Palette.GRAY, moons: [] },
     { name: "Venus",   radius: 110, size: 10, speed: 1.8, color: Palette.ORANGE, moons: [] },
@@ -80,74 +91,74 @@ const planets = [
 
 const app = new Application(screenWidth, screenHeight, "Solar System Simulation");
 
-// Simulation State
 let isRunning = true;
 let time = 0;
 
 app.run({
-
     onUpdate(ctx) {
-        // Toggle running state when Spacebar is pressed (fires once per press)
         if (ctx.isKeyPressed(Keyboard.KEY_SPACE)) {
             isRunning = !isRunning;
         }
 
-        // Reset the animation
         if (ctx.isKeyPressed(Keyboard.KEY_R)) {
             time = 0;
         }
 
-        // Advance simulation time only while running (assuming ~60 FPS)
         if (isRunning) {
             time += 1 / 60;
         }
     },
 
     onDraw(render) {
-
         render.clearBackground(Palette.BLACK);
 
-        // Solar Simulator
         render.withLayer2D((ctx) => {
             ctx.drawFPS(fpsPos);
 
-            // 1. Draw orbital paths for each planet (dotted circles)
-            planets.forEach((planet) => {
-                const totalDots = 64; // Number of dots along the orbit path
-                for (let i = 0; i < totalDots; i++) {
-                    const dotAngle = (i / totalDots) * Math.PI * 2;
-                    const dotPos = new Vector2(
-                        sunPos.x + Math.cos(dotAngle) * planet.radius,
-                        sunPos.y + Math.sin(dotAngle) * planet.radius
-                    );
-
-                    ctx.shapes.drawCircle(dotPos, 1.5, {
-                        color: Palette.GRAY
+            // 2. Draw the starfield
+            if (enable_starfield) {
+                stars.forEach((star) => {
+                    ctx.shapes.drawCircle(star.pos, star.size, {
+                        color: star.color
                     });
-                }
-            });
+                });
+            }
 
-            // 2. Draw the central Sun
+            // Draw orbital paths
+            if (enable_orbit_paths) {
+                planets.forEach((planet) => {
+                    const totalDots = 64;
+                    for (let i = 0; i < totalDots; i++) {
+                        const dotAngle = (i / totalDots) * Math.PI * 2;
+                        const dotPos = new Vector2(
+                            sunPos.x + Math.cos(dotAngle) * planet.radius,
+                            sunPos.y + Math.sin(dotAngle) * planet.radius
+                        );
+
+                        ctx.shapes.drawCircle(dotPos, 1.5, {
+                            color: Palette.GRAY
+                        });
+                    }
+                });
+            }
+
+            // Draw Sun
             ctx.shapes.drawCircle(sunPos, 35, {
                 color: Palette.YELLOW
             });
 
-            // 3. Render each planet and its moons
+            // Draw planets and moons
             planets.forEach((planet) => {
-
-                // Calculate planet position based on its distinct speed
                 const angle = time * planet.speed;
                 const planetPos = new Vector2(
                     sunPos.x + Math.cos(angle) * planet.radius,
                     sunPos.y + Math.sin(angle) * planet.radius
                 );
 
-                // Draw planet
                 ctx.shapes.drawCircle(planetPos, planet.size, {
                     color: planet.color
                 });
 
-                // Draw moons orbiting around the planet
                 planet.moons.forEach((moon) => {
                     const moonAngle = time * moon.speed;
                     const moonPos = new Vector2(
