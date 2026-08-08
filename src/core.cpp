@@ -9,8 +9,8 @@ namespace VectorJS {
         HostApi::make_vectorjs_module(ctx.raw_context());
     }
 
-    void Core::eval_script(const std::string& scriptPath) {
-        ctx.eval_file(scriptPath);
+    void Core::eval_script(const std::string& scriptPath) const {
+        std::ignore = ctx.eval_file(scriptPath);
     }
 
     constexpr int DEFAULT_FPS = 60;

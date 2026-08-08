@@ -21,10 +21,7 @@ namespace HostApi {
     };
 
     struct JSColor {
-        uint8_t r = 0;
-        uint8_t g = 0;
-        uint8_t b = 0;
-        uint8_t a = 0;
+        uint8_t r = 0, g = 0, b = 0, a = 0;
 
         constexpr JSColor() noexcept = default;
         constexpr JSColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a) noexcept : r(r), g(g), b(b), a(a) {}
@@ -37,24 +34,19 @@ namespace HostApi {
     };
 
     struct JSVector2 {
-        float x = 0.0f;
-        float y = 0.0f;
+        float x = 0.0f, y = 0.0f;
 
         constexpr JSVector2() noexcept = default;
         constexpr JSVector2(float x, float y) noexcept : x(x), y(y) {}
         explicit constexpr JSVector2(Vector2 v) noexcept : x(v.x), y(v.y) {}
 
-        // C++23: Explicit object parameter (Deducing This)
         [[nodiscard]] constexpr operator Vector2(this JSVector2 self) noexcept {
             return Vector2{ self.x, self.y };
         }
     };
 
     struct JSRectangle {
-        float x = 0.0f;
-        float y = 0.0f;
-        float width = 0.0f;
-        float height = 0.0f;
+        float x = 0.0f, y = 0.0f, width = 0.0f, height = 0.0f;
 
         constexpr JSRectangle() noexcept = default;
         constexpr JSRectangle(float x, float y, float width, float height) noexcept : x(x), y(y), width(width), height(height) {}

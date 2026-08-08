@@ -12,7 +12,7 @@ namespace VectorJS {
         ~Core() = default;
 
         // Execution
-        void eval_script(const std::string& scriptPath);
+        void eval_script(const std::string& scriptPath) const;
 
     private:
         qjs::Context ctx;
