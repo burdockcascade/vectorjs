@@ -112,7 +112,7 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawPixel", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawPixel requires position and color arguments");
-            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
+            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
             const auto col = qjs::try_get_opaque<JSColor>(c, argv[1], js_color_class_id).value_or(JSColor(RAYWHITE));
             ::DrawPixelV(pos, col);
             return JS_UNDEFINED;
@@ -120,8 +120,8 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawLine", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawLine requires start and end positions");
-            const auto start = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
-            const auto end = qjs::try_get_opaque<JSVector2>(c, argv[1], js_vector2_class_id).value_or({0, 0});
+            const auto start = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
+            const auto end = qjs::try_get_opaque<JSVector2>(c, argv[1], js_vector2_class_id).value_or(JSVector2{0, 0});
             const JSDrawOptions draw_options = parse_draw_options(c, argc > 2 ? argv[2] : JS_UNDEFINED);
             ::DrawLineV(start, end, draw_options.color);
             return JS_UNDEFINED;
@@ -129,7 +129,7 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawRectangle", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 1) return JS_ThrowTypeError(c, "drawRectangle requires a Rectangle argument");
-            const auto rect = qjs::try_get_opaque<JSRectangle>(c, argv[0], js_rectangle_class_id).value_or({0, 0, 0, 0});
+            const auto rect = qjs::try_get_opaque<JSRectangle>(c, argv[0], js_rectangle_class_id).value_or(JSRectangle{0, 0, 0, 0});
             const JSDrawOptions draw_options = parse_draw_options(c, argc > 1 ? argv[1] : JS_UNDEFINED);
             ::DrawRectanglePro(rect, draw_options.origin, draw_options.rotation, draw_options.color);
             return JS_UNDEFINED;
@@ -137,7 +137,7 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawCircle", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawCircle requires center and radius arguments");
-            const auto center = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
+            const auto center = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
             double rad = 0;
             if (JS_ToFloat64(c, &rad, argv[1]) != 0) {
                 return JS_ThrowTypeError(c, "drawCircle radius must be a number");
@@ -149,9 +149,9 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawTriangle", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 3) return JS_ThrowTypeError(c, "drawTriangle requires 3 Vector2 point arguments");
-            const auto p1 = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
-            const auto p2 = qjs::try_get_opaque<JSVector2>(c, argv[1], js_vector2_class_id).value_or({0, 0});
-            const auto p3 = qjs::try_get_opaque<JSVector2>(c, argv[2], js_vector2_class_id).value_or({0, 0});
+            const auto p1 = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
+            const auto p2 = qjs::try_get_opaque<JSVector2>(c, argv[1], js_vector2_class_id).value_or(JSVector2{0, 0});
+            const auto p3 = qjs::try_get_opaque<JSVector2>(c, argv[2], js_vector2_class_id).value_or(JSVector2{0, 0});
             const JSDrawOptions draw_options = parse_draw_options(c, argc > 3 ? argv[3] : JS_UNDEFINED);
             ::DrawTriangle(p1, p2, p3, draw_options.color);
             return JS_UNDEFINED;
@@ -159,7 +159,7 @@ namespace VectorJS {
 
         JS_SetPropertyStr(ctx, shape_obj.get(), "drawEllipse", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 3) return JS_ThrowTypeError(c, "drawEllipse requires center, radiusH, and radiusV arguments");
-            const auto center = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
+            const auto center = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
             double radH = 0, radV = 0;
             if (JS_ToFloat64(c, &radH, argv[1]) != 0 || JS_ToFloat64(c, &radV, argv[2]) != 0) {
                 return JS_ThrowTypeError(c, "drawEllipse radii parameters must be numbers");
@@ -176,7 +176,7 @@ namespace VectorJS {
         qjs::JSValueHandle text_obj(ctx, JS_NewObject(ctx));
         JS_SetPropertyStr(ctx, text_obj.get(), "drawText", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 2) return JS_ThrowTypeError(c, "drawText requires position and text string arguments");
-            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
+            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
 
             const char* txt_cstr = JS_ToCString(c, argv[1]);
             if (!txt_cstr) return JS_EXCEPTION;
@@ -200,7 +200,7 @@ namespace VectorJS {
         // Add FPS
         JSValue fps_func = JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {
             if (argc < 1) return JS_ThrowTypeError(c, "drawFPS requires a Vector2 position argument");
-            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or({0, 0});
+            const auto pos = qjs::try_get_opaque<JSVector2>(c, argv[0], js_vector2_class_id).value_or(JSVector2{0, 0});
             ::DrawFPS(static_cast<int>(pos.x), static_cast<int>(pos.y));
             return JS_UNDEFINED;
         }, "drawFPS", 1);
