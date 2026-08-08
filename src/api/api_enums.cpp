@@ -5,7 +5,7 @@
 #include <string_view>
 #include <concepts>
 
-namespace HostApi {
+namespace VectorJS {
 
     static JSValue create_js_color_instance(JSContext* ctx, ::Color color) noexcept {
         return qjs::create_class_instance<JSColor>(ctx, js_color_class_id, color);

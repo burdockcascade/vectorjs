@@ -7,7 +7,7 @@
 #include <raylib.h>
 #include <quickjs.h>
 
-namespace HostApi {
+namespace VectorJS {
 
     inline JSClassID js_color_class_id;
     inline JSClassID js_vector2_class_id;

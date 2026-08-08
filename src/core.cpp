@@ -6,7 +6,7 @@
 namespace VectorJS {
 
     Core::Core() {
-        HostApi::make_vectorjs_module(ctx.raw_context());
+        VectorJS::make_vectorjs_module(ctx.raw_context());
     }
 
     void Core::eval_script(const std::string& scriptPath) const {
@@ -25,8 +25,8 @@ namespace VectorJS {
             ClearBackground(RAYWHITE);
             DrawText("VectorJS", 40, 40, 80, DARKBLUE);
             DrawText("Welcome to the VectorJS!", 40, 140, 20, DARKGRAY);
-            DrawText(std::format("QuickJS Version: {}", HostApi::QUICKJS_VERSION_STR).c_str(), 40, GetScreenHeight() - 80, 20, LIGHTGRAY);
-            DrawText(std::format("Raylib Version: {}", HostApi::RAYLIB_VERSION_STR).c_str(), 40, GetScreenHeight() - 60, 20, LIGHTGRAY);
+            DrawText(std::format("QuickJS Version: {}", VectorJS::QUICKJS_VERSION_STR).c_str(), 40, GetScreenHeight() - 80, 20, LIGHTGRAY);
+            DrawText(std::format("Raylib Version: {}", VectorJS::RAYLIB_VERSION_STR).c_str(), 40, GetScreenHeight() - 60, 20, LIGHTGRAY);
             DrawText("Press ESC to exit.", 40, GetScreenHeight() - 40, 20, LIGHTGRAY);
             EndDrawing();
         }

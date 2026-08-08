@@ -11,7 +11,7 @@
         (&qjs::js_generic_setter<ClassType, decltype(ClassType::Member), &ClassType::Member, ClassIDPtr>) \
     )
 
-namespace HostApi {
+namespace VectorJS {
 
     static void register_application_class(JSContext* ctx, JSModuleDef* m) {
         static constexpr JSCFunctionListEntry proto_funcs[] = {

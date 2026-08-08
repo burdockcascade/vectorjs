@@ -2,7 +2,7 @@
 #include "../qjs.hpp"
 #include <iostream>
 
-namespace HostApi {
+namespace VectorJS {
 
     static JSDrawOptions parse_draw_options(JSContext* ctx, JSValueConst optionsObj) {
         JSDrawOptions options;
