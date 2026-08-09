@@ -11,6 +11,19 @@
         (&qjs::js_generic_setter<ClassType, decltype(ClassType::Member), &ClassType::Member, ClassIDPtr>) \
     )
 
+#define JS_ARG_TO_INT32(ctx, var, arg, default_val) \
+    int32_t var = (default_val);                   \
+    if (JS_ToInt32((ctx), &(var), (arg)) < 0)      \
+        return JS_EXCEPTION;
+
+#define JS_ARG_TO_FLOAT64(ctx, var, arg, default_val) \
+    double var = (default_val);                       \
+    if (JS_ToFloat64((ctx), &(var), (arg)) < 0)       \
+        return JS_EXCEPTION;
+
+#define JS_ARG_TO_STRING(ctx, var, arg, default_val) \
+    std::string var = qjs::js_to_std_string(ctx, arg, default_val);
+
 namespace VectorJS {
 
     static void register_application_class(JSContext* ctx, JSModuleDef* m) {
@@ -29,15 +42,13 @@ namespace VectorJS {
                 delete qjs::get_opaque<JSApplication>(val, js_application_class_id);
             },
             .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
-                const std::span args{argv, static_cast<size_t>(argc)};
-
-                int32_t w = 0;
-                int32_t h = 0;
-                if (args.size() > 0 && JS_ToInt32(c, &w, args[0]) < 0) return JS_EXCEPTION;
-                if (args.size() > 1 && JS_ToInt32(c, &h, args[1]) < 0) return JS_EXCEPTION;
-
-                std::string title = args.size() > 2 ? qjs::js_to_std_string(c, args[2]) : "VectorJS Application";
-                return qjs::create_js_instance<JSApplication>(c, new_target, js_application_class_id, w, h, std::move(title));
+                if (const std::span args{argv, static_cast<size_t>(argc)}; args.size() == 3) {
+                    JS_ARG_TO_INT32(c, w, args[0], 0);
+                    JS_ARG_TO_INT32(c, h, args[1], 0);
+                    JS_ARG_TO_STRING(c, title, args[2], "VectorJS Application")
+                    return qjs::create_js_instance<JSApplication>(c, new_target, js_application_class_id, w, h, std::move(title));
+                }
+                return JS_UNDEFINED;
             },
             .proto_funcs = proto_funcs
         });
@@ -58,25 +69,14 @@ namespace VectorJS {
                 delete qjs::get_opaque<JSColor>(val, js_color_class_id);
             },
             .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
-                const std::span args{argv, static_cast<size_t>(argc)};
-
-                if (args.size() >= 4) {
-                    int32_t r = 0;
-                    int32_t g = 0;
-                    int32_t b = 0;
-                    int32_t a = 255;
-                    if (args.size() > 0 && JS_ToInt32(c, &r, args[0]) < 0) return JS_EXCEPTION;
-                    if (args.size() > 1 && JS_ToInt32(c, &g, args[1]) < 0) return JS_EXCEPTION;
-                    if (args.size() > 2 && JS_ToInt32(c, &b, args[2]) < 0) return JS_EXCEPTION;
-                    if (args.size() > 3 && JS_ToInt32(c, &a, args[3]) < 0) return JS_EXCEPTION;
-
-                    return qjs::create_js_instance<JSColor>(
-                        c, new_target, js_color_class_id,
-                        static_cast<uint8_t>(r), static_cast<uint8_t>(g),
-                        static_cast<uint8_t>(b), static_cast<uint8_t>(a)
-                    );
+                if (const std::span args{argv, static_cast<size_t>(argc)}; args.size() == 4) {
+                    JS_ARG_TO_INT32(c, r, args[0], 0);
+                    JS_ARG_TO_INT32(c, g, args[1], 0);
+                    JS_ARG_TO_INT32(c, b, args[2], 0);
+                    JS_ARG_TO_INT32(c, a, args[3], 255);
+                    return qjs::create_js_instance<JSColor>(c, new_target, js_color_class_id, static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
                 }
-                return qjs::create_js_instance<JSColor>(c, new_target, js_color_class_id);
+                return JS_UNDEFINED;
             },
             .proto_funcs = proto_funcs
         });
@@ -95,17 +95,12 @@ namespace VectorJS {
                 delete qjs::get_opaque<JSVector2>(val, js_vector2_class_id);
             },
             .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
-                const std::span args{argv, static_cast<size_t>(argc)};
-
-                double x = 0;
-                double y = 0;
-                if (args.size() > 0 && JS_ToFloat64(c, &x, args[0]) < 0) return JS_EXCEPTION;
-                if (args.size() > 1 && JS_ToFloat64(c, &y, args[1]) < 0) return JS_EXCEPTION;
-
-                return qjs::create_js_instance<JSVector2>(
-                    c, new_target, js_vector2_class_id,
-                    static_cast<float>(x), static_cast<float>(y)
-                );
+                if (const std::span args{argv, static_cast<size_t>(argc)}; args.size() == 2) {
+                    JS_ARG_TO_FLOAT64(c, x, args[0], 0);
+                    JS_ARG_TO_FLOAT64(c, y, args[1], 0);
+                    return qjs::create_js_instance<JSVector2>(c, new_target, js_vector2_class_id, static_cast<float>(x), static_cast<float>(y));
+                }
+                return JS_UNDEFINED;
             },
             .proto_funcs = proto_funcs
         });
@@ -126,22 +121,14 @@ namespace VectorJS {
                 delete qjs::get_opaque<JSRectangle>(val, js_rectangle_class_id);
             },
             .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
-                const std::span args{argv, static_cast<size_t>(argc)};
-
-                double x = 0;
-                double y = 0;
-                double w = 0;
-                double h = 0;
-                if (args.size() > 0 && JS_ToFloat64(c, &x, args[0]) < 0) return JS_EXCEPTION;
-                if (args.size() > 1 && JS_ToFloat64(c, &y, args[1]) < 0) return JS_EXCEPTION;
-                if (args.size() > 2 && JS_ToFloat64(c, &w, args[2]) < 0) return JS_EXCEPTION;
-                if (args.size() > 3 && JS_ToFloat64(c, &h, args[3]) < 0) return JS_EXCEPTION;
-
-                return qjs::create_js_instance<JSRectangle>(
-                    c, new_target, js_rectangle_class_id,
-                    static_cast<float>(x), static_cast<float>(y),
-                    static_cast<float>(w), static_cast<float>(h)
-                );
+                if (const std::span args{argv, static_cast<size_t>(argc)}; args.size() == 4) {
+                    JS_ARG_TO_FLOAT64(c, x, args[0], 0);
+                    JS_ARG_TO_FLOAT64(c, y, args[1], 0);
+                    JS_ARG_TO_FLOAT64(c, w, args[2], 0);
+                    JS_ARG_TO_FLOAT64(c, h, args[3], 0);
+                    return qjs::create_js_instance<JSRectangle>(c, new_target, js_rectangle_class_id,static_cast<float>(x), static_cast<float>(y), static_cast<float>(w), static_cast<float>(h));
+                }
+                return JS_UNDEFINED;
             },
             .proto_funcs = proto_funcs
         });
@@ -159,7 +146,7 @@ namespace VectorJS {
 
                 if (args.empty()) return JS_ThrowTypeError(c, "Font requires at least a path argument");
 
-                auto font_path = qjs::js_to_std_string(c, args[0]);
+                JS_ARG_TO_STRING(c, font_path, args[2], "")
                 if (font_path.empty()) return JS_ThrowTypeError(c, "Font path must be a non-empty string");
 
                 if (args.size() >= 2) {

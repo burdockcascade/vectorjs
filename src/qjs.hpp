@@ -93,7 +93,7 @@ namespace qjs {
     };
 
     void register_js_class(JSContext* ctx, JSModuleDef* m, const ClassDefConfig& config);
-    std::string js_to_std_string(JSContext* ctx, JSValueConst val, std::string_view fallback = "");
+    std::string js_to_std_string(JSContext* ctx, JSValueConst val, std::string_view fallback);
 
     std::optional<float> try_get_float_property(JSContext* ctx, JSValueConst obj, const char* prop_name);
     std::optional<bool> try_get_bool_property(JSContext* ctx, JSValueConst obj, const char* prop_name);
