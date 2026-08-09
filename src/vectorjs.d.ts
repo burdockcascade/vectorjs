@@ -1,18 +1,6 @@
 declare module "vectorjs" {
 
     /**
-     * Structure representing an RGBA color.
-     */
-    export class Color {
-        r: number;
-        g: number;
-        b: number;
-        a: number;
-        constructor();
-        constructor(r: number, g: number, b: number, a: number);
-    }
-
-    /**
      * Structure representing a 2D vector.
      */
     export class Vector2 {
@@ -34,36 +22,106 @@ declare module "vectorjs" {
         constructor(x: number, y: number, width: number, height: number);
     }
 
-    /**
-     * Built-in color palette options matching Raylib defaults.
-     */
+    export class Color {
+        r: number;
+        g: number;
+        b: number;
+        a: number;
+
+        constructor(r?: number, g?: number, b?: number, a?: number);
+    }
+
     export const Palette: {
-        readonly LIGHTGRAY: Color;
-        readonly GRAY: Color;
-        readonly DARKGRAY: Color;
-        readonly YELLOW: Color;
-        readonly GOLD: Color;
-        readonly ORANGE: Color;
-        readonly PINK: Color;
-        readonly RED: Color;
-        readonly MAROON: Color;
-        readonly GREEN: Color;
-        readonly LIME: Color;
-        readonly DARKGREEN: Color;
-        readonly SKYBLUE: Color;
-        readonly BLUE: Color;
-        readonly DARKBLUE: Color;
-        readonly PURPLE: Color;
-        readonly VIOLET: Color;
-        readonly DARKPURPLE: Color;
-        readonly BEIGE: Color;
-        readonly BROWN: Color;
-        readonly DARKBROWN: Color;
+        // Grays & Neutrals
         readonly WHITE: Color;
+        readonly SNOW: Color;
+        readonly IVORY: Color;
+        readonly RAYWHITE: Color;
+        readonly OFFWHITE: Color;
+        readonly LIGHTGRAY: Color;
+        readonly SILVER: Color;
+        readonly GRAY: Color;
+        readonly SLATE: Color;
+        readonly DARKGRAY: Color;
+        readonly CHARBLACK: Color;
         readonly BLACK: Color;
         readonly BLANK: Color;
+
+        // Reds, Pinks & Oranges
+        readonly SALMON: Color;
+        readonly CORAL: Color;
+        readonly CRIMSON: Color;
+        readonly RED: Color;
+        readonly PURE_RED: Color;
+        readonly SCARLET: Color;
+        readonly MAROON: Color;
+        readonly BURGUNDY: Color;
+        readonly PEACH: Color;
+        readonly ORANGE: Color;
+        readonly DARKORANGE: Color;
+        readonly AMBER: Color;
+        readonly GOLD: Color;
+        readonly YELLOW: Color;
+        readonly LEMON: Color;
+        readonly ROSE: Color;
+        readonly PINK: Color;
+        readonly HOTPINK: Color;
         readonly MAGENTA: Color;
-        readonly RAYWHITE: Color;
+        readonly FUCHSIA: Color;
+
+        // Greens & Teals
+        readonly MINT: Color;
+        readonly PASTELGREEN: Color;
+        readonly LIME: Color;
+        readonly NEON_GREEN: Color;
+        readonly GREEN: Color;
+        readonly PURE_GREEN: Color;
+        readonly EMERALD: Color;
+        readonly DARKGREEN: Color;
+        readonly FOREST: Color;
+        readonly PINE: Color;
+        readonly OLIVE: Color;
+        readonly TURQUOISE: Color;
+        readonly TEAL: Color;
+
+        // Blues & Cyans
+        readonly ELECTRIC_BLUE: Color;
+        readonly CYAN: Color;
+        readonly AQUA: Color;
+        readonly PASTELBLUE: Color;
+        readonly SKYBLUE: Color;
+        readonly CORNFLOWER: Color;
+        readonly BLUE: Color;
+        readonly PURE_BLUE: Color;
+        readonly ROYALBLUE: Color;
+        readonly DARKBLUE: Color;
+        readonly NAVY: Color;
+        readonly MIDNIGHTBLUE: Color;
+
+        // Purples & Violets
+        readonly LAVENDER: Color;
+        readonly LILAC: Color;
+        readonly PURPLE: Color;
+        readonly PURE_PURPLE: Color;
+        readonly AMETHYST: Color;
+        readonly VIOLET: Color;
+        readonly INDIGO: Color;
+        readonly DARKPURPLE: Color;
+        readonly PLUM: Color;
+
+        // Browns & Earth Tones
+        readonly WHEAT: Color;
+        readonly BEIGE: Color;
+        readonly TAN: Color;
+        readonly SAND: Color;
+        readonly KHAKI: Color;
+        readonly TERRACOTTA: Color;
+        readonly BRONZE: Color;
+        readonly RUST: Color;
+        readonly BROWN: Color;
+        readonly SADDLEBROWN: Color;
+        readonly DARKBROWN: Color;
+        readonly COFFEE: Color;
     };
 
     export const MouseButton: {
