@@ -8,6 +8,7 @@ const screenWidth = 1200;
 const screenHeight = 1200;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
+const titlePos = new Vector2(screenWidth/3, 50);
 
 // 1. Generate a static background starfield
 const starCount = 200;
@@ -114,6 +115,11 @@ app.run({
 
         render.withLayer2D((ctx) => {
             ctx.drawFPS(fpsPos);
+
+            ctx.text.drawText(titlePos, "Solar System Simulator", {
+                color: Palette.WHITE,
+                fontSize: 36.0
+            })
 
             // 2. Draw the starfield
             if (enable_starfield) {
