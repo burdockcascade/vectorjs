@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 #include <raylib.h>
+#include <raymath.h>
 #include <quickjs.h>
 
 namespace VectorJS {
@@ -26,11 +27,10 @@ namespace VectorJS {
 
         constexpr JSColor() noexcept = default;
         constexpr JSColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a) noexcept : r(r), g(g), b(b), a(a) {}
-        explicit constexpr JSColor(Color color) noexcept : r(color.r), g(color.g), b(color.b), a(color.a) {}
+        explicit constexpr JSColor(::Color color) noexcept : r(color.r), g(color.g), b(color.b), a(color.a) {}
 
-        // C++23: Explicit object parameter (Deducing This)
-        [[nodiscard]] constexpr operator Color(this JSColor self) noexcept {
-            return Color{ self.r, self.g, self.b, self.a };
+        [[nodiscard]] constexpr operator ::Color(this JSColor self) noexcept {
+            return ::Color{ self.r, self.g, self.b, self.a };
         }
     };
 
@@ -39,10 +39,10 @@ namespace VectorJS {
 
         constexpr JSVector2() noexcept = default;
         constexpr JSVector2(float x, float y) noexcept : x(x), y(y) {}
-        explicit constexpr JSVector2(Vector2 v) noexcept : x(v.x), y(v.y) {}
+        explicit constexpr JSVector2(::Vector2 v) noexcept : x(v.x), y(v.y) {}
 
-        [[nodiscard]] constexpr operator Vector2(this JSVector2 self) noexcept {
-            return Vector2{ self.x, self.y };
+        [[nodiscard]] constexpr operator ::Vector2(this JSVector2 self) noexcept {
+            return ::Vector2{ self.x, self.y };
         }
     };
 
@@ -51,26 +51,24 @@ namespace VectorJS {
 
         constexpr JSRectangle() noexcept = default;
         constexpr JSRectangle(float x, float y, float width, float height) noexcept : x(x), y(y), width(width), height(height) {}
-        explicit constexpr JSRectangle(Rectangle r) noexcept : x(r.x), y(r.y), width(r.width), height(r.height) {}
+        explicit constexpr JSRectangle(::Rectangle r) noexcept : x(r.x), y(r.y), width(r.width), height(r.height) {}
 
-        // C++23: Explicit object parameter (Deducing This)
-        [[nodiscard]] constexpr operator Rectangle(this JSRectangle self) noexcept {
-            return Rectangle{ self.x, self.y, self.width, self.height };
+        [[nodiscard]] constexpr operator ::Rectangle(this JSRectangle self) noexcept {
+            return ::Rectangle{ self.x, self.y, self.width, self.height };
         }
     };
 
     struct JSFont {
-        std::shared_ptr<Font> font_ptr;
+        std::shared_ptr<::Font> font_ptr;
 
         JSFont() = default;
         explicit JSFont(std::string_view path, int baseSize = 64) {
-            const Font f = LoadFontEx(path.data(), baseSize, nullptr, 0);
+            const ::Font f = LoadFontEx(path.data(), baseSize, nullptr, 0);
             if (f.texture.id != 0) {
                 SetTextureFilter(f.texture, TEXTURE_FILTER_BILINEAR);
             }
 
-            // Replaced manual new with std::make_shared and custom deleter
-            font_ptr = std::shared_ptr<Font>(new Font(f), [](Font* pf) {
+            font_ptr = std::shared_ptr<::Font>(new ::Font(f), [](::Font* pf) {
                 if (pf) {
                     if (pf->texture.id != 0) {
                         UnloadFont(*pf);
@@ -82,18 +80,18 @@ namespace VectorJS {
     };
 
     struct JSCamera2D {
-        Vector2 offset{ .x = 0.0f, .y = 0.0f };
-        Vector2 target{ .x = 0.0f, .y = 0.0f };
+        ::Vector2 offset{ .x = 0.0f, .y = 0.0f };
+        ::Vector2 target{ .x = 0.0f, .y = 0.0f };
         float rotation = 0.0f;
         float zoom = 1.0f;
 
         constexpr JSCamera2D() noexcept = default;
-        constexpr JSCamera2D(Vector2 offset, Vector2 target, float rotation, float zoom) noexcept : offset(offset), target(target), rotation(rotation), zoom(zoom) {}
+        constexpr JSCamera2D(::Vector2 offset, ::Vector2 target, float rotation, float zoom) noexcept : offset(offset), target(target), rotation(rotation), zoom(zoom) {}
 
-        explicit constexpr JSCamera2D(Camera2D c) noexcept : offset(c.offset), target(c.target), rotation(c.rotation), zoom(c.zoom) {}
+        explicit constexpr JSCamera2D(::Camera2D c) noexcept : offset(c.offset), target(c.target), rotation(c.rotation), zoom(c.zoom) {}
 
-        [[nodiscard]] constexpr operator Camera2D(this JSCamera2D self) noexcept {
-            return Camera2D{ self.offset, self.target, self.rotation, self.zoom };
+        [[nodiscard]] constexpr operator ::Camera2D(this JSCamera2D self) noexcept {
+            return ::Camera2D{ self.offset, self.target, self.rotation, self.zoom };
         }
     };
 
