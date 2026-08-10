@@ -6,7 +6,7 @@
 namespace VectorJS {
 
     Core::Core() {
-        VectorJS::make_vectorjs_module(ctx.raw_context());
+        make_vectorjs_module(ctx.raw_context());
     }
 
     void Core::eval_script(const std::string& scriptPath) const {
