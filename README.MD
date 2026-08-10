@@ -1,5 +1,11 @@
 # VectorJS
 
+## Description
+
+VectorJS is a lightweight engine designed to execute JavaScript-based 2D/3D graphics, multimedia applications, and interactive scripts. Powered by QuickJS and Raylib, it bridges native performance with a simple JavaScript API.
+
+## Development Status
+
 | Feature   | Status   |
 |-----------|----------|
 | Shapes 2D | &#10004; |
