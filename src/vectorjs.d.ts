@@ -31,6 +31,14 @@ declare module "vectorjs" {
         constructor(r?: number, g?: number, b?: number, a?: number);
     }
 
+    export class Camera2D {
+        offset: Vector2;
+        target: Vector2;
+        rotation: number;
+        zoom: number;
+        constructor(offset?: Vector2, target?: Vector2, rotation?: number, zoom?: number);
+    }
+
     export const Palette: {
         // Grays & Neutrals
         readonly WHITE: Color;
@@ -309,7 +317,7 @@ declare module "vectorjs" {
     export interface RenderContext {
         drawFPS(position: Vector2): void;
         readonly shapes: Render2DShapes;
-        withLayer2D(callback: (layer: RenderContext) => void): void;
+        withViewport2D(callback: (layer: RenderContext) => void): void;
     }
 
     /**
@@ -330,13 +338,6 @@ declare module "vectorjs" {
         readonly fontSize?: number;
         readonly spacing?: number;
         readonly origin?: Vector2;
-    }
-
-    /**
-     * Context parameter exposed to the `onUpdate` hook loop.
-     */
-    export interface UpdateContext {
-        // Currently instantated as empty object context inside create_update_context_object
     }
 
     /**

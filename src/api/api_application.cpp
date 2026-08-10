@@ -194,6 +194,55 @@ namespace VectorJS {
         return text_obj.release();
     }
 
+    // Creates the withViewport2D handler (supporting both camera-transformed and screen-space UI rendering)
+    static JSValue create_viewport2d_function(JSContext* ctx, JSValueConst r2d_val) {
+        return JS_NewCFunctionData(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv, int, JSValue* magic_argv) -> JSValue {
+            if (argc < 1) {
+                return JS_ThrowTypeError(c, "withViewport2D requires at least a callback function");
+            }
+
+            JSValueConst callback = JS_UNDEFINED;
+            std::optional<JSCamera2D> camera;
+
+            if (argc >= 2 && JS_IsFunction(c, argv[1])) {
+                camera = qjs::try_get_opaque<JSCamera2D>(c, argv[0], js_camera2d_class_id);
+                callback = argv[1];
+            } else if (JS_IsFunction(c, argv[0])) {
+                callback = argv[0];
+            } else {
+                return JS_ThrowTypeError(c, "Invalid arguments passed to withViewport2D");
+            }
+
+            if (camera.has_value()) {
+                ::BeginMode2D(camera.value());
+            }
+
+            const qjs::JSValueHandle res(c, JS_Call(c, callback, JS_UNDEFINED, 1, &magic_argv[0]));
+
+            if (camera.has_value()) {
+                ::EndMode2D();
+            }
+
+            if (JS_IsException(res.get())) return JS_EXCEPTION;
+
+            return JS_UNDEFINED;
+        }, 1, 0, 1, &r2d_val);
+    }
+
+    // Optional helper if you want an explicit semantic shortcut for UI / Screen-Space rendering
+    static JSValue create_screen_space_function(JSContext* ctx, JSValueConst r2d_val) {
+        return JS_NewCFunctionData(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv, int, JSValue* magic_argv) -> JSValue {
+            if (argc < 1 || !JS_IsFunction(c, argv[0])) {
+                return JS_ThrowTypeError(c, "withScreenSpace requires a callback function");
+            }
+
+            const qjs::JSValueHandle res(c, JS_Call(c, argv[0], JS_UNDEFINED, 1, &magic_argv[0]));
+            if (JS_IsException(res.get())) return JS_EXCEPTION;
+
+            return JS_UNDEFINED;
+        }, 1, 0, 1, &r2d_val);
+    }
+
     static JSValue create_draw_render_object(JSContext* ctx) {
         qjs::JSValueHandle render2d_obj(ctx, JS_NewObject(ctx));
 
@@ -214,14 +263,8 @@ namespace VectorJS {
         qjs::JSValueHandle render_obj(ctx, JS_NewObject(ctx));
         JSValue r2d_val = render2d_obj.release();
 
-        JSValue layer_func = JS_NewCFunctionData(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv, int, JSValue* magic_argv) -> JSValue {
-            if (argc > 0 && JS_IsFunction(c, argv[0])) {
-                const qjs::JSValueHandle res(c, JS_Call(c, argv[0], JS_UNDEFINED, 1, &magic_argv[0]));
-                if (JS_IsException(res.get())) return JS_EXCEPTION;
-            }
-            return JS_UNDEFINED;
-        }, 1, 0, 1, &r2d_val);
-        JS_SetPropertyStr(ctx, render_obj.get(), "withLayer2D", layer_func);
+        JS_SetPropertyStr(ctx, render_obj.get(), "withViewport2D", create_viewport2d_function(ctx, r2d_val));
+        JS_SetPropertyStr(ctx, render_obj.get(), "withScreenSpace", create_screen_space_function(ctx, r2d_val));
 
         // Add ClearBackground
         JS_SetPropertyStr(ctx, render_obj.get(), "clearBackground", JS_NewCFunction(ctx, [](JSContext* c, JSValueConst, int argc, JSValueConst* argv) -> JSValue {

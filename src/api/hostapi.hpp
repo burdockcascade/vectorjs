@@ -29,6 +29,7 @@ namespace VectorJS {
             JS_AddModuleExport(ctx, m, "Font");
             JS_AddModuleExport(ctx, m, "Info");
             JS_AddModuleExport(ctx, m, "ConfigFlags");
+            JS_AddModuleExport(ctx, m, "Camera2D");
         }
     }
 } // namespace HostApi

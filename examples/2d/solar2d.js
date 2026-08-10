@@ -1,4 +1,4 @@
-import { Application, Vector2, Palette, Keyboard } from "vectorjs";
+import { Application, Vector2, Palette, Keyboard, Camera2D } from "vectorjs";
 
 const enable_orbit_paths = false;
 const enable_starfield = true;
@@ -9,6 +9,8 @@ const screenHeight = 1200;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
 const titlePos = new Vector2(screenWidth/3, 50);
+
+const camera = new Camera2D(new Vector2(0, 0), new Vector2(0, 0), 0, 1.0);
 
 // 1. Generate a static background starfield
 const starCount = 200;
@@ -113,7 +115,7 @@ app.run({
     onDraw(render) {
         render.clearBackground(Palette.BLACK);
 
-        render.withLayer2D((ctx) => {
+        render.withViewport2D(camera, (ctx) => {
             ctx.drawFPS(fpsPos);
 
             ctx.text.drawText(titlePos, "Solar System Simulator", {

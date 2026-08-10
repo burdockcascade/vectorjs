@@ -14,6 +14,7 @@ namespace VectorJS {
     inline JSClassID js_rectangle_class_id;
     inline JSClassID js_font_class_id;
     inline JSClassID js_application_class_id;
+    inline JSClassID js_camera2d_class_id;
 
     struct JSApplication {
         JSApplication(int w, int h, std::string_view title);
@@ -77,6 +78,22 @@ namespace VectorJS {
                     delete pf;
                 }
             });
+        }
+    };
+
+    struct JSCamera2D {
+        Vector2 offset{ .x = 0.0f, .y = 0.0f };
+        Vector2 target{ .x = 0.0f, .y = 0.0f };
+        float rotation = 0.0f;
+        float zoom = 1.0f;
+
+        constexpr JSCamera2D() noexcept = default;
+        constexpr JSCamera2D(Vector2 offset, Vector2 target, float rotation, float zoom) noexcept : offset(offset), target(target), rotation(rotation), zoom(zoom) {}
+
+        explicit constexpr JSCamera2D(Camera2D c) noexcept : offset(c.offset), target(c.target), rotation(c.rotation), zoom(c.zoom) {}
+
+        [[nodiscard]] constexpr operator Camera2D(this JSCamera2D self) noexcept {
+            return Camera2D{ self.offset, self.target, self.rotation, self.zoom };
         }
     };
 

@@ -161,12 +161,47 @@ namespace VectorJS {
         });
     }
 
+    static void register_camera2d_class(JSContext* ctx, JSModuleDef* m) {
+        static constexpr JSCFunctionListEntry proto_funcs[] = {
+            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "offset", offset),
+            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "target", target),
+            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "rotation", rotation),
+            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "zoom", zoom),
+        };
+
+        qjs::register_js_class(ctx, m, {
+            .name = "Camera2D",
+            .class_id = js_camera2d_class_id,
+            .finalizer = [](JSRuntime*, JSValue val) {
+                delete qjs::get_opaque<JSCamera2D>(val, js_camera2d_class_id);
+            },
+            .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
+                const std::span args{argv, static_cast<size_t>(argc)};
+
+                // Optional constructors: Camera2D() or Camera2D(offset, target, rotation, zoom)
+                if (args.size() >= 2) {
+                    auto offset = qjs::try_get_opaque<JSVector2>(c, args[0], js_vector2_class_id).value_or(JSVector2{0, 0});
+                    auto target = qjs::try_get_opaque<JSVector2>(c, args[1], js_vector2_class_id).value_or(JSVector2{0, 0});
+
+                    JS_ARG_TO_FLOAT64(c, rot, args.size() > 2 ? args[2] : JS_UNDEFINED, 0.0);
+                    JS_ARG_TO_FLOAT64(c, zoom, args.size() > 3 ? args[3] : JS_UNDEFINED, 1.0);
+
+                    return qjs::create_js_instance<JSCamera2D>(c, new_target, js_camera2d_class_id, offset, target, static_cast<float>(rot), static_cast<float>(zoom));
+                }
+
+                return qjs::create_js_instance<JSCamera2D>(c, new_target, js_camera2d_class_id);
+            },
+            .proto_funcs = proto_funcs
+        });
+    }
+
     void register_hapi_classes(JSContext* ctx, JSModuleDef* m) {
         register_application_class(ctx, m);
         register_color_class(ctx, m);
         register_vector2_class(ctx, m);
         register_rectangle_class(ctx, m);
         register_font_class(ctx, m);
+        register_camera2d_class(ctx, m);
     }
 
 } // namespace HostApi
