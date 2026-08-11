@@ -3,12 +3,10 @@ import { Application, Vector2, Palette, Keyboard, Camera2D } from "vectorjs";
 const enable_orbit_paths = false;
 const enable_starfield = true;
 
-
 const screenWidth = 1200;
 const screenHeight = 1200;
 const sunPos = new Vector2(screenWidth / 2, screenHeight / 2);
 const fpsPos = new Vector2(10, 10);
-const titlePos = new Vector2(screenWidth/3, 50);
 
 const camera = new Camera2D(new Vector2(0, 0), new Vector2(0, 0), 0, 1.0);
 
@@ -16,8 +14,9 @@ const camera = new Camera2D(new Vector2(0, 0), new Vector2(0, 0), 0, 1.0);
 const starCount = 200;
 const stars = Array.from({ length: starCount }, () => ({
     pos: new Vector2(Math.random() * screenWidth, Math.random() * screenHeight),
-    size: Math.random() < 0.8 ? 1 : 2, // Most stars are 1px, some are 2px
-    color: Math.random() < 0.2 ? Palette.LIGHTGRAY : Palette.WHITE // Slight variety
+    size: Math.random() < 0.8 ? 1 : 2,
+    color: Math.random() < 0.2 ? Palette.LIGHTGRAY : Palette.WHITE,
+    phase: Math.random() * Math.PI * 2 // Random speed/phase for twinkling
 }));
 
 const planets = [
@@ -110,6 +109,9 @@ app.run({
         if (isRunning) {
             time += 1 / 60;
         }
+
+        // Smooth camera drift toward sun center using Vector2.lerp
+        //camera.target = camera.target.lerp(sunPos, 0.02);
     },
 
     onDraw(render) {
@@ -118,30 +120,26 @@ app.run({
         render.withViewport2D(camera, (ctx) => {
             ctx.drawFPS(fpsPos);
 
-            ctx.text.drawText(titlePos, "Solar System Simulator", {
-                color: Palette.WHITE,
-                fontSize: 36.0
-            })
-
-            // 2. Draw the starfield
+            // 2. Draw starfield with twinkling effect using Color.fade
             if (enable_starfield) {
                 stars.forEach((star) => {
-                    ctx.shapes.drawCircle(star.pos, star.size, {
-                        color: star.color
+                    const twinkleAmount = 0.4 + 0.6 * Math.sin(time * 3 + star.phase);
+                    const starColor = star.color.fade(twinkleAmount);
+
+                     ctx.shapes.drawCircle(star.pos, star.size, {
+                          color: starColor
                     });
                 });
             }
 
-            // Draw orbital paths
+            // Draw orbital paths using Vector2.add and Vector2.scale
             if (enable_orbit_paths) {
                 planets.forEach((planet) => {
                     const totalDots = 64;
                     for (let i = 0; i < totalDots; i++) {
                         const dotAngle = (i / totalDots) * Math.PI * 2;
-                        const dotPos = new Vector2(
-                            sunPos.x + Math.cos(dotAngle) * planet.radius,
-                            sunPos.y + Math.sin(dotAngle) * planet.radius
-                        );
+                        const dotDir = new Vector2(Math.cos(dotAngle), Math.sin(dotAngle));
+                        const dotPos = sunPos.add(dotDir.scale(planet.radius));
 
                         ctx.shapes.drawCircle(dotPos, 1.5, {
                             color: Palette.GRAY
@@ -150,18 +148,21 @@ app.run({
                 });
             }
 
-            // Draw Sun
-            ctx.shapes.drawCircle(sunPos, 35, {
-                color: Palette.YELLOW
-            });
+            // Draw Pulsating Sun using Color.brightness and Color.lerp
+            const pulse = (Math.sin(time * 2) + 1) * 0.5;
+            const sunGlow = Palette.YELLOW.brightness(0.3 * pulse);
+            const sunColor = Palette.YELLOW.lerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
 
-            // Draw planets and moons
+            // Outer sun aura
+            ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.fade(0.4) });
+            // Core sun
+            ctx.shapes.drawCircle(sunPos, 35, { color: sunColor });
+
+            // Draw planets and moons using Vector2 math
             planets.forEach((planet) => {
                 const angle = time * planet.speed;
-                const planetPos = new Vector2(
-                    sunPos.x + Math.cos(angle) * planet.radius,
-                    sunPos.y + Math.sin(angle) * planet.radius
-                );
+                const planetDir = new Vector2(Math.cos(angle), Math.sin(angle));
+                const planetPos = sunPos.add(planetDir.scale(planet.radius));
 
                 ctx.shapes.drawCircle(planetPos, planet.size, {
                     color: planet.color
@@ -169,10 +170,8 @@ app.run({
 
                 planet.moons.forEach((moon) => {
                     const moonAngle = time * moon.speed;
-                    const moonPos = new Vector2(
-                        planetPos.x + Math.cos(moonAngle) * moon.radius,
-                        planetPos.y + Math.sin(moonAngle) * moon.radius
-                    );
+                    const moonDir = new Vector2(Math.cos(moonAngle), Math.sin(moonAngle));
+                    const moonPos = planetPos.add(moonDir.scale(moon.radius));
 
                     ctx.shapes.drawCircle(moonPos, moon.size, {
                         color: moon.color

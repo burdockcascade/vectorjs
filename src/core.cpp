@@ -1,6 +1,9 @@
 #include <string>
 #include "core.hpp"
 
+#include <iostream>
+#include <sstream>
+
 #include "api/hostapi.hpp"
 
 namespace VectorJS {
@@ -10,7 +13,12 @@ namespace VectorJS {
     }
 
     void Core::eval_script(const std::string& scriptPath) const {
-        std::ignore = ctx.eval_file(scriptPath);
+        try {
+            std::ignore = ctx.eval_file(scriptPath);
+        } catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            show_bsod(e.what());
+        }
     }
 
     constexpr int DEFAULT_FPS = 60;
@@ -34,17 +42,23 @@ namespace VectorJS {
     }
 
     void show_bsod(const std::string &errStr) {
-        if (!IsWindowReady()) {
-            InitWindow(WIN_WIDTH, WIN_HEIGHT, "VectorJS - Fatal Error");
-            SetTargetFPS(DEFAULT_FPS);
-        }
+        if (IsWindowReady()) CloseWindow();
+        InitWindow(WIN_WIDTH, WIN_HEIGHT, "VectorJS - Fatal Error");
+        SetTargetFPS(DEFAULT_FPS);
         while (!WindowShouldClose()) {
             BeginDrawing();
             ClearBackground(BLUE);
-            DrawText(":(", 40, 40, 80, WHITE);
-            DrawText("Your VectorJS script ran into a problem and crashed.", 40, 140, 20, WHITE);
-            DrawText(errStr.c_str(), 40, 190, 20, LIGHTGRAY);
-            DrawText("Press ESC to exit.", 40, GetScreenHeight() - 40, 20, LIGHTGRAY);
+            DrawText(":(", 40, 30, 60, WHITE);
+            DrawText("Your VectorJS script ran into a problem and crashed.", 40, 100, 18, WHITE);
+            int yPos = 140;
+            std::istringstream stream(errStr);
+            std::string line;
+            while (std::getline(stream, line)) {
+                if (yPos > WIN_HEIGHT - 60) break; // Keep within window bounds
+                DrawText(line.c_str(), 40, yPos, 14, LIGHTGRAY);
+                yPos += 18;
+            }
+            DrawText("Press ESC to exit.", 40, GetScreenHeight() - 40, 16, LIGHTGRAY);
             EndDrawing();
         }
         CloseWindow();

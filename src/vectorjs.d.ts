@@ -6,8 +6,19 @@ declare module "vectorjs" {
     export class Vector2 {
         x: number;
         y: number;
-        constructor();
+
         constructor(x: number, y: number);
+
+        add(other: Vector2): Vector2;
+        subtract(other: Vector2): Vector2;
+        multiply(other: Vector2): Vector2;
+        scale(scale: number): Vector2;
+        length(): number;
+        normalize(): Vector2;
+        dot(other: Vector2): number;
+        distance(other: Vector2): number;
+        negate(): Vector2;
+        lerp(target: Vector2, amount: number): Vector2;
     }
 
     /**
@@ -28,7 +39,12 @@ declare module "vectorjs" {
         b: number;
         a: number;
 
-        constructor(r?: number, g?: number, b?: number, a?: number);
+        constructor(r: number, g: number, b: number, a?: number);
+
+        fade(alpha: number): Color;
+        lerp(target: Color, factor: number): Color;
+        brightness(factor: number): Color;
+        toInt(): number;
     }
 
     export class Camera2D {
@@ -317,7 +333,7 @@ declare module "vectorjs" {
     export interface RenderContext {
         drawFPS(position: Vector2): void;
         readonly shapes: Render2DShapes;
-        withViewport2D(callback: (layer: RenderContext) => void): void;
+        withViewport2D(camera: Camera2D, callback: (layer: RenderContext) => void): void;
     }
 
     /**

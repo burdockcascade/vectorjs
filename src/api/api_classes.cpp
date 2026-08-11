@@ -1,8 +1,9 @@
+#include <iostream>
+#include <string_view>
+#include <span>
 #include "hostapi.hpp"
 #include "js_types.hpp"
 #include "../qjs.hpp"
-#include <span>
-#include <string_view>
 
 #define JS_BIND_PROP(ClassType, ClassIDPtr, name, Member) \
     JS_CGETSET_DEF( \
@@ -60,6 +61,42 @@ namespace VectorJS {
             JS_BIND_PROP(JSColor, &js_color_class_id, "g", g),
             JS_BIND_PROP(JSColor, &js_color_class_id, "b", b),
             JS_BIND_PROP(JSColor, &js_color_class_id, "a", a),
+            JS_CFUNC_DEF("lerp", 2, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
+                auto* target = qjs::get_opaque<JSColor>(c, argv[0], js_color_class_id);
+                double factor = 0.0;
+
+                if (!self || !target || JS_ToFloat64(c, &factor, argv[1]) < 0) {
+                    return JS_ThrowTypeError(c, "Expected Color target and numeric factor");
+                }
+
+                Color result = ColorLerp(*self, *target, static_cast<float>(factor));
+                return qjs::create_class_instance<JSColor>(c, js_color_class_id, result.r, result.g, result.b, result.a);
+            }),
+            JS_CFUNC_DEF("fade", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                JSColor* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
+                if (!self) return JS_ThrowTypeError(c, "Called Color.fade on an invalid Color object");
+                double alpha = 1.0;
+                if (argc > 0 && JS_ToFloat64(c, &alpha, argv[0]) < 0) {
+                    return JS_EXCEPTION;
+                }
+                Color result = ::Fade(*self, static_cast<float>(alpha));
+                return qjs::create_class_instance<JSColor>(c, js_color_class_id, static_cast<uint8_t>(result.r), static_cast<uint8_t>(result.g), static_cast<uint8_t>(result.b), static_cast<uint8_t>(result.a));
+            }),
+            JS_CFUNC_DEF("brightness", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
+                if (!self) return JS_ThrowTypeError(c, "Called Color.brightness on an invalid Color object");
+
+                double factor = 0.0;
+                if (argc > 0 && JS_ToFloat64(c, &factor, argv[0]) < 0) return JS_EXCEPTION;
+
+                Color result = ColorBrightness(*self, static_cast<float>(factor));
+                return qjs::create_class_instance<JSColor>(c, js_color_class_id, result.r, result.g, result.b, result.a);
+            }),
+            JS_CFUNC_DEF("toInt", 0, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
+                return self ? JS_NewInt32(c, ColorToInt(*self)) : JS_EXCEPTION;
+            }),
         };
 
         qjs::register_js_class(ctx, m, {
@@ -86,6 +123,84 @@ namespace VectorJS {
         static constexpr JSCFunctionListEntry proto_funcs[] = {
             JS_BIND_PROP(JSVector2, &js_vector2_class_id, "x", x),
             JS_BIND_PROP(JSVector2, &js_vector2_class_id, "y", y),
+
+            // Existing functions
+            JS_CFUNC_DEF("add", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* other = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                if (!self || !other) return JS_ThrowTypeError(c, "Expected Vector2 instance");
+
+                Vector2 result = Vector2Add(*self, *other);
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("scale", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                double scale = 0.0;
+                if (!self || JS_ToFloat64(c, &scale, argv[0]) < 0) return JS_EXCEPTION;
+
+                Vector2 result = Vector2Scale(*self, static_cast<float>(scale));
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("length", 0, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                return self ? JS_NewFloat64(c, Vector2Length(*self)) : JS_EXCEPTION;
+            }),
+            JS_CFUNC_DEF("normalize", 0, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                if (!self) return JS_EXCEPTION;
+
+                Vector2 result = Vector2Normalize(*self);
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("subtract", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* other = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                if (!self || !other) return JS_ThrowTypeError(c, "Expected Vector2 instance");
+
+                Vector2 result = Vector2Subtract(*self, *other);
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("multiply", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* other = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                if (!self || !other) return JS_ThrowTypeError(c, "Expected Vector2 instance");
+
+                Vector2 result = Vector2Multiply(*self, *other);
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("dot", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* other = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                if (!self || !other) return JS_ThrowTypeError(c, "Expected Vector2 instance");
+
+                return JS_NewFloat64(c, Vector2DotProduct(*self, *other));
+            }),
+            JS_CFUNC_DEF("distance", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* other = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                if (!self || !other) return JS_ThrowTypeError(c, "Expected Vector2 instance");
+
+                return JS_NewFloat64(c, Vector2Distance(*self, *other));
+            }),
+            JS_CFUNC_DEF("negate", 0, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                if (!self) return JS_EXCEPTION;
+
+                Vector2 result = Vector2Negate(*self);
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
+            JS_CFUNC_DEF("lerp", 2, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
+                auto* self = qjs::get_opaque<JSVector2>(c, this_val, js_vector2_class_id);
+                auto* target = qjs::get_opaque<JSVector2>(c, argv[0], js_vector2_class_id);
+                double amount = 0.0;
+
+                if (!self || !target || JS_ToFloat64(c, &amount, argv[1]) < 0) {
+                    return JS_ThrowTypeError(c, "Expected Vector2 target and numeric amount");
+                }
+
+                Vector2 result = Vector2Lerp(*self, *target, static_cast<float>(amount));
+                return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, result.x, result.y);
+            }),
         };
 
         qjs::register_js_class(ctx, m, {
@@ -146,7 +261,7 @@ namespace VectorJS {
 
                 if (args.empty()) return JS_ThrowTypeError(c, "Font requires at least a path argument");
 
-                JS_ARG_TO_STRING(c, font_path, args[2], "")
+                JS_ARG_TO_STRING(c, font_path, args[0], "")
                 if (font_path.empty()) return JS_ThrowTypeError(c, "Font path must be a non-empty string");
 
                 if (args.size() >= 2) {
@@ -163,8 +278,42 @@ namespace VectorJS {
 
     static void register_camera2d_class(JSContext* ctx, JSModuleDef* m) {
         static constexpr JSCFunctionListEntry proto_funcs[] = {
-            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "offset", offset),
-            JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "target", target),
+            JS_CGETSET_DEF(
+                "target",
+                [](JSContext* c, JSValueConst this_val) -> JSValue {
+                    auto* self = qjs::get_opaque<JSCamera2D>(c, this_val, js_camera2d_class_id);
+                    if (!self) return JS_ThrowTypeError(c, "Invalid Camera2D instance");
+                    return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, self->target.x, self->target.y);
+                },
+                [](JSContext* c, JSValueConst this_val, JSValueConst val) -> JSValue {
+                    auto* self = qjs::get_opaque<JSCamera2D>(c, this_val, js_camera2d_class_id);
+                    if (!self) return JS_ThrowTypeError(c, "Invalid Camera2D instance");
+
+                    auto vec = qjs::try_get_opaque<JSVector2>(c, val, js_vector2_class_id);
+                    if (!vec.has_value()) return JS_ThrowTypeError(c, "Expected Vector2 instance for camera.target");
+
+                    self->target = vec.value();
+                    return JS_UNDEFINED;
+                }
+            ),
+            JS_CGETSET_DEF(
+                "offset",
+                [](JSContext* c, JSValueConst this_val) -> JSValue {
+                    auto* self = qjs::get_opaque<JSCamera2D>(c, this_val, js_camera2d_class_id);
+                    if (!self) return JS_ThrowTypeError(c, "Invalid Camera2D instance");
+                    return qjs::create_class_instance<JSVector2>(c, js_vector2_class_id, self->offset.x, self->offset.y);
+                },
+                [](JSContext* c, JSValueConst this_val, JSValueConst val) -> JSValue {
+                    auto* self = qjs::get_opaque<JSCamera2D>(c, this_val, js_camera2d_class_id);
+                    if (!self) return JS_ThrowTypeError(c, "Invalid Camera2D instance");
+
+                    auto vec = qjs::try_get_opaque<JSVector2>(c, val, js_vector2_class_id);
+                    if (!vec.has_value()) return JS_ThrowTypeError(c, "Expected Vector2 instance for camera.offset");
+
+                    self->offset = vec.value();
+                    return JS_UNDEFINED;
+                }
+            ),
             JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "rotation", rotation),
             JS_BIND_PROP(JSCamera2D, &js_camera2d_class_id, "zoom", zoom),
         };
@@ -178,13 +327,13 @@ namespace VectorJS {
             .constructor = [](JSContext* c, JSValueConst new_target, int argc, JSValueConst* argv) -> JSValue {
                 const std::span args{argv, static_cast<size_t>(argc)};
 
-                // Optional constructors: Camera2D() or Camera2D(offset, target, rotation, zoom)
                 if (args.size() >= 2) {
                     auto offset = qjs::try_get_opaque<JSVector2>(c, args[0], js_vector2_class_id).value_or(JSVector2{0, 0});
                     auto target = qjs::try_get_opaque<JSVector2>(c, args[1], js_vector2_class_id).value_or(JSVector2{0, 0});
 
-                    JS_ARG_TO_FLOAT64(c, rot, args.size() > 2 ? args[2] : JS_UNDEFINED, 0.0);
-                    JS_ARG_TO_FLOAT64(c, zoom, args.size() > 3 ? args[3] : JS_UNDEFINED, 1.0);
+                    double rot = 0.0, zoom = 1.0;
+                    if (args.size() > 2 && !JS_IsUndefined(args[2])) JS_ToFloat64(c, &rot, args[2]);
+                    if (args.size() > 3 && !JS_IsUndefined(args[3])) JS_ToFloat64(c, &zoom, args[3]);
 
                     return qjs::create_js_instance<JSCamera2D>(c, new_target, js_camera2d_class_id, offset, target, static_cast<float>(rot), static_cast<float>(zoom));
                 }

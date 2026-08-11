@@ -151,36 +151,28 @@ namespace qjs {
 
     template <typename T, typename... Args>
     JSValue create_js_instance(JSContext* ctx, JSValueConst new_target, JSClassID class_id, Args&&... args) {
-        const JSValueHandle proto(ctx, JS_GetPropertyStr(ctx, new_target, "prototype"));
-        if (JS_IsException(proto.get())) return JS_EXCEPTION;
-
-        JSValueConst proto_val = proto.is_null_or_undefined() ? JS_NULL : proto.get();
-
-        auto instance = std::make_unique<T>(std::forward<Args>(args)...);
-
-        JSValue obj = JS_NewObjectProtoClass(ctx, proto_val, class_id);
-        if (JS_IsException(obj)) {
-            return JS_EXCEPTION;
+        // Resolve prototype: if new_target is valid/object, get its .prototype;
+        // otherwise, fallback to JS_GetClassProto(ctx, class_id).
+        JSValue proto;
+        if (JS_IsObject(new_target)) {
+            proto = JS_GetPropertyStr(ctx, new_target, "prototype");
+        } else {
+            proto = JS_GetClassProto(ctx, class_id);
         }
 
-        JS_SetOpaque(obj, instance.release());
+        // Allocate C++ object and create JS Object with proto
+        auto* instance = new T(std::forward<Args>(args)...);
+        JSValue obj = JS_NewObjectProtoClass(ctx, proto, class_id);
+        JS_FreeValue(ctx, proto);
+
+        // Bind opaque pointer
+        JS_SetOpaque(obj, instance);
         return obj;
     }
 
     template <typename T, typename... Args>
     JSValue create_class_instance(JSContext* ctx, JSClassID class_id, Args&&... args) {
-        const JSValueHandle proto(ctx, JS_GetClassProto(ctx, class_id));
-        if (JS_IsException(proto.get())) return JS_EXCEPTION;
-
-        auto instance = std::make_unique<T>(std::forward<Args>(args)...);
-
-        JSValue obj = JS_NewObjectProtoClass(ctx, proto.get(), class_id);
-        if (JS_IsException(obj)) {
-            return JS_EXCEPTION;
-        }
-
-        JS_SetOpaque(obj, instance.release());
-        return obj;
+        return create_js_instance<T>(ctx, JS_UNDEFINED, class_id, std::forward<Args>(args)...);
     }
 
     template <typename T>

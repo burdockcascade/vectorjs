@@ -283,8 +283,8 @@ namespace VectorJS {
 
     JSValue JSApplication::Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv) {
         if (argc < 1) return JS_ThrowTypeError(ctx, "Expected a user application config object");
-        JSValueConst user_app = argv[0];
 
+        JSValueConst user_app = argv[0];
         qjs::JSValueHandle on_init_func(ctx, JS_GetPropertyStr(ctx, user_app, "onInit"));
         qjs::JSValueHandle on_update_func(ctx, JS_GetPropertyStr(ctx, user_app, "onUpdate"));
         qjs::JSValueHandle on_draw_func(ctx, JS_GetPropertyStr(ctx, user_app, "onDraw"));
@@ -296,6 +296,7 @@ namespace VectorJS {
         if (JS_IsFunction(ctx, on_init_func.get())) {
             qjs::JSValueHandle ret(ctx, JS_Call(ctx, on_init_func.get(), user_app, 0, nullptr));
             if (JS_IsException(ret.get())) {
+                if (IsWindowReady()) CloseWindow();
                 return JS_EXCEPTION;
             }
         }
@@ -307,11 +308,18 @@ namespace VectorJS {
                 JSValue u = update_obj.get();
                 qjs::JSValueHandle ret(ctx, JS_Call(ctx, on_update_func.get(), user_app, 1, &u));
                 if (JS_IsException(ret.get())) {
+                    JSValue exc = JS_GetException(ctx);
+                    const char* str = JS_ToCString(ctx, exc);
+                    std::cerr << "JS Update Exception: " << (str ? str : "Unknown Error") << std::endl;
+                    if (str) JS_FreeCString(ctx, str);
+                    JS_FreeValue(ctx, exc);
+
                     EndDrawing();
                     if (IsWindowReady()) CloseWindow();
                     return JS_EXCEPTION;
                 }
             }
+
             if (JS_IsFunction(ctx, on_draw_func.get())) {
                 JSValue r = render_obj.get();
                 qjs::JSValueHandle ret(ctx, JS_Call(ctx, on_draw_func.get(), user_app, 1, &r));
@@ -321,6 +329,7 @@ namespace VectorJS {
                     return JS_EXCEPTION;
                 }
             }
+
             EndDrawing();
         }
 
