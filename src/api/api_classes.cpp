@@ -74,7 +74,7 @@ namespace VectorJS {
                 return qjs::create_class_instance<JSColor>(c, js_color_class_id, result.r, result.g, result.b, result.a);
             }),
             JS_CFUNC_DEF("fade", 1, [](JSContext* c, JSValueConst this_val, int argc, JSValueConst* argv) -> JSValue {
-                JSColor* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
+                auto* self = qjs::get_opaque<JSColor>(c, this_val, js_color_class_id);
                 if (!self) return JS_ThrowTypeError(c, "Called Color.fade on an invalid Color object");
                 double alpha = 1.0;
                 if (argc > 0 && JS_ToFloat64(c, &alpha, argv[0]) < 0) {
