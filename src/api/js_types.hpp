@@ -30,7 +30,7 @@ namespace VectorJS {
         explicit constexpr JSColor(::Color color) noexcept : r(color.r), g(color.g), b(color.b), a(color.a) {}
 
         [[nodiscard]] constexpr operator ::Color(this const JSColor& self) noexcept {
-            return ::Color{ self.r, self.g, self.b, self.a };
+            return ::Color{ .r = self.r, .g = self.g, .b = self.b, .a = self.a };
         }
     };
 
@@ -42,7 +42,7 @@ namespace VectorJS {
         explicit constexpr JSVector2(::Vector2 v) noexcept : x(v.x), y(v.y) {}
 
         [[nodiscard]] constexpr operator ::Vector2(this JSVector2 self) noexcept {
-            return ::Vector2{ self.x, self.y };
+            return ::Vector2{ .x = self.x, .y = self.y };
         }
     };
 
@@ -54,7 +54,7 @@ namespace VectorJS {
         explicit constexpr JSRectangle(::Rectangle r) noexcept : x(r.x), y(r.y), width(r.width), height(r.height) {}
 
         [[nodiscard]] constexpr operator ::Rectangle(this JSRectangle self) noexcept {
-            return ::Rectangle{ self.x, self.y, self.width, self.height };
+            return ::Rectangle{ .x = self.x, .y = self.y, .width = self.width, .height = self.height };
         }
     };
 
@@ -91,7 +91,7 @@ namespace VectorJS {
         explicit constexpr JSCamera2D(::Camera2D c) noexcept : offset(c.offset), target(c.target), rotation(c.rotation), zoom(c.zoom) {}
 
         [[nodiscard]] constexpr operator ::Camera2D(this JSCamera2D self) noexcept {
-            return ::Camera2D{ self.offset, self.target, self.rotation, self.zoom };
+            return ::Camera2D{ .offset = self.offset, .target = self.target, .rotation = self.rotation, .zoom = self.zoom };
         }
     };
 
