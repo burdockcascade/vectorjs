@@ -4,12 +4,16 @@
 #include "screens.hpp"
 #include "core.hpp"
 
-#include "api/hostapi.hpp"
+#include "api/vectorjs/vectorjs.hpp"
 
 namespace VectorJS {
 
     Core::Core() {
-        make_vectorjs_module(engine);
+
+        // Add VectorJS Module
+        add_vectorjs_module(engine);
+
+
     }
 
     void Core::eval_script(const std::string& scriptPath) const {

@@ -2,7 +2,6 @@
 #include <string>
 #include <qjspp.hpp>
 
-#include "../hostapi.hpp"
 #include "js_types.hpp"
 
 namespace VectorJS {
