@@ -19,16 +19,16 @@ int main(const int argc, char** argv) {
     }
 
     if (scriptInput.empty()) {
-        VectorJS::show_welcome();
+        App::show_welcome();
         return 0;
     }
 
     try {
-        VectorJS::Core app{};
+        App::Core app{};
         app.eval_script(scriptInput);
     } catch (const std::exception& e) {
         std::cerr << "Fatal Error: " << e.what() << std::endl;
-        VectorJS::show_bsod(e.what());
+        App::show_bsod(e.what());
         return 1;
     }
 

@@ -6,14 +6,10 @@
 
 #include "api/vectorjs/vectorjs.hpp"
 
-namespace VectorJS {
+namespace App {
 
     Core::Core() {
-
-        // Add VectorJS Module
-        add_vectorjs_module(engine);
-
-
+        Module::VectorJS::register_module(engine);
     }
 
     void Core::eval_script(const std::string& scriptPath) const {

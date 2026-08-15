@@ -1,7 +1,7 @@
 #pragma once
 #include <qjspp.hpp>
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     void register_hapi_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_color_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
@@ -12,7 +12,7 @@ namespace VectorJS {
     void register_text(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_math(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
-    inline void add_vectorjs_module(qjspp::Engine& engine) {
+    inline void register_module(qjspp::Engine& engine) {
         auto m = engine.new_module("vectorjs");
         register_hapi_enums(engine, m);
         register_color_class(engine, m);

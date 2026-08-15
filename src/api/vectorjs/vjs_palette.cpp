@@ -4,7 +4,7 @@
 #include "js_types.hpp"
 #include "../../info.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     namespace {
         struct ColorEntry {

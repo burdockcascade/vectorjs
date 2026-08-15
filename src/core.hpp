@@ -2,7 +2,7 @@
 #include <string>
 #include <qjspp.hpp>
 
-namespace VectorJS {
+namespace App {
 
     class Core {
     public:

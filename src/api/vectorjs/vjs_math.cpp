@@ -5,7 +5,7 @@
 
 #include "js_types.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     static void register_vector2_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSVector2>("Vector2");

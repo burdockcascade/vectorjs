@@ -5,7 +5,7 @@
 #include <sstream>
 #include "info.hpp"
 
-namespace VectorJS {
+namespace App {
 
     constexpr int DEFAULT_FPS = 60;
     constexpr int WIN_HEIGHT = 600;

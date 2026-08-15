@@ -6,7 +6,7 @@
 #include <raylib.h>
 #include <qjspp.hpp>
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     struct JSApplication {
         JSApplication(int w, int h, std::string_view title);

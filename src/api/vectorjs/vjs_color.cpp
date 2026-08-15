@@ -3,7 +3,7 @@
 #include "js_types.hpp"
 #include "../../info.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     void register_color_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSColor>("Color");

@@ -4,7 +4,7 @@
 
 #include "js_types.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSCamera2D>("Camera2D");

@@ -7,7 +7,7 @@
 #include "screens.hpp"
 #include "js_types.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     static JSDrawOptions parse_draw_options(const qjspp::Value& options_val) {
         JSDrawOptions options;

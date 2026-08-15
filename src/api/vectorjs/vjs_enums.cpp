@@ -6,7 +6,7 @@
 #include "js_types.hpp"
 #include "../../info.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     static void set_property(qjspp::Engine& engine, qjspp::Value& obj, const char* name, auto&& val) {
         using T = std::decay_t<decltype(val)>;

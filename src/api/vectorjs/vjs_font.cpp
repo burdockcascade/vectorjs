@@ -4,7 +4,7 @@
 
 #include "js_types.hpp"
 
-namespace VectorJS {
+namespace App::Module::VectorJS {
 
     static void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSFont>("Font");
