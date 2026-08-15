@@ -1,5 +1,7 @@
 #include <CLI/CLI.hpp>
+#include "screens.hpp"
 #include "core.hpp"
+
 
 int main(const int argc, char** argv) {
 

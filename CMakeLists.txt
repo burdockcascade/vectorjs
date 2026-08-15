@@ -34,13 +34,13 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 
 # qjs
 FetchContent_Declare(
-        qjs
-        GIT_REPOSITORY https://github.com/quickjs-ng/quickjs
-        GIT_TAG v0.16.1
+        qjspp
+        GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
+        GIT_TAG master
 )
 
 # Bring all dependencies into the build tree automatically
-FetchContent_MakeAvailable(cli11 raylib qjs)
+FetchContent_MakeAvailable(cli11 raylib qjspp)
 
 # -----------------------------------------------------------------------------
 # 2. Executable Target
@@ -52,11 +52,14 @@ add_executable(vectorjs)
 # Add source files to the target
 target_sources(vectorjs PRIVATE
         "src/main.cpp"
-        "src/qjs.cpp"
         "src/core.cpp"
-        "src/api/api_application.cpp"
-        "src/api/api_classes.cpp"
-        "src/api/api_enums.cpp"
+        "src/api/vectorjs/vjs_enums.cpp"
+        "src/api/vectorjs/vjs_color.cpp"
+        "src/api/vectorjs/vjs_palette.cpp"
+        "src/api/vectorjs/vjs_camera.cpp"
+        "src/api/vectorjs/vjs_math.cpp"
+        "src/api/vectorjs/vjs_text.cpp"
+        "src/api/vectorjs/vjs_application.cpp"
 )
 
 # Hide console on Windows, keep standard main() entry point
@@ -74,7 +77,7 @@ target_include_directories(vectorjs PRIVATE src)
 target_link_libraries(vectorjs PRIVATE
         CLI11::CLI11
         raylib
-        qjs
+        qjspp
 )
 
 # -----------------------------------------------------------------------------
@@ -95,4 +98,3 @@ target_link_libraries(vectorjs PRIVATE
 #add_feature_flag(ENABLE_3D "Enable 3D graphics systems" ON ENABLE_FEATURE_3D)
 #add_feature_flag(ENABLE_FONT "Enable fonts"             OFF ENABLE_FEATURE_FONT)
 #add_feature_flag(ENABLE_AUDIO "Enable audio engine"     ON ENABLE_FEATURE_AUDIO)
-

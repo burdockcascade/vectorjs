@@ -1,25 +1,17 @@
 #pragma once
 
-#include <string>
 #include <string_view>
 #include <memory>
 #include <utility>
+#include <vector>
 #include <raylib.h>
-#include <raymath.h>
-#include <quickjs.h>
+#include "qjspp.hpp"
 
 namespace VectorJS {
 
-    inline JSClassID js_color_class_id;
-    inline JSClassID js_vector2_class_id;
-    inline JSClassID js_rectangle_class_id;
-    inline JSClassID js_font_class_id;
-    inline JSClassID js_application_class_id;
-    inline JSClassID js_camera2d_class_id;
-
     struct JSApplication {
         JSApplication(int w, int h, std::string_view title);
-        static JSValue Run(JSContext* ctx, JSValueConst this_val, int argc, JSValueConst* argv);
+        qjspp::Value run(const std::vector<qjspp::Value>& args);
     };
 
     struct JSColor {
