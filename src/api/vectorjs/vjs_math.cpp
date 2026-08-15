@@ -1,11 +1,10 @@
 #include <memory>
-#include <string>
 #include <raylib.h>
 #include <raymath.h>
+#include <qjspp.hpp>
 
 #include "../hostapi.hpp"
 #include "js_types.hpp"
-#include "qjspp.hpp"
 
 namespace VectorJS {
 

@@ -1,9 +1,9 @@
 #include <memory>
 #include <string>
+#include <qjspp.hpp>
 
 #include "../hostapi.hpp"
 #include "js_types.hpp"
-#include "qjspp.hpp"
 
 namespace VectorJS {
 

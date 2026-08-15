@@ -1,8 +1,8 @@
 #include <memory>
 #include <raylib.h>
+#include <qjspp.hpp>
 
 #include "js_types.hpp"
-#include "qjspp.hpp"
 
 namespace VectorJS {
 

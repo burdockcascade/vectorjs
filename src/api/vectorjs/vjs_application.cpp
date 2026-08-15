@@ -2,10 +2,10 @@
 #include <optional>
 #include <memory>
 #include <raylib.h>
+#include <qjspp.hpp>
 
 #include "screens.hpp"
 #include "js_types.hpp"
-#include "qjspp.hpp"
 
 namespace VectorJS {
 

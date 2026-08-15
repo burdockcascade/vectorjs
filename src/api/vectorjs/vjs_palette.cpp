@@ -1,5 +1,6 @@
 #include <array>
-#include "qjspp.hpp"
+#include <qjspp.hpp>
+
 #include "js_types.hpp"
 #include "../../info.hpp"
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "qjspp.hpp"
+#include <qjspp.hpp>
 
 namespace VectorJS {
 
