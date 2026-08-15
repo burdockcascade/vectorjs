@@ -8,37 +8,31 @@
 
 namespace VectorJS {
 
-    template <typename T>
-    static void set_object_property(qjspp::Engine& engine, qjspp::Value& obj, const char* name, T&& val) {
-        if constexpr (std::integral<std::decay_t<T>> || std::is_enum_v<std::decay_t<T>>) {
-            obj.set(name, engine.make_int(val));
-        } else if constexpr (std::floating_point<std::decay_t<T>>) {
+    static void set_property(qjspp::Engine& engine, qjspp::Value& obj, const char* name, auto&& val) {
+        using T = std::decay_t<decltype(val)>;
+
+        if constexpr (std::integral<T> || std::is_enum_v<T>) {
+            obj.set(name, engine.make_int(static_cast<int>(val)));
+        } else if constexpr (std::floating_point<T>) {
             obj.set(name, engine.make_double(val));
         } else if constexpr (std::convertible_to<T, std::string_view>) {
             obj.set(name, engine.make_string(std::string_view{val}));
-        } else if constexpr (std::same_as<std::decay_t<T>, ::Color>) {
+        } else if constexpr (std::same_as<T, ::Color>) {
             auto color_ptr = std::make_unique<JSColor>(val);
-            qjspp::Value color_val = qjspp::make_native_object<JSColor>(engine.context(), std::move(color_ptr));
-            obj.set(name, color_val);
+            obj.set(name, qjspp::make_native_object<JSColor>(engine.context(), std::move(color_ptr)));
         }
-    }
-
-    template <typename... Args>
-    static void set_object_properties(qjspp::Engine& engine, qjspp::Value& obj, Args&&... entries) {
-        (set_object_property(engine, obj, entries.first, std::forward<decltype(entries.second)>(entries.second)), ...);
     }
 
     template <typename... Pairs>
     static void export_object(qjspp::Engine& engine, qjspp::ModuleBuilder& builder, const char* obj_name, Pairs&&... pairs) {
         qjspp::Value obj = qjspp::Value::make_object(engine.context());
-        set_object_properties(engine, obj, std::forward<Pairs>(pairs)...);
+        (set_property(engine, obj, pairs.first, std::get<1>(pairs)), ...);
         builder.export_value(obj_name, std::move(obj));
     }
 
     #define BIND_ENUM(val) std::pair{#val, val}
 
     void register_hapi_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-
 
         // --- Info Object ---
         export_object(engine, builder, "Info",
@@ -208,6 +202,5 @@ namespace VectorJS {
     }
 
     #undef BIND_ENUM
-    #undef BIND_COLOR
 
 } // namespace VectorJS
