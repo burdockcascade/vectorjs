@@ -8,7 +8,7 @@ namespace VectorJS {
     void register_color_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSColor>("Color");
 
-        cls.constructor([](const std::vector<qjspp::Value>& args) -> std::unique_ptr<JSColor> {
+        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSColor> {
             if (args.size() < 4) return nullptr;
             auto r = static_cast<uint8_t>(args[0].to_int());
             auto g = static_cast<uint8_t>(args[1].to_int());
@@ -34,7 +34,7 @@ namespace VectorJS {
             [](JSColor* self, const qjspp::Value& val) { self->a = static_cast<uint8_t>(val.to_int()); }
         );
 
-        cls.instance_method("lerp", [](JSColor* self, const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        cls.instance_method("lerp", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) return {};
             auto* target = qjspp::get_native_opaque<JSColor>(args[0]);
             if (!self || !target) return {};
@@ -44,21 +44,21 @@ namespace VectorJS {
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });
 
-        cls.instance_method("fade", [](JSColor* self, const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        cls.instance_method("fade", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             double alpha = args[0].to_double();
             Color result = ::Fade(*self, static_cast<float>(alpha));
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });
 
-        cls.instance_method("brightness", [](JSColor* self, const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        cls.instance_method("brightness", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             double factor = args[0].to_double();
             Color result = ColorBrightness(*self, static_cast<float>(factor));
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });
 
-        cls.instance_method("toInt", [](JSColor* self, const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        cls.instance_method("toInt", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             return qjspp::Value::make_int(args[0].context(), ColorToInt(*self));
         });

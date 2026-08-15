@@ -15,7 +15,7 @@ namespace VectorJS {
         void eval_script(const std::string& scriptPath) const;
 
     private:
-        qjspp::Engine engine;
+        qjspp::Engine engine = qjspp::Engine::large();
 
     };
 

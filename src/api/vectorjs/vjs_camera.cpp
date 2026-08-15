@@ -9,7 +9,7 @@ namespace VectorJS {
     void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSCamera2D>("Camera2D");
 
-        cls.constructor([](const std::vector<qjspp::Value>& args) -> std::unique_ptr<JSCamera2D> {
+        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSCamera2D> {
             if (args.size() >= 2) {
                 auto* offset = qjspp::get_native_opaque<JSVector2>(args[0]);
                 auto* target = qjspp::get_native_opaque<JSVector2>(args[1]);

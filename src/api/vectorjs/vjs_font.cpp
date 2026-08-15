@@ -9,7 +9,7 @@ namespace VectorJS {
     static void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSFont>("Font");
 
-        cls.constructor([](const std::vector<qjspp::Value>& args) -> std::unique_ptr<JSFont> {
+        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSFont> {
             if (args.empty()) return nullptr;
             std::string path = args[0].to_string();
             if (args.size() >= 2) {

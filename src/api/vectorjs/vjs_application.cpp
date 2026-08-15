@@ -69,23 +69,23 @@ namespace VectorJS {
         qjspp::Value update_obj = qjspp::Value::make_object(ctx);
 
         #define BIND_VOID_FN(js_name, cpp_fn) \
-            update_obj.set(js_name, qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>&) -> qjspp::Value { \
+            update_obj.set(js_name, qjspp::Value::make_function(ctx, [](const qjspp::ArgList&) -> qjspp::Value { \
                 ::cpp_fn(); \
                 return {}; \
             }))
 
         #define BIND_BOOL_FN(js_name, cpp_fn) \
-            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const std::vector<qjspp::Value>&) -> qjspp::Value { \
+            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const qjspp::ArgList&) -> qjspp::Value { \
                 return qjspp::Value::make_bool(ctx, ::cpp_fn()); \
             }))
 
         #define BIND_INT_FN(js_name, cpp_fn) \
-            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const std::vector<qjspp::Value>&) -> qjspp::Value { \
+            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const qjspp::ArgList&) -> qjspp::Value { \
                 return qjspp::Value::make_int(ctx, ::cpp_fn()); \
             }))
 
         #define BIND_INT_PARAM_BOOL_FN(js_name, cpp_fn, err_msg) \
-            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const std::vector<qjspp::Value>& args) -> qjspp::Value { \
+            update_obj.set(js_name, qjspp::Value::make_function(ctx, [ctx](const qjspp::ArgList& args) -> qjspp::Value { \
                 if (args.empty()) throw std::runtime_error(err_msg); \
                 return qjspp::Value::make_bool(ctx, ::cpp_fn(args[0].to_int())); \
             }))
@@ -123,11 +123,11 @@ namespace VectorJS {
         BIND_INT_PARAM_BOOL_FN("isMouseButtonUp", IsMouseButtonUp, "isMouseButtonUp requires a button argument");
 
         // Custom Mouse Getters
-        update_obj.set("getMouseWheelMove", qjspp::Value::make_function(ctx, [ctx](const std::vector<qjspp::Value>&) -> qjspp::Value {
+        update_obj.set("getMouseWheelMove", qjspp::Value::make_function(ctx, [ctx](const qjspp::ArgList&) -> qjspp::Value {
             return qjspp::Value::make_double(ctx, static_cast<double>(::GetMouseWheelMove()));
         }));
 
-        update_obj.set("getMousePosition", qjspp::Value::make_function(ctx, [ctx](const std::vector<qjspp::Value>&) -> qjspp::Value {
+        update_obj.set("getMousePosition", qjspp::Value::make_function(ctx, [ctx](const qjspp::ArgList&) -> qjspp::Value {
             const ::Vector2 pos = ::GetMousePosition();
             return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(pos));
         }));
@@ -143,7 +143,7 @@ namespace VectorJS {
     static qjspp::Value create_shapes_object(JSContext* ctx) {
         qjspp::Value shape_obj = qjspp::Value::make_object(ctx);
 
-        shape_obj.set("drawPixel", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawPixel", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawPixel requires position and color arguments");
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             auto* col = qjspp::get_native_opaque<JSColor>(args[1]);
@@ -153,7 +153,7 @@ namespace VectorJS {
             return {};
         }));
 
-        shape_obj.set("drawLine", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawLine", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawLine requires start and end positions");
             auto* start = qjspp::get_native_opaque<JSVector2>(args[0]);
             auto* end = qjspp::get_native_opaque<JSVector2>(args[1]);
@@ -165,7 +165,7 @@ namespace VectorJS {
             return {};
         }));
 
-        shape_obj.set("drawRectangle", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawRectangle", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawRectangle requires a Rectangle argument");
             auto* rect = qjspp::get_native_opaque<JSRectangle>(args[0]);
 
@@ -177,7 +177,7 @@ namespace VectorJS {
             return {};
         }));
 
-        shape_obj.set("drawCircle", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawCircle", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawCircle requires center and radius arguments");
             auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
             double rad = args[1].to_double();
@@ -189,7 +189,7 @@ namespace VectorJS {
             return {};
         }));
 
-        shape_obj.set("drawTriangle", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawTriangle", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawTriangle requires 3 Vector2 point arguments");
             auto* p1 = qjspp::get_native_opaque<JSVector2>(args[0]);
             auto* p2 = qjspp::get_native_opaque<JSVector2>(args[1]);
@@ -203,7 +203,7 @@ namespace VectorJS {
             return {};
         }));
 
-        shape_obj.set("drawEllipse", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        shape_obj.set("drawEllipse", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawEllipse requires center, radiusH, and radiusV arguments");
             auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
             double radH = args[1].to_double();
@@ -223,7 +223,7 @@ namespace VectorJS {
     static qjspp::Value create_text_object(JSContext* ctx) {
         qjspp::Value text_obj = qjspp::Value::make_object(ctx);
 
-        text_obj.set("drawText", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        text_obj.set("drawText", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawText requires position and text string arguments");
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             std::string txt_str = args[1].to_string();
@@ -250,7 +250,7 @@ namespace VectorJS {
 
     static qjspp::Value create_viewport2d_function(JSContext* ctx, const qjspp::Value& r2d_val) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
-        return qjspp::Value::make_function(ctx, [r2d_ptr](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        return qjspp::Value::make_function(ctx, [r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
 
             qjspp::Value callback;
@@ -281,7 +281,7 @@ namespace VectorJS {
 
     static qjspp::Value create_screen_space_function(JSContext* ctx, const qjspp::Value& r2d_val) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
-        return qjspp::Value::make_function(ctx, [r2d_ptr](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        return qjspp::Value::make_function(ctx, [r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withScreenSpace requires a callback function");
             (void)args[0].call({r2d_ptr->clone()});
             return {};
@@ -292,7 +292,7 @@ namespace VectorJS {
         qjspp::Value render2d_obj = qjspp::Value::make_object(ctx);
 
         // Add FPS
-        render2d_obj.set("drawFPS", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        render2d_obj.set("drawFPS", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawFPS requires a Vector2 position argument");
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             if (pos) {
@@ -311,7 +311,7 @@ namespace VectorJS {
         render_obj.set("withScreenSpace", create_screen_space_function(ctx, render2d_obj));
 
         // ClearBackground
-        render_obj.set("clearBackground", qjspp::Value::make_function(ctx, [](const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        render_obj.set("clearBackground", qjspp::Value::make_function(ctx, [](const qjspp::ArgList& args) -> qjspp::Value {
             auto* color = args.empty() ? nullptr : qjspp::get_native_opaque<JSColor>(args[0]);
             ::ClearBackground(color ? static_cast<::Color>(*color) : BLACK);
             return {};
@@ -325,7 +325,7 @@ namespace VectorJS {
         SetTargetFPS(60);
     }
 
-    qjspp::Value JSApplication::run(const std::vector<qjspp::Value>& args) {
+    qjspp::Value JSApplication::run(const qjspp::ArgList& args) {
         if (args.empty()) {
             throw std::runtime_error("Expected a user application config object");
         }
@@ -333,9 +333,9 @@ namespace VectorJS {
         qjspp::Value user_app = args[0].clone();
         JSContext* ctx = user_app.context();
 
-        qjspp::Value on_init_func = user_app.get("onInit");
-        qjspp::Value on_update_func = user_app.get("onUpdate");
-        qjspp::Value on_draw_func = user_app.get("onDraw");
+        const qjspp::Value on_init_func = user_app.get("onInit");
+        const qjspp::Value on_update_func = user_app.get("onUpdate");
+        const qjspp::Value on_draw_func = user_app.get("onDraw");
 
         // Instantiate rendering and context objects ONCE outside the frame loop
         qjspp::Value update_obj = create_update_context_object(ctx);
@@ -376,7 +376,7 @@ namespace VectorJS {
     void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSApplication>("Application");
 
-        cls.constructor([](const std::vector<qjspp::Value>& args) -> std::unique_ptr<JSApplication> {
+        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSApplication> {
             if (args.size() < 3) return nullptr;
             int w = args[0].to_int();
             int h = args[1].to_int();
@@ -384,7 +384,7 @@ namespace VectorJS {
             return std::make_unique<JSApplication>(w, h, title);
         });
 
-        cls.instance_method("run", [](JSApplication* app, const std::vector<qjspp::Value>& args) -> qjspp::Value {
+        cls.instance_method("run", [](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
             if (!app) return {};
             return app->run(args);
         });
