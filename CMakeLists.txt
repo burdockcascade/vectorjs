@@ -58,7 +58,7 @@ target_sources(vectorjs PRIVATE
         "src/api/vectorjs/vjs_palette.cpp"
         "src/api/vectorjs/vjs_camera.cpp"
         "src/api/vectorjs/vjs_math.cpp"
-        "src/api/vectorjs/vjs_text.cpp"
+        "src/api/vectorjs/vjs_font.cpp"
         "src/api/vectorjs/vjs_application.cpp"
 )
 

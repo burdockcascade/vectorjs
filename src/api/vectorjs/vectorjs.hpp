@@ -21,7 +21,7 @@ namespace VectorJS {
         register_application(engine, m);
         register_text(engine, m);
         register_math(engine, m);
-        m.build();
+        m.finalize();
     }
     
 } // namespace HostApi
