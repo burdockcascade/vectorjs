@@ -1,4 +1,4 @@
-declare module "vectorjs" {
+declare module "ts/vectorjs" {
 
     /**
      * Structure representing a 2D vector.
