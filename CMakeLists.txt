@@ -35,8 +35,9 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 # qjs
 FetchContent_Declare(
         qjspp
+#        SOURCE_DIR "C:/workspace/c/qjspp"
         GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
-        GIT_TAG v0.1.0
+        GIT_TAG master
 )
 
 # Bring all dependencies into the build tree automatically
@@ -63,7 +64,7 @@ target_sources(vectorjs PRIVATE
 )
 
 # Hide console on Windows, keep standard main() entry point
-if(MSVC AND ENABLE_MSVC_WIN_MAIN)
+if(MSVC)
     target_link_options(vectorjs PRIVATE
             "LINKER:/SUBSYSTEM:WINDOWS"
             "LINKER:/ENTRY:mainCRTStartup"
