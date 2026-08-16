@@ -401,9 +401,4 @@ namespace App::Module::VectorJS {
         builder.export_class("Application", cls.build());
     }
 
-    void register_application(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        register_application_class(engine, builder);
-    }
-
-
 } // namespace VectorJS
