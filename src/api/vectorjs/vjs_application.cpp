@@ -9,21 +9,23 @@
 
 namespace App::Module::VectorJS {
 
-    struct JSDrawOptions {
-        JSColor color{BLACK};
-        float rotation = 0.0f;
-        bool wireframe = false;
-        JSVector2 origin{0.0f, 0.0f};
-    };
+    namespace {
+        struct JSDrawOptions {
+            JSColor color{BLACK};
+            float rotation = 0.0f;
+            bool wireframe = false;
+            JSVector2 origin{0.0f, 0.0f};
+        };
 
-    struct JSTextOptions {
-        JSFont font;
-        JSColor color{BLACK};
-        float rotation = 0.0f;
-        float fontSize = 24.0f;
-        float spacing = 1.0f;
-        JSVector2 origin{0.0f, 0.0f};
-    };
+        struct JSTextOptions {
+            JSFont font;
+            JSColor color{BLACK};
+            float rotation = 0.0f;
+            float fontSize = 24.0f;
+            float spacing = 1.0f;
+            JSVector2 origin{0.0f, 0.0f};
+        };
+    }
 
     static JSDrawOptions parse_draw_options(const qjspp::Value& options_val) {
         JSDrawOptions options;
