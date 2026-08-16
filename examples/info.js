@@ -10,7 +10,7 @@ app.run({
 
     onDraw(render) {
 
-        render.clearBackground(Palette.BLACK);
+        render.clearBackground(Palette.WHITE);
 
         render.withScreenSpace((ctx) => {
             ctx.text.drawText(line1, `RAYLIB VERSION: ${Info.RAYLIB_VERSION}`)

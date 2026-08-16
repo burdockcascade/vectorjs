@@ -36,8 +36,8 @@ namespace App::Module::VectorJS {
 
         // --- Info Object ---
         export_object(engine, builder, "Info",
-            BIND_ENUM(RAYLIB_VERSION_STR),
-            BIND_ENUM(QUICKJS_VERSION_STR)
+            std::pair("RAYLIB_VERSION", RAYLIB_VERSION_STR),
+            std::pair("QUICKJS_VERSION", QUICKJS_VERSION_STR)
         );
 
         // --- ConfigFlags Object ---
