@@ -35,9 +35,9 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 # qjs
 FetchContent_Declare(
         qjspp
-        SOURCE_DIR "C:/workspace/c/qjspp"
-        #GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
-        #GIT_TAG master
+        #SOURCE_DIR "C:/workspace/c/qjspp"
+        GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
+        GIT_TAG master
 )
 
 # Bring all dependencies into the build tree automatically
