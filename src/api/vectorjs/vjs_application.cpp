@@ -32,12 +32,12 @@ namespace App::Module::VectorJS {
         if (!options_val.is_object()) return options;
 
         if (options_val.has("color")) {
-            if (auto* col = qjspp::get_native_opaque<JSColor>(options_val.get("color"))) {
+            if (const auto* col = qjspp::get_native_opaque<JSColor>(options_val.get("color"))) {
                 options.color = *col;
             }
         }
         if (options_val.has("origin")) {
-            if (auto* orig = qjspp::get_native_opaque<JSVector2>(options_val.get("origin"))) {
+            if (const auto* orig = qjspp::get_native_opaque<JSVector2>(options_val.get("origin"))) {
                 options.origin = *orig;
             }
         }
@@ -56,12 +56,12 @@ namespace App::Module::VectorJS {
         if (!options_val.is_object()) return options;
 
         if (options_val.has("font")) {
-            if (auto* font = qjspp::get_native_opaque<JSFont>(options_val.get("font"))) {
+            if (const auto* font = qjspp::get_native_opaque<JSFont>(options_val.get("font"))) {
                 options.font = *font;
             }
         }
         if (options_val.has("color")) {
-            if (auto* col = qjspp::get_native_opaque<JSColor>(options_val.get("color"))) {
+            if (const auto* col = qjspp::get_native_opaque<JSColor>(options_val.get("color"))) {
                 options.color = *col;
             }
         }
@@ -75,7 +75,7 @@ namespace App::Module::VectorJS {
             options.spacing = static_cast<float>(options_val.get("spacing").to_double());
         }
         if (options_val.has("origin")) {
-            if (auto* orig = qjspp::get_native_opaque<JSVector2>(options_val.get("origin"))) {
+            if (const auto* orig = qjspp::get_native_opaque<JSVector2>(options_val.get("origin"))) {
                 options.origin = *orig;
             }
         }
@@ -198,7 +198,7 @@ namespace App::Module::VectorJS {
         shape_obj.set("drawCircle", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawCircle requires center and radius arguments");
             auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
-            double rad = args[1].to_double();
+            const double rad = args[1].to_double();
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
             DrawCircleV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
@@ -224,8 +224,8 @@ namespace App::Module::VectorJS {
         shape_obj.set("drawEllipse", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawEllipse requires center, radiusH, and radiusV arguments");
             auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
-            double radH = args[1].to_double();
-            double radV = args[2].to_double();
+            const double radH = args[1].to_double();
+            const double radV = args[2].to_double();
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
             DrawEllipseV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
@@ -244,7 +244,7 @@ namespace App::Module::VectorJS {
         text_obj.set("drawText", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawText requires position and text string arguments");
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
-            std::string txt_str = args[1].to_string();
+            const std::string txt_str = args[1].to_string();
 
             JSTextOptions options = parse_text_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
             Font fontToUse = GetFontDefault();
@@ -272,13 +272,13 @@ namespace App::Module::VectorJS {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
 
             JSCamera2D camera;
-            if (auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
+            if (const auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
                 camera = *cam_ptr;
             } else {
                 return {};
             }
 
-            qjspp::Value callback = args[1].clone();
+            const qjspp::Value callback = args[1].clone();
 
             BeginMode2D(camera);
             std::ignore = callback.call({r2d_ptr->clone()});
@@ -303,7 +303,7 @@ namespace App::Module::VectorJS {
         // Add FPS
         render2d_obj.set("drawFPS", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawFPS requires a Vector2 position argument");
-            if (auto* pos = qjspp::get_native_opaque<JSVector2>(args[0])) {
+            if (const auto* pos = qjspp::get_native_opaque<JSVector2>(args[0])) {
                 DrawFPS(static_cast<int>(pos->x), static_cast<int>(pos->y));
             }
             return {};
@@ -328,12 +328,12 @@ namespace App::Module::VectorJS {
         return render_obj;
     }
 
-    JSApplication::JSApplication(qjspp::Engine& engine, int w, int h, std::string_view title): engine(engine) {
+    JSApplication::JSApplication(qjspp::Engine& engine, const int w, const int h, const std::string_view title): engine(engine) {
         InitWindow(w, h, title.data());
         SetTargetFPS(60);
     }
 
-    qjspp::Value JSApplication::run(const qjspp::ArgList& args) {
+    qjspp::Value JSApplication::run(const qjspp::ArgList& args) const {
         if (args.empty()) {
             throw std::runtime_error("Expected a user application config object");
         }
@@ -344,8 +344,8 @@ namespace App::Module::VectorJS {
         const qjspp::Value on_draw_func = user_app.get("onDraw");
 
         // Instantiate rendering and context objects ONCE outside the frame loop
-        qjspp::Value update_obj = create_update_context_object(engine);
-        qjspp::Value render_obj = create_draw_render_object(engine);
+        const qjspp::Value update_obj = create_update_context_object(engine);
+        const qjspp::Value render_obj = create_draw_render_object(engine);
 
         try {
             if (!on_init_func.is_undefined()) {
@@ -391,7 +391,7 @@ namespace App::Module::VectorJS {
             return std::make_unique<JSApplication>(engine, w, h, title);
         });
 
-        cls.instance_method("run", [](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
+        cls.instance_method("run", [](const JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
             if (!app) return {};
             return app->run(args);
         });

@@ -10,7 +10,7 @@ namespace App::Module::VectorJS {
     struct JSApplication {
         qjspp::Engine& engine;
         JSApplication(qjspp::Engine& engine, int w, int h, std::string_view title);
-        qjspp::Value run(const qjspp::ArgList& args);
+        qjspp::Value run(const qjspp::ArgList& args) const;
     };
 
     struct JSColor {
