@@ -330,7 +330,7 @@ namespace App::Module::VectorJS {
             throw std::runtime_error("Expected a user application config object");
         }
 
-        qjspp::Value user_app = args[0].clone();
+        const qjspp::Value user_app = args[0].clone();
         JSContext* ctx = user_app.context();
 
         const qjspp::Value on_init_func = user_app.get("onInit");

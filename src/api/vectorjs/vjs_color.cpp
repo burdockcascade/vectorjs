@@ -39,21 +39,21 @@ namespace App::Module::VectorJS {
             auto* target = qjspp::get_native_opaque<JSColor>(args[0]);
             if (!self || !target) return {};
 
-            double factor = args[1].to_double();
+            const double factor = args[1].to_double();
             Color result = ColorLerp(*self, *target, static_cast<float>(factor));
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });
 
         cls.instance_method("fade", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
-            double alpha = args[0].to_double();
-            Color result = ::Fade(*self, static_cast<float>(alpha));
+            const double alpha = args[0].to_double();
+            Color result = Fade(*self, static_cast<float>(alpha));
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });
 
         cls.instance_method("brightness", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
-            double factor = args[0].to_double();
+            const double factor = args[0].to_double();
             Color result = ColorBrightness(*self, static_cast<float>(factor));
             return qjspp::make_native_object(args[0].context(), std::make_unique<JSColor>(result));
         });

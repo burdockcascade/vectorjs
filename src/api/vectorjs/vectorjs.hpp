@@ -9,7 +9,7 @@ namespace App::Module::VectorJS {
     void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
     void register_application(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
-    void register_text(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
+    void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_rectangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
@@ -20,7 +20,7 @@ namespace App::Module::VectorJS {
         register_palette_object(engine, m);
         register_camera2d(engine, m);
         register_application(engine, m);
-        register_text(engine, m);
+        register_font_class(engine, m);
         register_vector2(engine, m);
         register_rectangle(engine, m);
         m.finalize();
