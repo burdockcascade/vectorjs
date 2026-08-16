@@ -104,6 +104,15 @@ app.run({
 
         if (ctx.isKeyPressed(Keyboard.KEY_R)) {
             time = 0;
+            camera.target = new Vector2(0, 0);
+        }
+
+        if (ctx.isKeyDown(Keyboard.KEY_UP)) {
+            camera.moveY(10)
+        }
+
+        if (ctx.isKeyDown(Keyboard.KEY_DOWN)) {
+            camera.moveY(-10)
         }
 
         if (isRunning) {
@@ -117,9 +126,11 @@ app.run({
     onDraw(render) {
         render.clearBackground(Palette.BLACK);
 
-        render.withViewport2D(camera, (ctx) => {
+        render.withScreenSpace((ctx) => {
             ctx.drawFPS(fpsPos);
+        })
 
+        render.withViewport2D(camera, (ctx) => {
             // 2. Draw starfield with twinkling effect using Color.fade
             if (enable_starfield) {
                 stars.forEach((star) => {

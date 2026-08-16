@@ -1,175 +1,201 @@
-declare module "ts/vectorjs" {
-
-    /**
-     * Structure representing a 2D vector.
-     */
+declare module "vectorjs" {
     export class Vector2 {
+        constructor(x: number, y: number);
         x: number;
         y: number;
-
-        constructor(x: number, y: number);
 
         add(other: Vector2): Vector2;
         subtract(other: Vector2): Vector2;
         multiply(other: Vector2): Vector2;
-        scale(scale: number): Vector2;
+        scale(factor: number): Vector2;
         length(): number;
         normalize(): Vector2;
         dot(other: Vector2): number;
         distance(other: Vector2): number;
         negate(): Vector2;
-        lerp(target: Vector2, amount: number): Vector2;
-    }
-
-    /**
-     * Structure representing a 2D rectangle.
-     */
-    export class Rectangle {
-        x: number;
-        y: number;
-        width: number;
-        height: number;
-        constructor();
-        constructor(x: number, y: number, width: number, height: number);
+        lerp(target: Vector2, factor: number): Vector2;
     }
 
     export class Color {
+        constructor(r: number, g: number, b: number, a: number);
         r: number;
         g: number;
         b: number;
         a: number;
 
-        constructor(r: number, g: number, b: number, a?: number);
-
-        fade(alpha: number): Color;
         lerp(target: Color, factor: number): Color;
+        fade(alpha: number): Color;
         brightness(factor: number): Color;
         toInt(): number;
+        contrast(factor: number): Color;
+        alpha(alpha: number): Color;
+        tint(tintColor: Color): Color;
+        isEqual(other: Color): boolean;
+
+        static fromHex(hex: number): Color;
+        static fromHSV(hue: number, saturation: number, value: number): Color;
+    }
+
+    export class Rectangle {
+        constructor(x: number, y: number, width: number, height: number);
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    }
+
+    export class Font {
+        constructor(path: string, baseSize?: number);
     }
 
     export class Camera2D {
+        constructor(
+            offset?: Vector2,
+            target?: Vector2,
+            rotation?: number,
+            zoom?: number
+        );
+
         offset: Vector2;
         target: Vector2;
         rotation: number;
         zoom: number;
-        constructor(offset?: Vector2, target?: Vector2, rotation?: number, zoom?: number);
+
+        move(deltaX: number, deltaY: number): void;
+        move(delta: Vector2): void;
+        moveX(deltaX: number): void;
+        moveY(deltaY: number): void;
+        zoomBy(factor: number): void;
+        zoomIn(amount?: number): void;
+        zoomOut(amount?: number): void;
     }
 
-    export const Palette: {
-        // Grays & Neutrals
-        readonly WHITE: Color;
-        readonly SNOW: Color;
-        readonly IVORY: Color;
-        readonly RAYWHITE: Color;
-        readonly OFFWHITE: Color;
-        readonly LIGHTGRAY: Color;
-        readonly SILVER: Color;
-        readonly GRAY: Color;
-        readonly SLATE: Color;
-        readonly DARKGRAY: Color;
-        readonly CHARBLACK: Color;
-        readonly BLACK: Color;
-        readonly BLANK: Color;
+    export interface DrawOptions {
+        color?: Color;
+        rotation?: number;
+        wireframe?: boolean;
+        origin?: Vector2;
+    }
 
-        // Reds, Pinks & Oranges
-        readonly SALMON: Color;
-        readonly CORAL: Color;
-        readonly CRIMSON: Color;
-        readonly RED: Color;
-        readonly PURE_RED: Color;
-        readonly SCARLET: Color;
-        readonly MAROON: Color;
-        readonly BURGUNDY: Color;
-        readonly PEACH: Color;
-        readonly ORANGE: Color;
-        readonly DARKORANGE: Color;
-        readonly AMBER: Color;
-        readonly GOLD: Color;
-        readonly YELLOW: Color;
-        readonly LEMON: Color;
-        readonly ROSE: Color;
-        readonly PINK: Color;
-        readonly HOTPINK: Color;
-        readonly MAGENTA: Color;
-        readonly FUCHSIA: Color;
+    export interface TextOptions {
+        font?: Font;
+        color?: Color;
+        rotation?: number;
+        fontSize?: number;
+        spacing?: number;
+        origin?: Vector2;
+    }
 
-        // Greens & Teals
-        readonly MINT: Color;
-        readonly PASTELGREEN: Color;
-        readonly LIME: Color;
-        readonly NEON_GREEN: Color;
-        readonly GREEN: Color;
-        readonly PURE_GREEN: Color;
-        readonly EMERALD: Color;
-        readonly DARKGREEN: Color;
-        readonly FOREST: Color;
-        readonly PINE: Color;
-        readonly OLIVE: Color;
-        readonly TURQUOISE: Color;
-        readonly TEAL: Color;
+    export interface ShapesApi {
+        drawPixel(pos: Vector2, color: Color): void;
+        drawLine(start: Vector2, end: Vector2, options?: DrawOptions): void;
+        drawRectangle(rect: Rectangle, options?: DrawOptions): void;
+        drawCircle(center: Vector2, radius: number, options?: DrawOptions): void;
+        drawTriangle(
+            p1: Vector2,
+            p2: Vector2,
+            p3: Vector2,
+            options?: DrawOptions
+        ): void;
+        drawEllipse(
+            center: Vector2,
+            radiusH: number,
+            radiusV: number,
+            options?: DrawOptions
+        ): void;
+    }
 
-        // Blues & Cyans
-        readonly ELECTRIC_BLUE: Color;
-        readonly CYAN: Color;
-        readonly AQUA: Color;
-        readonly PASTELBLUE: Color;
-        readonly SKYBLUE: Color;
-        readonly CORNFLOWER: Color;
-        readonly BLUE: Color;
-        readonly PURE_BLUE: Color;
-        readonly ROYALBLUE: Color;
-        readonly DARKBLUE: Color;
-        readonly NAVY: Color;
-        readonly MIDNIGHTBLUE: Color;
+    export interface TextApi {
+        drawText(pos: Vector2, text: string, options?: TextOptions): void;
+    }
 
-        // Purples & Violets
-        readonly LAVENDER: Color;
-        readonly LILAC: Color;
-        readonly PURPLE: Color;
-        readonly PURE_PURPLE: Color;
-        readonly AMETHYST: Color;
-        readonly VIOLET: Color;
-        readonly INDIGO: Color;
-        readonly DARKPURPLE: Color;
-        readonly PLUM: Color;
+    export interface Render2DApi {
+        drawFPS(pos: Vector2): void;
+        shapes: ShapesApi;
+        text: TextApi;
+    }
 
-        // Browns & Earth Tones
-        readonly WHEAT: Color;
-        readonly BEIGE: Color;
-        readonly TAN: Color;
-        readonly SAND: Color;
-        readonly KHAKI: Color;
-        readonly TERRACOTTA: Color;
-        readonly BRONZE: Color;
-        readonly RUST: Color;
-        readonly BROWN: Color;
-        readonly SADDLEBROWN: Color;
-        readonly DARKBROWN: Color;
-        readonly COFFEE: Color;
+    export interface RenderContext {
+        clearBackground(color?: Color): void;
+        withViewport2D(
+            camera: Camera2D,
+            callback: (r2d: Render2DApi) => void
+        ): void;
+        withViewport2D(callback: (r2d: Render2DApi) => void): void;
+        withScreenSpace(callback: (r2d: Render2DApi) => void): void;
+    }
+
+    export interface UpdateContext {
+        // Window Actions
+        minimizeWindow(): void;
+        maximizeWindow(): void;
+
+        // Window Properties
+        isWindowFullscreen(): boolean;
+        isWindowHidden(): boolean;
+        isWindowResized(): boolean;
+        isWindowMinimized(): boolean;
+        isWindowMaximized(): boolean;
+        isWindowFocused(): boolean;
+
+        // Monitor
+        getScreenWidth(): number;
+        getScreenHeight(): number;
+        getRenderWidth(): number;
+        getRenderHeight(): number;
+        getMonitorCount(): number;
+        getCurrentMonitor(): number;
+
+        // Keyboard Checks
+        isKeyPressed(keyCode: number): boolean;
+        isKeyDown(keyCode: number): boolean;
+        isKeyReleased(keyCode: number): boolean;
+        isKeyUp(keyCode: number): boolean;
+
+        // Mouse Button Checks
+        isMouseButtonPressed(button: number): boolean;
+        isMouseButtonDown(button: number): boolean;
+        isMouseButtonReleased(button: number): boolean;
+        isMouseButtonUp(button: number): boolean;
+
+        // Custom Mouse Getters
+        getMouseWheelMove(): number;
+        getMousePosition(): Vector2;
+    }
+
+    export interface ApplicationConfig {
+        onInit?: (this: ApplicationConfig) => void;
+        onUpdate?: (this: ApplicationConfig, ctx: UpdateContext) => void;
+        onDraw?: (this: ApplicationConfig, render: RenderContext) => void;
+    }
+
+    export class Application {
+        constructor(width: number, height: number, title: string);
+        run(config: ApplicationConfig): void;
+    }
+
+    export const Info: {
+        readonly RAYLIB_VERSION_STR: string;
+        readonly QUICKJS_VERSION_STR: string;
     };
 
-    export const MouseButton: {
-        readonly MOUSE_BUTTON_LEFT: number;
-        readonly MOUSE_BUTTON_RIGHT: number;
-        readonly MOUSE_BUTTON_MIDDLE: number;
-        readonly MOUSE_BUTTON_SIDE: number;
-        readonly MOUSE_BUTTON_EXTRA: number;
-        readonly MOUSE_BUTTON_FORWARD: number;
-        readonly MOUSE_BUTTON_BACK: number;
-    };
-
-    export const MouseCursor: {
-        readonly MOUSE_CURSOR_DEFAULT: number;
-        readonly MOUSE_CURSOR_ARROW: number;
-        readonly MOUSE_CURSOR_IBEAM: number;
-        readonly MOUSE_CURSOR_CROSSHAIR: number;
-        readonly MOUSE_CURSOR_POINTING_HAND: number;
-        readonly MOUSE_CURSOR_RESIZE_EW: number;
-        readonly MOUSE_CURSOR_RESIZE_NS: number;
-        readonly MOUSE_CURSOR_RESIZE_NWSE: number;
-        readonly MOUSE_CURSOR_RESIZE_NESW: number;
-        readonly MOUSE_CURSOR_RESIZE_ALL: number;
-        readonly MOUSE_CURSOR_NOT_ALLOWED: number;
+    export const ConfigFlags: {
+        readonly FLAG_VSYNC_HINT: number;
+        readonly FLAG_FULLSCREEN_MODE: number;
+        readonly FLAG_WINDOW_RESIZABLE: number;
+        readonly FLAG_WINDOW_UNDECORATED: number;
+        readonly FLAG_WINDOW_HIDDEN: number;
+        readonly FLAG_WINDOW_MINIMIZED: number;
+        readonly FLAG_WINDOW_MAXIMIZED: number;
+        readonly FLAG_WINDOW_UNFOCUSED: number;
+        readonly FLAG_WINDOW_TOPMOST: number;
+        readonly FLAG_WINDOW_ALWAYS_RUN: number;
+        readonly FLAG_WINDOW_TRANSPARENT: number;
+        readonly FLAG_WINDOW_HIGHDPI: number;
+        readonly FLAG_WINDOW_MOUSE_PASSTHROUGH: number;
+        readonly FLAG_BORDERLESS_WINDOWED_MODE: number;
+        readonly FLAG_MSAA_4X_HINT: number;
+        readonly FLAG_INTERLACED_HINT: number;
     };
 
     export const Keyboard: {
@@ -285,92 +311,118 @@ declare module "ts/vectorjs" {
         readonly KEY_VOLUME_DOWN: number;
     };
 
-    export interface UpdateContext {
-        // --- Keyboard Inputs ---
-        isKeyPressed(key: number): boolean;
-        isKeyDown(key: number): boolean;
-        isKeyReleased(key: number): boolean;
-        isKeyUp(key: number): boolean;
+    export const MouseButton: {
+        readonly MOUSE_BUTTON_LEFT: number;
+        readonly MOUSE_BUTTON_RIGHT: number;
+        readonly MOUSE_BUTTON_MIDDLE: number;
+        readonly MOUSE_BUTTON_SIDE: number;
+        readonly MOUSE_BUTTON_EXTRA: number;
+        readonly MOUSE_BUTTON_FORWARD: number;
+        readonly MOUSE_BUTTON_BACK: number;
+    };
 
-        // --- Mouse Inputs ---
-        isMouseButtonPressed(button: number): boolean;
-        isMouseButtonDown(button: number): boolean;
-        isMouseButtonReleased(button: number): boolean;
-        isMouseButtonUp(button: number): boolean;
+    export const MouseCursor: {
+        readonly MOUSE_CURSOR_DEFAULT: number;
+        readonly MOUSE_CURSOR_ARROW: number;
+        readonly MOUSE_CURSOR_IBEAM: number;
+        readonly MOUSE_CURSOR_CROSSHAIR: number;
+        readonly MOUSE_CURSOR_POINTING_HAND: number;
+        readonly MOUSE_CURSOR_RESIZE_EW: number;
+        readonly MOUSE_CURSOR_RESIZE_NS: number;
+        readonly MOUSE_CURSOR_RESIZE_NWSE: number;
+        readonly MOUSE_CURSOR_RESIZE_NESW: number;
+        readonly MOUSE_CURSOR_RESIZE_ALL: number;
+        readonly MOUSE_CURSOR_NOT_ALLOWED: number;
+    };
 
-        // --- Mouse Positioning ---
-        getMousePosition(): Vector2;
-        getMouseX(): number;
-        getMouseY(): number;
-        getMouseWheelMove(): number;
-    }
-
-    /**
-     * Options passed as a raw JS object to shape drawing methods (like drawRectangle).
-     */
-    export interface DrawOptions {
-        readonly color?: Color;
-        readonly rotation?: number;
-        readonly wireframe?: boolean;
-        readonly origin?: Vector2;
-    }
-
-    /**
-     * Exposes individual primitive 2D structural rendering mechanisms.
-     */
-    export interface Render2DShapes {
-        drawPixel(position: Vector2, color: Color): void;
-        drawLine(startPosition: Vector2, endPosition: Vector2, options: DrawOptions): void;
-        drawRectangle(rect: Rectangle, options: DrawOptions): void;
-        drawCircle(centre: Vector2, radius: number, options: DrawOptions): void;
-        drawTriangle(point1: Vector2, point2: Vector2, point3: Vector2, options: DrawOptions): void;
-        drawEllipse(center: Vector2, radiusH: number, radiusV: number, options: DrawOptions): void;
-    }
-
-    /**
-     * Context parameter exposed to the `onDraw` hook loop.
-     */
-    export interface RenderContext {
-        drawFPS(position: Vector2): void;
-        readonly shapes: Render2DShapes;
-        withViewport2D(camera: Camera2D, callback: (layer: RenderContext) => void): void;
-    }
-
-    /**
-     * Custom font resource loaded from a path.
-     */
-    export class Font {
-        constructor(path: string);
-        constructor(path: string, baseSize: number);
-    }
-
-    /**
-     * Custom options configuring text rendering layout and styling.
-     */
-    export interface TextOptions {
-        readonly font?: Font;
-        readonly color?: Color;
-        readonly rotation?: number;
-        readonly fontSize?: number;
-        readonly spacing?: number;
-        readonly origin?: Vector2;
-    }
-
-    /**
-     * Hook listener declarations to tie context events explicitly to runtime loops.
-     */
-    export interface UserApplication {
-        onInit?(this: UserApplication): void;
-        onUpdate?(this: UserApplication, ctx: UpdateContext): void;
-        onDraw?(this: UserApplication, render: RenderContext): void;
-    }
-
-    /**
-     * Core Application wrapper executing the rendering pipeline.
-     */
-    export class Application {
-        constructor(width: number, height: number, title: string);
-        run(userApp: UserApplication): void;
-    }
-
+    export const Palette: {
+        readonly WHITE: Color;
+        readonly SNOW: Color;
+        readonly IVORY: Color;
+        readonly RAYWHITE: Color;
+        readonly OFFWHITE: Color;
+        readonly GAINSBORO: Color;
+        readonly LIGHTGRAY: Color;
+        readonly SILVER: Color;
+        readonly GRAY: Color;
+        readonly SLATE: Color;
+        readonly DARKGRAY: Color;
+        readonly CHARBLACK: Color;
+        readonly BLACK: Color;
+        readonly BLANK: Color;
+        readonly SALMON: Color;
+        readonly CORAL: Color;
+        readonly TOMATO: Color;
+        readonly CRIMSON: Color;
+        readonly RED: Color;
+        readonly PURE_RED: Color;
+        readonly SCARLET: Color;
+        readonly MAROON: Color;
+        readonly BURGUNDY: Color;
+        readonly PEACH: Color;
+        readonly ORANGE: Color;
+        readonly DARKORANGE: Color;
+        readonly AMBER: Color;
+        readonly GOLD: Color;
+        readonly YELLOW: Color;
+        readonly LEMON: Color;
+        readonly ROSE: Color;
+        readonly PINK: Color;
+        readonly HOTPINK: Color;
+        readonly DEEPPINK: Color;
+        readonly MAGENTA: Color;
+        readonly FUCHSIA: Color;
+        readonly MINT: Color;
+        readonly PASTELGREEN: Color;
+        readonly LIME: Color;
+        readonly LIMEGREEN: Color;
+        readonly NEON_GREEN: Color;
+        readonly GREEN: Color;
+        readonly PURE_GREEN: Color;
+        readonly EMERALD: Color;
+        readonly DARKGREEN: Color;
+        readonly FOREST: Color;
+        readonly PINE: Color;
+        readonly OLIVE: Color;
+        readonly TURQUOISE: Color;
+        readonly TEAL: Color;
+        readonly "SEA GREEN": Color;
+        readonly ELECTRIC_BLUE: Color;
+        readonly CYAN: Color;
+        readonly AQUA: Color;
+        readonly PASTELBLUE: Color;
+        readonly SKYBLUE: Color;
+        readonly DEEPSKYBLUE: Color;
+        readonly CORNFLOWER: Color;
+        readonly BLUE: Color;
+        readonly PURE_BLUE: Color;
+        readonly ROYALBLUE: Color;
+        readonly DARKBLUE: Color;
+        readonly NAVY: Color;
+        readonly MIDNIGHTBLUE: Color;
+        readonly LAVENDER: Color;
+        readonly LILAC: Color;
+        readonly PURPLE: Color;
+        readonly PURE_PURPLE: Color;
+        readonly AMETHYST: Color;
+        readonly VIOLET: Color;
+        readonly INDIGO: Color;
+        readonly DARKPURPLE: Color;
+        readonly PLUM: Color;
+        readonly ORCHID: Color;
+        readonly WHEAT: Color;
+        readonly BEIGE: Color;
+        readonly TAN: Color;
+        readonly SAND: Color;
+        readonly KHAKI: Color;
+        readonly TERRACOTTA: Color;
+        readonly BRONZE: Color;
+        readonly COPPER: Color;
+        readonly RUST: Color;
+        readonly BROWN: Color;
+        readonly SADDLEBROWN: Color;
+        readonly DARKBROWN: Color;
+        readonly COFFEE: Color;
+        readonly CHOCOLATE: Color;
+    };
 }

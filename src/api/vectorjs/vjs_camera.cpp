@@ -24,6 +24,70 @@ namespace App::Module::VectorJS {
             return std::make_unique<JSCamera2D>();
         });
 
+        // =========================================================================
+        // Instance Methods
+        // =========================================================================
+
+        // Move target along x (horizontal) and y (vertical) axes
+        camera.instance_method("move", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (args.size() >= 2) {
+                self->target.x += static_cast<float>(args[0].to_double());
+                self->target.y += static_cast<float>(args[1].to_double());
+            } else if (args.size() == 1) {
+                if (auto* vec = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                    self->target.x += vec->x;
+                    self->target.y += vec->y;
+                }
+            }
+            return engine.make_undefined();
+        });
+
+        // Horizontal movement: moveX(deltaX)
+        camera.instance_method("moveX", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!args.empty()) {
+                self->target.x += static_cast<float>(args[0].to_double());
+            }
+            return engine.make_undefined();
+        });
+
+        // Vertical movement: moveY(deltaY)
+        camera.instance_method("moveY", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!args.empty()) {
+                self->target.y += static_cast<float>(args[0].to_double());
+            }
+            return engine.make_undefined();
+        });
+
+        // Relative zoom adjusting: zoomBy(factor)
+        camera.instance_method("zoomBy", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!args.empty()) {
+                float factor = static_cast<float>(args[0].to_double());
+                self->zoom += factor;
+                if (self->zoom < 0.001f) self->zoom = 0.001f;
+            }
+            return engine.make_undefined();
+        });
+
+        // Zoom In helper: zoomIn(amount = 0.1)
+        camera.instance_method("zoomIn", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            float amount = !args.empty() ? static_cast<float>(args[0].to_double()) : 0.1f;
+            self->zoom += amount;
+            if (self->zoom < 0.001f) self->zoom = 0.001f;
+            return engine.make_undefined();
+        });
+
+        // Zoom Out helper: zoomOut(amount = 0.1)
+        camera.instance_method("zoomOut", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+            float amount = !args.empty() ? static_cast<float>(args[0].to_double()) : 0.1f;
+            self->zoom -= amount;
+            if (self->zoom < 0.001f) self->zoom = 0.001f;
+            return engine.make_undefined();
+        });
+
+        // =========================================================================
+        // Properties
+        // =========================================================================
+
         camera.property("target",
             [](JSContext* ctx, JSCamera2D* self) {
                 return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->target));
@@ -51,7 +115,10 @@ namespace App::Module::VectorJS {
 
         camera.property("zoom",
             [](JSContext* ctx, JSCamera2D* self) { return qjspp::Value::make_double(ctx, self->zoom); },
-            [](JSCamera2D* self, const qjspp::Value& val) { self->zoom = static_cast<float>(val.to_double()); }
+            [](JSCamera2D* self, const qjspp::Value& val) {
+                auto z = static_cast<float>(val.to_double());
+                self->zoom = (z < 0.001f) ? 0.001f : z;
+            }
         );
 
         builder.export_class("Camera2D", camera.build());
