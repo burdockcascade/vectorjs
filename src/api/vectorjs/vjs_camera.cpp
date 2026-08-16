@@ -7,9 +7,9 @@
 namespace App::Module::VectorJS {
 
     void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        auto cls = engine.make_class<JSCamera2D>("Camera2D");
+        auto camera = engine.make_class<JSCamera2D>("Camera2D");
 
-        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSCamera2D> {
+        camera.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSCamera2D> {
             if (args.size() >= 2) {
                 auto* offset = qjspp::get_native_opaque<JSVector2>(args[0]);
                 auto* target = qjspp::get_native_opaque<JSVector2>(args[1]);
@@ -24,7 +24,7 @@ namespace App::Module::VectorJS {
             return std::make_unique<JSCamera2D>();
         });
 
-        cls.property("target",
+        camera.property("target",
             [](JSContext* ctx, JSCamera2D* self) {
                 return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->target));
             },
@@ -34,7 +34,7 @@ namespace App::Module::VectorJS {
             }
         );
 
-        cls.property("offset",
+        camera.property("offset",
             [](JSContext* ctx, JSCamera2D* self) {
                 return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->offset));
             },
@@ -44,17 +44,17 @@ namespace App::Module::VectorJS {
             }
         );
 
-        cls.property("rotation",
+        camera.property("rotation",
             [](JSContext* ctx, JSCamera2D* self) { return qjspp::Value::make_double(ctx, self->rotation); },
             [](JSCamera2D* self, const qjspp::Value& val) { self->rotation = static_cast<float>(val.to_double()); }
         );
 
-        cls.property("zoom",
+        camera.property("zoom",
             [](JSContext* ctx, JSCamera2D* self) { return qjspp::Value::make_double(ctx, self->zoom); },
             [](JSCamera2D* self, const qjspp::Value& val) { self->zoom = static_cast<float>(val.to_double()); }
         );
 
-        builder.export_class("Camera2D", cls.build());
+        builder.export_class("Camera2D", camera.build());
     }
 
 }

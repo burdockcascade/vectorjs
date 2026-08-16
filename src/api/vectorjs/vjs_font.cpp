@@ -7,9 +7,9 @@
 namespace App::Module::VectorJS {
 
     void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        auto cls = engine.make_class<JSFont>("Font");
+        auto font = engine.make_class<JSFont>("Font");
 
-        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSFont> {
+        font.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSFont> {
             if (args.empty()) return nullptr;
             std::string path = args[0].to_string();
             if (args.size() >= 2) {
@@ -18,7 +18,7 @@ namespace App::Module::VectorJS {
             return std::make_unique<JSFont>(path);
         });
 
-        builder.export_class("Font", cls.build());
+        builder.export_class("Font", font.build());
     }
 
 } // namespace VectorJS

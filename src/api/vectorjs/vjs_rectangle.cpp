@@ -8,9 +8,9 @@
 namespace App::Module::VectorJS {
 
     void register_rectangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        auto cls = engine.make_class<JSRectangle>("Rectangle");
+        auto rectangle = engine.make_class<JSRectangle>("Rectangle");
 
-        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSRectangle> {
+        rectangle.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSRectangle> {
             if (args.size() < 4) return nullptr;
             return std::make_unique<JSRectangle>(
                 static_cast<float>(args[0].to_double()),
@@ -20,24 +20,27 @@ namespace App::Module::VectorJS {
             );
         });
 
-        cls.property("x",
+        rectangle.property("x",
             [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->x); },
             [](JSRectangle* self, const qjspp::Value& val) { self->x = static_cast<float>(val.to_double()); }
         );
-        cls.property("y",
+
+        rectangle.property("y",
             [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->y); },
             [](JSRectangle* self, const qjspp::Value& val) { self->y = static_cast<float>(val.to_double()); }
         );
-        cls.property("width",
+
+        rectangle.property("width",
             [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->width); },
             [](JSRectangle* self, const qjspp::Value& val) { self->width = static_cast<float>(val.to_double()); }
         );
-        cls.property("height",
+
+        rectangle.property("height",
             [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->height); },
             [](JSRectangle* self, const qjspp::Value& val) { self->height = static_cast<float>(val.to_double()); }
         );
 
-        builder.export_class("Rectangle", cls.build());
+        builder.export_class("Rectangle", rectangle.build());
     }
 
 } // namespace VectorJS
