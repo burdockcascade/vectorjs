@@ -35,9 +35,9 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 # qjs
 FetchContent_Declare(
         qjspp
-#        SOURCE_DIR "C:/workspace/c/qjspp"
-        GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
-        GIT_TAG master
+        SOURCE_DIR "C:/workspace/c/qjspp"
+        #GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
+        #GIT_TAG master
 )
 
 # Bring all dependencies into the build tree automatically
@@ -58,7 +58,8 @@ target_sources(vectorjs PRIVATE
         "src/api/vectorjs/vjs_color.cpp"
         "src/api/vectorjs/vjs_palette.cpp"
         "src/api/vectorjs/vjs_camera.cpp"
-        "src/api/vectorjs/vjs_math.cpp"
+        "src/api/vectorjs/vjs_rectangle.cpp"
+        "src/api/vectorjs/vjs_vector2.cpp"
         "src/api/vectorjs/vjs_font.cpp"
         "src/api/vectorjs/vjs_application.cpp"
 )

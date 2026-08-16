@@ -7,7 +7,7 @@
 
 namespace App::Module::VectorJS {
 
-    static void register_vector2_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSVector2>("Vector2");
 
         cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSVector2> {
@@ -90,44 +90,6 @@ namespace App::Module::VectorJS {
         });
 
         builder.export_class("Vector2", cls.build());
-    }
-
-    static void register_rectangle_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        auto cls = engine.make_class<JSRectangle>("Rectangle");
-
-        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSRectangle> {
-            if (args.size() < 4) return nullptr;
-            return std::make_unique<JSRectangle>(
-                static_cast<float>(args[0].to_double()),
-                static_cast<float>(args[1].to_double()),
-                static_cast<float>(args[2].to_double()),
-                static_cast<float>(args[3].to_double())
-            );
-        });
-
-        cls.property("x",
-            [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->x); },
-            [](JSRectangle* self, const qjspp::Value& val) { self->x = static_cast<float>(val.to_double()); }
-        );
-        cls.property("y",
-            [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->y); },
-            [](JSRectangle* self, const qjspp::Value& val) { self->y = static_cast<float>(val.to_double()); }
-        );
-        cls.property("width",
-            [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->width); },
-            [](JSRectangle* self, const qjspp::Value& val) { self->width = static_cast<float>(val.to_double()); }
-        );
-        cls.property("height",
-            [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->height); },
-            [](JSRectangle* self, const qjspp::Value& val) { self->height = static_cast<float>(val.to_double()); }
-        );
-
-        builder.export_class("Rectangle", cls.build());
-    }
-
-    void register_math(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
-        register_vector2_class(engine, builder);
-        register_rectangle_class(engine, builder);
     }
 
 } // namespace VectorJS
