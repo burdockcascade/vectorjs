@@ -2,7 +2,6 @@
 
 #include <string_view>
 #include <memory>
-#include <vector>
 #include <raylib.h>
 #include <qjspp.hpp>
 
@@ -84,22 +83,6 @@ namespace App::Module::VectorJS {
         [[nodiscard]] constexpr operator ::Camera2D(this JSCamera2D self) noexcept {
             return ::Camera2D{ .offset = self.offset, .target = self.target, .rotation = self.rotation, .zoom = self.zoom };
         }
-    };
-
-    struct JSDrawOptions {
-        JSColor color{BLACK};
-        float rotation = 0.0f;
-        bool wireframe = false;
-        JSVector2 origin{0.0f, 0.0f};
-    };
-
-    struct JSTextOptions {
-        JSFont font;
-        JSColor color{BLACK};
-        float rotation = 0.0f;
-        float fontSize = 24.0f;
-        float spacing = 1.0f;
-        JSVector2 origin{0.0f, 0.0f};
     };
 
 }
