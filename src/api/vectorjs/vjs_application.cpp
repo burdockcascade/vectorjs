@@ -269,27 +269,18 @@ namespace App::Module::VectorJS {
         return qjspp::Value::make_function(ctx, [r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
 
-            qjspp::Value callback;
-            std::optional<JSCamera2D> camera;
-
-            if (args.size() >= 2) {
-                if (auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
-                    camera = *cam_ptr;
-                }
-                callback = args[1].clone();
+            JSCamera2D camera;
+            if (auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
+                camera = *cam_ptr;
             } else {
-                callback = args[0].clone();
+                return {};
             }
 
-            if (camera.has_value()) {
-                ::BeginMode2D(camera.value());
-            }
+            qjspp::Value callback = args[1].clone();
 
-            (void)callback.call({r2d_ptr->clone()});
-
-            if (camera.has_value()) {
-                ::EndMode2D();
-            }
+            BeginMode2D(camera);
+            std::ignore = callback.call({r2d_ptr->clone()});
+            EndMode2D();
 
             return {};
         });
