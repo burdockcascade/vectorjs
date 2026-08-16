@@ -330,6 +330,7 @@ namespace App::Module::VectorJS {
 
     JSApplication::JSApplication(qjspp::Engine& engine, const int w, const int h, const std::string_view title): engine(engine) {
         InitWindow(w, h, title.data());
+        InitAudioDevice();
         SetTargetFPS(60);
     }
 
@@ -349,18 +350,18 @@ namespace App::Module::VectorJS {
 
         try {
             if (!on_init_func.is_undefined()) {
-                (void)on_init_func.call_method(user_app, {});
+                std::ignore = on_init_func.call_method(user_app, {});
             }
 
             while (!WindowShouldClose()) {
                 BeginDrawing();
 
                 if (!on_update_func.is_undefined()) {
-                    (void)on_update_func.call_method(user_app, {update_obj.clone()});
+                    std::ignore = on_update_func.call_method(user_app, {update_obj.clone()});
                 }
 
                 if (!on_draw_func.is_undefined()) {
-                    (void)on_draw_func.call_method(user_app, {render_obj.clone()});
+                    std::ignore = on_draw_func.call_method(user_app, {render_obj.clone()});
                 }
 
                 EndDrawing();
@@ -373,6 +374,7 @@ namespace App::Module::VectorJS {
         }
 
         if (IsWindowReady()) {
+            CloseAudioDevice();
             CloseWindow();
         }
 

@@ -54,6 +54,7 @@ add_executable(vectorjs)
 target_sources(vectorjs PRIVATE
         "src/main.cpp"
         "src/core.cpp"
+        "src/api/vectorjs/vjs_audio.cpp"
         "src/api/vectorjs/vjs_enums.cpp"
         "src/api/vectorjs/vjs_color.cpp"
         "src/api/vectorjs/vjs_palette.cpp"

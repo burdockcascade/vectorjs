@@ -12,6 +12,7 @@ namespace App::Module::VectorJS {
     void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_rectangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
+    void register_audio_classes(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
     inline void register_module(qjspp::Engine& engine) {
         auto m = engine.new_module("vectorjs");
@@ -23,6 +24,7 @@ namespace App::Module::VectorJS {
         register_font_class(engine, m);
         register_vector2(engine, m);
         register_rectangle(engine, m);
+        register_audio_classes(engine, m);
         m.finalize();
     }
     

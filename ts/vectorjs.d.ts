@@ -425,4 +425,64 @@ declare module "vectorjs" {
         readonly COFFEE: Color;
         readonly CHOCOLATE: Color;
     };
+
+    /**
+     * Represents a short audio clip loaded entirely into memory.
+     * Ideal for sound effects and quick, repeatable noises.
+     */
+    export class Sound {
+        /**
+         * Loads a sound from the specified file path.
+         * @param path The file path to the audio file (e.g., .wav, .ogg, .mp3)
+         */
+        constructor(path: string);
+
+        /** Plays the sound. */
+        play(): void;
+
+        /** Stops the sound if it is currently playing. */
+        stop(): void;
+
+        /**
+         * Sets the playback volume of the sound.
+         * @param volume Volume level, where 1.0 is max and 0.0 is silent.
+         */
+        setVolume(volume: number): void;
+    }
+
+    /**
+     * Represents a streaming audio track.
+     * Ideal for background music (BGM) or long ambient tracks to save RAM.
+     */
+    export class Music {
+        /**
+         * Opens an audio stream from the specified file path.
+         * @param path The file path to the audio file (e.g., .wav, .ogg, .mp3)
+         */
+        constructor(path: string);
+
+        /** Starts playing the music stream. */
+        play(): void;
+
+        /** Stops the music stream and resets it to the beginning. */
+        stop(): void;
+
+        /** Pauses the music stream at its current position. */
+        pause(): void;
+
+        /** Resumes a paused music stream. */
+        resume(): void;
+
+        /**
+         * Sets the playback volume of the music.
+         * @param volume Volume level, where 1.0 is max and 0.0 is silent.
+         */
+        setVolume(volume: number): void;
+
+        /**
+         * Refills the audio buffer.
+         * **Note:** This MUST be called every frame in your update loop for the music to keep playing!
+         */
+        update(): void;
+    }
 }

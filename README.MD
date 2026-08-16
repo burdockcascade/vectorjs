@@ -9,7 +9,7 @@ VectorJS is a lightweight engine designed to execute JavaScript-based 2D/3D grap
 | Feature   | Status   |
 |-----------|----------|
 | Shapes 2D | &#10004; |
-| Audio     |          |
+| Audio     | &#10004;  |
 | Text      | &#10004; |
 | Fonts     | &#10004; |
 
