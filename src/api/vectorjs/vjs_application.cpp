@@ -146,7 +146,7 @@ namespace App::Module::VectorJS {
         }));
 
         update_obj.set("getMousePosition", engine.make_function([&engine](const qjspp::ArgList&) -> qjspp::Value {
-            const ::Vector2 pos = ::GetMousePosition();
+            const Vector2 pos = GetMousePosition();
             return qjspp::make_native_object(engine.context(), std::make_unique<JSVector2>(pos));
         }));
 
@@ -166,7 +166,7 @@ namespace App::Module::VectorJS {
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             auto* col = qjspp::get_native_opaque<JSColor>(args[1]);
 
-            ::DrawPixelV(pos ? static_cast<::Vector2>(*pos) : ::Vector2{.x = 0, .y = 0},
+            DrawPixelV(pos ? static_cast<Vector2>(*pos) : Vector2{.x = 0, .y = 0},
                          col ? static_cast<::Color>(*col) : RAYWHITE);
             return {};
         }));
@@ -177,8 +177,8 @@ namespace App::Module::VectorJS {
             auto* end = qjspp::get_native_opaque<JSVector2>(args[1]);
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
-            ::DrawLineV(start ? static_cast<::Vector2>(*start) : ::Vector2{.x = 0, .y = 0},
-                        end ? static_cast<::Vector2>(*end) : ::Vector2{.x = 0, .y = 0},
+            DrawLineV(start ? static_cast<Vector2>(*start) : Vector2{.x = 0, .y = 0},
+                        end ? static_cast<Vector2>(*end) : Vector2{.x = 0, .y = 0},
                         draw_options.color);
             return {};
         }));
@@ -188,7 +188,7 @@ namespace App::Module::VectorJS {
             auto* rect = qjspp::get_native_opaque<JSRectangle>(args[0]);
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 1 ? args[1].clone() : qjspp::Value());
-            ::DrawRectanglePro(rect ? static_cast<::Rectangle>(*rect) : ::Rectangle{.x = 0, .y = 0, .width = 0, .height = 0},
+            DrawRectanglePro(rect ? static_cast<::Rectangle>(*rect) : ::Rectangle{.x = 0, .y = 0, .width = 0, .height = 0},
                                draw_options.origin,
                                draw_options.rotation,
                                draw_options.color);
@@ -201,7 +201,7 @@ namespace App::Module::VectorJS {
             double rad = args[1].to_double();
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
-            ::DrawCircleV(center ? static_cast<::Vector2>(*center) : ::Vector2{.x = 0, .y = 0},
+            DrawCircleV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
                           static_cast<float>(rad),
                           draw_options.color);
             return {};
@@ -214,9 +214,9 @@ namespace App::Module::VectorJS {
             auto* p3 = qjspp::get_native_opaque<JSVector2>(args[2]);
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
-            ::DrawTriangle(p1 ? static_cast<::Vector2>(*p1) : ::Vector2{.x = 0, .y = 0},
-                           p2 ? static_cast<::Vector2>(*p2) : ::Vector2{.x = 0, .y = 0},
-                           p3 ? static_cast<::Vector2>(*p3) : ::Vector2{.x = 0, .y = 0},
+            DrawTriangle(p1 ? static_cast<Vector2>(*p1) : Vector2{.x = 0, .y = 0},
+                           p2 ? static_cast<Vector2>(*p2) : Vector2{.x = 0, .y = 0},
+                           p3 ? static_cast<Vector2>(*p3) : Vector2{.x = 0, .y = 0},
                            draw_options.color);
             return {};
         }));
@@ -228,7 +228,7 @@ namespace App::Module::VectorJS {
             double radV = args[2].to_double();
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
-            ::DrawEllipseV(center ? static_cast<::Vector2>(*center) : ::Vector2{.x = 0, .y = 0},
+            DrawEllipseV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
                            static_cast<float>(radH),
                            static_cast<float>(radV),
                            draw_options.color);
@@ -252,9 +252,9 @@ namespace App::Module::VectorJS {
                 fontToUse = *options.font.font_ptr;
             }
 
-            ::DrawTextPro(fontToUse,
+            DrawTextPro(fontToUse,
                           txt_str.c_str(),
-                          pos ? static_cast<::Vector2>(*pos) : ::Vector2{.x = 0, .y = 0},
+                          pos ? static_cast<Vector2>(*pos) : Vector2{.x = 0, .y = 0},
                           options.origin,
                           options.rotation,
                           options.fontSize,
@@ -303,9 +303,8 @@ namespace App::Module::VectorJS {
         // Add FPS
         render2d_obj.set("drawFPS", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawFPS requires a Vector2 position argument");
-            auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (pos) {
-                ::DrawFPS(static_cast<int>(pos->x), static_cast<int>(pos->y));
+            if (auto* pos = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                DrawFPS(static_cast<int>(pos->x), static_cast<int>(pos->y));
             }
             return {};
         }));
