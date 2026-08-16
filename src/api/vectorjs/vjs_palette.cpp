@@ -70,7 +70,7 @@ namespace App::Module::VectorJS {
             ColorEntry{.name = "OLIVE", .color = {.r = 128, .g = 128, .b = 0, .a = 255}},
             ColorEntry{.name = "TURQUOISE", .color = {.r = 64, .g = 224, .b = 208, .a = 255}},
             ColorEntry{.name = "TEAL", .color = {.r = 0, .g = 128, .b = 128, .a = 255}},
-            ColorEntry{.name = "SEA GREEN", .color = {.r = 46, .g = 139, .b = 87, .a = 255}},
+            ColorEntry{.name = "SEA_GREEN", .color = {.r = 46, .g = 139, .b = 87, .a = 255}},
 
             // Blues & Cyans
             ColorEntry{.name = "ELECTRIC_BLUE", .color = {.r = 125, .g = 249, .b = 255, .a = 255}},

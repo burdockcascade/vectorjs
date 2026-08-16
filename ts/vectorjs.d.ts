@@ -386,7 +386,7 @@ declare module "vectorjs" {
         readonly OLIVE: Color;
         readonly TURQUOISE: Color;
         readonly TEAL: Color;
-        readonly "SEA GREEN": Color;
+        readonly SEA_GREEN: Color;
         readonly ELECTRIC_BLUE: Color;
         readonly CYAN: Color;
         readonly AQUA: Color;
