@@ -1,6 +1,6 @@
 import { Application, Vector2, Palette, Keyboard, Camera2D } from "vectorjs";
 
-const enable_orbit_paths = false;
+const enable_orbit_paths = true;
 const enable_starfield = true;
 
 const screenWidth = 1200;
@@ -108,11 +108,11 @@ app.run({
         }
 
         if (ctx.isKeyDown(Keyboard.KEY_UP)) {
-            camera.moveY(10)
+            camera.moveY(-10)
         }
 
         if (ctx.isKeyDown(Keyboard.KEY_DOWN)) {
-            camera.moveY(-10)
+            camera.moveY(10)
         }
 
         if (isRunning) {
