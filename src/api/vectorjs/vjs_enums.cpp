@@ -3,30 +3,30 @@
 #include <concepts>
 #include <qjspp.hpp>
 
-#include "js_types.hpp"
 #include "../../info.hpp"
 
 namespace App::Module::VectorJS {
 
-    static void set_property(qjspp::Engine& engine, qjspp::Value& obj, const char* name, auto&& val) {
-        using T = std::decay_t<decltype(val)>;
-
-        if constexpr (std::integral<T> || std::is_enum_v<T>) {
-            obj.set(name, engine.make_int(static_cast<int>(val)));
-        } else if constexpr (std::floating_point<T>) {
-            obj.set(name, engine.make_double(val));
-        } else if constexpr (std::convertible_to<T, std::string_view>) {
-            obj.set(name, engine.make_string(std::string_view{val}));
-        } else if constexpr (std::same_as<T, ::Color>) {
-            auto color_ptr = std::make_unique<JSColor>(val);
-            obj.set(name, qjspp::make_native_object<JSColor>(engine.context(), std::move(color_ptr)));
-        }
-    }
-
     template <typename... Pairs>
     static void export_object(qjspp::Engine& engine, qjspp::ModuleBuilder& builder, const char* obj_name, Pairs&&... pairs) {
         qjspp::Value obj = qjspp::Value::make_object(engine.context());
-        (set_property(engine, obj, pairs.first, std::get<1>(pairs)), ...);
+
+        auto add_prop = [&]<typename Pair>(Pair&& pair) {
+            auto&& key = pair.first;
+            auto&& val = std::get<1>(pair);
+            using T = std::decay_t<decltype(val)>;
+
+            if constexpr (std::integral<T> || std::is_enum_v<T>) {
+                obj.set(key, engine.make_int(static_cast<int>(val)));
+            } else if constexpr (std::floating_point<T>) {
+                obj.set(key, engine.make_double(val));
+            } else if constexpr (std::convertible_to<T, std::string_view>) {
+                obj.set(key, engine.make_string(std::string_view{val}));
+            }
+        };
+
+        (add_prop(std::forward<Pairs>(pairs)), ...);
+
         builder.export_value(obj_name, std::move(obj));
     }
 
