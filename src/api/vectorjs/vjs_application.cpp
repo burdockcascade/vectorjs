@@ -329,7 +329,7 @@ namespace App::Module::VectorJS {
         return render_obj;
     }
 
-    JSApplication::JSApplication(int w, int h, std::string_view title) {
+    JSApplication::JSApplication(qjspp::Engine& engine, int w, int h, std::string_view title): engine(engine) {
         InitWindow(w, h, title.data());
         SetTargetFPS(60);
     }
@@ -385,12 +385,13 @@ namespace App::Module::VectorJS {
     void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSApplication>("Application");
 
-        cls.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSApplication> {
+        cls.constructor([&engine](const qjspp::ArgList& args) -> std::unique_ptr<JSApplication> {
             if (args.size() < 3) return nullptr;
             int w = args[0].to_int();
             int h = args[1].to_int();
             std::string title = args[2].to_string();
-            return std::make_unique<JSApplication>(w, h, title);
+
+            return std::make_unique<JSApplication>(engine, w, h, title);
         });
 
         cls.instance_method("run", [](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
