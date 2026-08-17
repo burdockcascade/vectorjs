@@ -4,12 +4,12 @@
 #include "screens.hpp"
 #include "core.hpp"
 
-#include "api/vectorjs/vectorjs.hpp"
+#include "modules/modules.hpp"
 
 namespace App {
 
     Core::Core() {
-        Module::VectorJS::register_module(engine);
+        Modules::register_module(engine);
     }
 
     void Core::eval_script(const std::string& scriptPath) const {

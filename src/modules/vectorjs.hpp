@@ -5,12 +5,36 @@
 #include <raylib.h>
 #include <qjspp.hpp>
 
-namespace App::Module::VectorJS {
+namespace App::Modules {
+
+    template <typename... Pairs>
+    static void export_object(qjspp::Engine& engine, qjspp::ModuleBuilder& builder, const char* obj_name, Pairs&&... pairs) {
+        qjspp::Value obj = qjspp::Value::make_object(engine.context());
+
+        auto add_prop = [&]<typename Pair>(Pair&& pair) {
+            auto&& key = pair.first;
+            auto&& val = std::get<1>(pair);
+            using T = std::decay_t<decltype(val)>;
+
+            if constexpr (std::integral<T> || std::is_enum_v<T>) {
+                obj.set(key, engine.make_int(static_cast<int>(val)));
+            } else if constexpr (std::floating_point<T>) {
+                obj.set(key, engine.make_double(val));
+            } else if constexpr (std::convertible_to<T, std::string_view>) {
+                obj.set(key, engine.make_string(std::string_view{val}));
+            }
+        };
+
+        (add_prop(std::forward<Pairs>(pairs)), ...);
+
+        builder.export_value(obj_name, std::move(obj));
+    }
 
     struct JSApplication {
         qjspp::Engine& engine;
-        JSApplication(qjspp::Engine& engine, int w, int h, std::string_view title);
-        qjspp::Value run(const qjspp::ArgList& args) const;
+        JSApplication(qjspp::Engine& engine, int w, int h, const std::string& title);
+        [[nodiscard]] qjspp::Value run(const qjspp::ArgList& args) const;
+        ~JSApplication();
     };
 
     struct JSColor {
@@ -53,7 +77,7 @@ namespace App::Module::VectorJS {
         std::shared_ptr<::Font> font_ptr;
 
         JSFont() = default;
-        explicit JSFont(std::string_view path, int baseSize = 64) {
+        explicit JSFont(std::string path, int baseSize = 64) {
             const ::Font f = LoadFontEx(path.data(), baseSize, nullptr, 0);
             if (f.texture.id != 0) {
                 SetTextureFilter(f.texture, TEXTURE_FILTER_BILINEAR);
@@ -74,7 +98,7 @@ namespace App::Module::VectorJS {
         std::shared_ptr<::Sound> sound_ptr;
         JSSound() = default;
 
-        explicit JSSound(std::string_view path) {
+        explicit JSSound(std::string path) {
             const ::Sound s = LoadSound(path.data());
             sound_ptr = std::shared_ptr<::Sound>(new ::Sound(s), [](::Sound* ps) {
                 if (ps) {
@@ -90,7 +114,7 @@ namespace App::Module::VectorJS {
     struct JSMusic {
         std::shared_ptr<::Music> music_ptr;
 
-        explicit JSMusic(std::string_view path) {
+        explicit JSMusic(std::string path) {
             const ::Music m = LoadMusicStream(path.data());
             music_ptr = std::shared_ptr<::Music>(new ::Music(m), [](::Music* pm) {
                 if (pm) {
@@ -117,6 +141,22 @@ namespace App::Module::VectorJS {
         [[nodiscard]] constexpr operator ::Camera2D(this JSCamera2D self) noexcept {
             return ::Camera2D{ .offset = self.offset, .target = self.target, .rotation = self.rotation, .zoom = self.zoom };
         }
+    };
+
+    struct JSDrawOptions {
+        JSColor color{BLACK};
+        float rotation = 0.0f;
+        bool wireframe = false;
+        JSVector2 origin{0.0f, 0.0f};
+    };
+
+    struct JSTextOptions {
+        JSFont font;
+        JSColor color{BLACK};
+        float rotation = 0.0f;
+        float fontSize = 24.0f;
+        float spacing = 1.0f;
+        JSVector2 origin{0.0f, 0.0f};
     };
 
 }

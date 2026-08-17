@@ -54,15 +54,7 @@ add_executable(vectorjs)
 target_sources(vectorjs PRIVATE
         "src/main.cpp"
         "src/core.cpp"
-        "src/api/vectorjs/vjs_audio.cpp"
-        "src/api/vectorjs/vjs_enums.cpp"
-        "src/api/vectorjs/vjs_color.cpp"
-        "src/api/vectorjs/vjs_palette.cpp"
-        "src/api/vectorjs/vjs_camera.cpp"
-        "src/api/vectorjs/vjs_rectangle.cpp"
-        "src/api/vectorjs/vjs_vector2.cpp"
-        "src/api/vectorjs/vjs_font.cpp"
-        "src/api/vectorjs/vjs_application.cpp"
+        "src/modules/vectorjs.cpp"
 )
 
 # Hide console on Windows, keep standard main() entry point
