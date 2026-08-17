@@ -3,7 +3,7 @@
 #include <raymath.h>
 #include <qjspp.hpp>
 
-#include "js_types.hpp"
+#include "vjs_structs.hpp"
 
 namespace App::Module::VectorJS {
 

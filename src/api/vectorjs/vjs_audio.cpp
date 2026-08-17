@@ -2,7 +2,7 @@
 #include <string>
 #include <qjspp.hpp>
 #include <raylib.h>
-#include "js_types.hpp"
+#include "vjs_structs.hpp"
 
 namespace App::Module::VectorJS {
 

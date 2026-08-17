@@ -1,7 +1,7 @@
 #include <array>
 #include <qjspp.hpp>
 
-#include "js_types.hpp"
+#include "vjs_structs.hpp"
 #include "../../info.hpp"
 
 namespace App::Module::VectorJS {
