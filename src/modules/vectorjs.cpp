@@ -692,25 +692,26 @@ namespace App::Modules {
         // Relative zoom adjusting: zoomBy(factor)
         camera.instance_method("zoomBy", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!args.empty()) {
-                float factor = static_cast<float>(args[0].to_double());
-                self->zoom += factor;
-                if (self->zoom < 0.001f) self->zoom = 0.001f;
+                self->zoom *= static_cast<float>(args[0].to_double());
             }
+            if (self->zoom < 0.001f) self->zoom = 0.001f;
             return engine.make_undefined();
         });
 
         // Zoom In helper: zoomIn(amount = 0.1)
         camera.instance_method("zoomIn", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
-            float amount = !args.empty() ? static_cast<float>(args[0].to_double()) : 0.1f;
-            self->zoom += amount;
+            if (!args.empty()) {
+                self->zoom += static_cast<float>(args[0].to_double());
+            }
             if (self->zoom < 0.001f) self->zoom = 0.001f;
             return engine.make_undefined();
         });
 
         // Zoom Out helper: zoomOut(amount = 0.1)
         camera.instance_method("zoomOut", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
-            float amount = !args.empty() ? static_cast<float>(args[0].to_double()) : 0.1f;
-            self->zoom -= amount;
+            if (!args.empty()) {
+                self->zoom -= static_cast<float>(args[0].to_double());
+            }
             if (self->zoom < 0.001f) self->zoom = 0.001f;
             return engine.make_undefined();
         });
