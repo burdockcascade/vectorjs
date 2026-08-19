@@ -87,23 +87,23 @@ namespace App::Modules {
         });
 
         // Convert screen space position to world space
-        camera.instance_method("toWorldSpace", [](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+        camera.instance_method("toWorldSpace", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             auto* screen_pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             if (!screen_pos) return {};
 
             Vector2 world_pos = GetScreenToWorld2D(*screen_pos, *self);
-            return qjspp::make_native_object(args[0].context(), std::make_unique<JSVector2>(world_pos));
+            return engine.make_native_object(std::make_unique<JSVector2>(world_pos));
         });
 
         // Convert world space position to screen space
-        camera.instance_method("toScreenSpace", [](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
+        camera.instance_method("toScreenSpace", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             auto* world_pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             if (!world_pos) return {};
 
             Vector2 screen_pos = GetWorldToScreen2D(*world_pos, *self);
-            return qjspp::make_native_object(args[0].context(), std::make_unique<JSVector2>(screen_pos));
+            return engine.make_native_object(std::make_unique<JSVector2>(screen_pos));
         });
 
         // =========================================================================
@@ -111,8 +111,8 @@ namespace App::Modules {
         // =========================================================================
 
         camera.property("target",
-            [](JSContext* ctx, JSCamera2D* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->target));
+            [&engine](JSContext* ctx, JSCamera2D* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->target));
             },
             [](JSCamera2D* self, const qjspp::Value& val) {
                 auto* vec = qjspp::get_native_opaque<JSVector2>(val);
@@ -121,8 +121,8 @@ namespace App::Modules {
         );
 
         camera.property("offset",
-            [](JSContext* ctx, JSCamera2D* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->offset));
+            [&engine](JSContext* ctx, JSCamera2D* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->offset));
             },
             [](JSCamera2D* self, const qjspp::Value& val) {
                 auto* vec = qjspp::get_native_opaque<JSVector2>(val);

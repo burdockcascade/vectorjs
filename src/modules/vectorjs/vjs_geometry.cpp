@@ -60,7 +60,7 @@ namespace App::Modules {
             auto* rec2 = qjspp::get_native_opaque<JSRectangle>(args[0]);
             if (!rec2) return {};
             auto result = GetCollisionRec(*self, *rec2);
-            return qjspp::make_native_object(args[0].context(), std::make_unique<JSRectangle>(result));
+            return engine.make_native_object(std::make_unique<JSRectangle>(result));
         });
 
         builder.export_class("Rectangle", rectangle.build());
@@ -135,8 +135,8 @@ namespace App::Modules {
 
         // Properties: v1, v2, v3
         triangle.property("v1",
-            [](JSContext* ctx, JSTriangle* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->v1));
+            [&engine](JSContext* ctx, JSTriangle* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->v1));
             },
             [](JSTriangle* self, const qjspp::Value& val) {
                 if (auto* v = qjspp::get_native_opaque<JSVector2>(val)) self->v1 = *v;
@@ -144,8 +144,8 @@ namespace App::Modules {
         );
 
         triangle.property("v2",
-            [](JSContext* ctx, JSTriangle* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->v2));
+            [&engine](JSContext* ctx, JSTriangle* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->v2));
             },
             [](JSTriangle* self, const qjspp::Value& val) {
                 if (auto* v = qjspp::get_native_opaque<JSVector2>(val)) self->v2 = *v;
@@ -153,8 +153,8 @@ namespace App::Modules {
         );
 
         triangle.property("v3",
-            [](JSContext* ctx, JSTriangle* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->v3));
+            [&engine](JSContext* ctx, JSTriangle* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->v3));
             },
             [](JSTriangle* self, const qjspp::Value& val) {
                 if (auto* v = qjspp::get_native_opaque<JSVector2>(val)) self->v3 = *v;
@@ -230,8 +230,8 @@ namespace App::Modules {
 
         // Properties: start, end
         line.property("start",
-            [](JSContext* ctx, JSLine* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->start));
+            [&engine](JSContext* ctx, JSLine* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->start));
             },
             [](JSLine* self, const qjspp::Value& val) {
                 if (auto* v = qjspp::get_native_opaque<JSVector2>(val)) self->start = *v;
@@ -239,8 +239,8 @@ namespace App::Modules {
         );
 
         line.property("end",
-            [](JSContext* ctx, JSLine* self) {
-                return qjspp::make_native_object(ctx, std::make_unique<JSVector2>(self->end));
+            [&engine](JSContext* ctx, JSLine* self) {
+                return engine.make_native_object(std::make_unique<JSVector2>(self->end));
             },
             [](JSLine* self, const qjspp::Value& val) {
                 if (auto* v = qjspp::get_native_opaque<JSVector2>(val)) self->end = *v;
@@ -265,7 +265,7 @@ namespace App::Modules {
         });
 
         // Get collision intersection point with another Line (returns Vector2 or null)
-        line.instance_method("getIntersection", [](JSLine* self, const qjspp::ArgList& args) -> qjspp::Value {
+        line.instance_method("getIntersection", [&engine](JSLine* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
 
             auto* otherLine = qjspp::get_native_opaque<JSLine>(args[0]);
@@ -273,7 +273,7 @@ namespace App::Modules {
 
             Vector2 collisionPoint = { 0 };
             if (CheckCollisionLines(self->start, self->end, otherLine->start, otherLine->end, &collisionPoint)) {
-                return qjspp::make_native_object(args[0].context(), std::make_unique<JSVector2>(collisionPoint));
+                return engine.make_native_object(std::make_unique<JSVector2>(collisionPoint));
             }
 
             return {};
@@ -311,11 +311,11 @@ namespace App::Modules {
         );
 
         // Method: getPoint(index) -> Vector2
-        polygon.instance_method("getPoint", [](JSPolygon* self, const qjspp::ArgList& args) -> qjspp::Value {
+        polygon.instance_method("getPoint", [&engine](JSPolygon* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             int index = args[0].to_int();
             if (index < 0 || index >= static_cast<int>(self->points.size())) return {};
-            return qjspp::make_native_object(args[0].context(), std::make_unique<JSVector2>(self->points[index]));
+            return engine.make_native_object(std::make_unique<JSVector2>(self->points[index]));
         });
 
         // Collision: Point vs Polygon check using Raylib's native function

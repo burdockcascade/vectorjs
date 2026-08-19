@@ -132,10 +132,10 @@ namespace App::Modules {
 
         update_obj.set("getMousePosition", engine.make_function([&engine](const qjspp::ArgList&) -> qjspp::Value {
             const Vector2 pos = GetMousePosition();
-            return qjspp::make_native_object(engine.context(), std::make_unique<JSVector2>(pos));
+            return engine.make_native_object(std::make_unique<JSVector2>(pos));
         }));
 
-        #undef BIND_VOID_FN
+        #undef BIND_VOID_FN 
         #undef BIND_BOOL_FN
         #undef BIND_INT_FN
         #undef BIND_INT_PARAM_BOOL_FN
