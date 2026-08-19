@@ -369,7 +369,7 @@ namespace App::Modules {
         }
     }
 
-    static void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSApplication>("Application");
 
         cls.constructor([&engine](const qjspp::ArgList& args) -> std::unique_ptr<JSApplication> {
@@ -389,7 +389,7 @@ namespace App::Modules {
         builder.export_class("Application", cls.build());
     }
 
-    static void register_sound_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_sound_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto sound = engine.make_class<JSSound>("Sound");
 
         // Constructor: const mySound = new vectorjs.Sound("assets/sfx.wav");
@@ -441,7 +441,7 @@ namespace App::Modules {
         builder.export_class("Sound", sound.build());
     }
 
-    static void register_music_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_music_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto music = engine.make_class<JSMusic>("Music");
 
         // Constructor: const myMusic = new vectorjs.Sound("assets/sfx.wav");
@@ -501,7 +501,7 @@ namespace App::Modules {
         builder.export_class("Music", music.build());
     }
 
-    static void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto vector2 = engine.make_class<JSVector2>("Vector2");
 
         vector2.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSVector2> {
@@ -586,7 +586,7 @@ namespace App::Modules {
         builder.export_class("Vector2", vector2.build());
     }
 
-    static void register_rectangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_rectangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto rectangle = engine.make_class<JSRectangle>("Rectangle");
 
         rectangle.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSRectangle> {
@@ -622,7 +622,7 @@ namespace App::Modules {
         builder.export_class("Rectangle", rectangle.build());
     }
 
-    static void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_font_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto font = engine.make_class<JSFont>("Font");
 
         font.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSFont> {
@@ -637,7 +637,7 @@ namespace App::Modules {
         builder.export_class("Font", font.build());
     }
 
-    static void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto camera = engine.make_class<JSCamera2D>("Camera2D");
 
         camera.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSCamera2D> {
@@ -776,7 +776,7 @@ namespace App::Modules {
         builder.export_class("Camera2D", camera.build());
     }
 
-    static void register_palette_object(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_palette_object(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
 
         struct ColorEntry {
             const char* name;
@@ -896,7 +896,7 @@ namespace App::Modules {
         builder.export_value("Palette", std::move(obj));
     }
 
-    static void register_color_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_color_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto color = engine.make_class<JSColor>("Color");
 
         // Constructor: Takes RGBA integer values (4 arguments) to create a new JSColor instance
@@ -1017,7 +1017,7 @@ namespace App::Modules {
         builder.export_class("Color", color.build());
     }
 
-    static void register_hapi_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_hapi_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
 
         #define BIND_ENUM(val) std::pair{#val, val}
 
@@ -1188,21 +1188,6 @@ namespace App::Modules {
         );
 
         #undef BIND_ENUM
-    }
-
-    void register_module(qjspp::Engine& engine) {
-        auto m = engine.new_module("vectorjs");
-        register_hapi_enums(engine, m);
-        register_color_class(engine, m);
-        register_palette_object(engine, m);
-        register_camera2d(engine, m);
-        register_application_class(engine, m);
-        register_font_class(engine, m);
-        register_vector2(engine, m);
-        register_rectangle(engine, m);
-        register_sound_class(engine, m);
-        register_music_class(engine, m);
-        m.finalize();
     }
 
 } // namespace VectorJS

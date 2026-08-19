@@ -9,7 +9,7 @@
 namespace App {
 
     Core::Core() {
-        Modules::register_module(engine);
+        Modules::register_vectorjs_module(engine);
     }
 
     void Core::eval_script(const std::string& scriptPath) const {
