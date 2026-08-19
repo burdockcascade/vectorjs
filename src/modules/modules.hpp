@@ -19,6 +19,8 @@ namespace App::Modules {
     void register_triangle(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
     void register_polygon(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
+    void register_file_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
+
     inline void register_vectorjs_module(qjspp::Engine& engine) {
         auto m = engine.new_module("vectorjs");
 
@@ -47,6 +49,8 @@ namespace App::Modules {
 
         // Input
         register_vjs_enums(engine, m);
+
+        register_file_class(engine, m);
 
         m.finalize();
     }

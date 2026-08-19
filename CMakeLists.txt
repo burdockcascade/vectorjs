@@ -57,6 +57,7 @@ target_sources(vectorjs PRIVATE
         "src/modules/vectorjs/vjs_application.cpp"
         "src/modules/vectorjs/vjs_audio.cpp"
         "src/modules/vectorjs/vjs_color.cpp"
+        "src/modules/vectorjs/vjs_file.cpp"
         "src/modules/vectorjs/vjs_geometry.cpp"
         "src/modules/vectorjs/vjs_graphics.cpp"
         "src/modules/vectorjs/vjs_input.cpp"
