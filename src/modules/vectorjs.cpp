@@ -327,6 +327,7 @@ namespace App::Modules {
         const qjspp::Value on_init_func = user_app.get("onInit");
         const qjspp::Value on_update_func = user_app.get("onUpdate");
         const qjspp::Value on_draw_func = user_app.get("onDraw");
+        const qjspp::Value on_event_func = user_app.get("onEvent");
 
         // Instantiate rendering and context objects ONCE outside the frame loop
         const qjspp::Value update_obj = create_update_context_object(engine);
@@ -368,6 +369,10 @@ namespace App::Modules {
             CloseWindow();
         }
     }
+
+    // ===========================
+    // CLASSES
+    // ===========================
 
     void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSApplication>("Application");
@@ -618,6 +623,28 @@ namespace App::Modules {
             [](JSContext* ctx, JSRectangle* self) { return qjspp::Value::make_double(ctx, self->height); },
             [](JSRectangle* self, const qjspp::Value& val) { self->height = static_cast<float>(val.to_double()); }
         );
+
+        rectangle.instance_method("contains", [&engine](JSRectangle* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self) return {};
+            if (!args.empty()) return engine.make_bool(false);
+            auto* point = qjspp::get_native_opaque<JSVector2>(args[0]);
+            return engine.make_bool(CheckCollisionPointRec(*point, *self));
+        });
+
+        rectangle.instance_method("overlaps", [&engine](JSRectangle* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self) return {};
+            if (!args.empty()) return engine.make_bool(false);
+            auto* rec2 = qjspp::get_native_opaque<JSRectangle>(args[0]);
+            return engine.make_bool(CheckCollisionRecs(*self, *rec2));
+        });
+
+        rectangle.instance_method("getCollisionRect", [&engine](JSRectangle* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self) return {};
+            if (!args.empty()) return engine.make_bool(false);
+            auto* rec2 = qjspp::get_native_opaque<JSRectangle>(args[0]);
+            auto result = GetCollisionRec(*self, *rec2);
+            return qjspp::make_native_object(args[0].context(), std::make_unique<JSRectangle>(result));
+        });
 
         builder.export_class("Rectangle", rectangle.build());
     }
