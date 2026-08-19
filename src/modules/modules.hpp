@@ -22,37 +22,39 @@ namespace App::Modules {
     void register_file_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder);
 
     inline void register_vectorjs_module(qjspp::Engine& engine) {
-        auto m = engine.new_module("vectorjs");
 
-        register_application_class(engine, m);
+        auto core = engine.new_module("vectorjs/core");
+        register_application_class(engine, core);
+        register_file_class(engine, core);
+        register_color_class(engine, core);
+        register_palette_object(engine, core);
+        core.finalize();
 
-        // Audio
-        register_sound_class(engine, m);
-        register_music_class(engine, m);
+        auto audio = engine.new_module("vectorjs/audio");
+        register_sound_class(engine, audio);
+        register_music_class(engine, audio);
+        audio.finalize();
 
-        // Color
-        register_color_class(engine, m);
-        register_palette_object(engine, m);
+        auto math = engine.new_module("vectorjs/math");
+        register_vector2(engine, math);
+        math.finalize();
 
-        // Graphics
-        register_camera2d(engine, m);
-        register_font_class(engine, m);
+        auto g2d = engine.new_module("vectorjs/graphics2d");
+        register_camera2d(engine, g2d);
+        register_font_class(engine, g2d);
+        g2d.finalize();
 
-        // Math
-        register_vector2(engine, m);
+        auto input = engine.new_module("vectorjs/input");
+        register_vjs_enums(engine, input);
+        input.finalize();
 
-        // Geometry
-        register_rectangle(engine, m);
-        register_circle(engine, m);
-        register_triangle(engine, m);
-        register_polygon(engine, m);
+        auto geometry = engine.new_module("vectorjs/geometry");
+        register_rectangle(engine, geometry);
+        register_circle(engine, geometry);
+        register_triangle(engine, geometry);
+        register_polygon(engine, geometry);
+        geometry.finalize();
 
-        // Input
-        register_vjs_enums(engine, m);
-
-        register_file_class(engine, m);
-
-        m.finalize();
     }
 
 }

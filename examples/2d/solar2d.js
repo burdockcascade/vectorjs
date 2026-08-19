@@ -1,4 +1,7 @@
-import { Application, Vector2, Palette, Keyboard, Camera2D } from "vectorjs";
+import { Application, Palette } from "vectorjs/core";
+import { Vector2  } from "vectorjs/math";
+import { Keyboard } from "vectorjs/input";
+import { Camera2D } from "vectorjs/graphics2d";
 
 const enable_orbit_paths = true;
 const enable_starfield = true;
