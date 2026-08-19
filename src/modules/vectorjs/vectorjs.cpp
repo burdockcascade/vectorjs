@@ -1044,7 +1044,7 @@ namespace App::Modules {
         builder.export_class("Color", color.build());
     }
 
-    void register_hapi_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+    void register_vjs_enums(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
 
         #define BIND_ENUM(val) std::pair{#val, val}
 

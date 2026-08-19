@@ -54,7 +54,7 @@ add_executable(vectorjs)
 target_sources(vectorjs PRIVATE
         "src/main.cpp"
         "src/core.cpp"
-        "src/modules/vectorjs.cpp"
+        "src/modules/vectorjs/vectorjs.cpp"
 )
 
 # Hide console on Windows, keep standard main() entry point
