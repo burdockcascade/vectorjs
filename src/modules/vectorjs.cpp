@@ -2,6 +2,7 @@
 #include <optional>
 #include <memory>
 #include <array>
+#include <fstream>
 #include <raylib.h>
 #include <raymath.h>
 #include <qjspp.hpp>
