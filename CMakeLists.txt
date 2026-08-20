@@ -35,9 +35,9 @@ set(BUILD_GAMES OFF CACHE BOOL "" FORCE)
 # qjs
 FetchContent_Declare(
         qjspp
-        SOURCE_DIR "C:/workspace/c/qjspp"
-        #GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
-        #GIT_TAG master
+        #SOURCE_DIR "C:/workspace/c/qjspp"
+        GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
+        GIT_TAG master
 )
 
 # Bring all dependencies into the build tree automatically
@@ -52,16 +52,9 @@ add_executable(vectorjs)
 
 # Add source files to the target
 target_sources(vectorjs PRIVATE
-        "src/main.cpp"
-        "src/core.cpp"
-        "src/modules/vectorjs/vjs_application.cpp"
-        "src/modules/vectorjs/vjs_audio.cpp"
-        "src/modules/vectorjs/vjs_color.cpp"
-        "src/modules/vectorjs/vjs_file.cpp"
-        "src/modules/vectorjs/vjs_geometry.cpp"
-        "src/modules/vectorjs/vjs_graphics.cpp"
-        "src/modules/vectorjs/vjs_input.cpp"
-        "src/modules/vectorjs/vjs_math.cpp"
+        src/main.cpp
+        src/core.cpp
+        src/modules/vectorjs.cpp
 )
 
 # Hide console on Windows, keep standard main() entry point
