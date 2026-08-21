@@ -116,7 +116,7 @@ app.run({
         }
 
         if (isRunning) {
-            time += 1 / 60;
+            time += ctx.getDeltaTime();
         }
     },
 

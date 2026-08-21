@@ -97,6 +97,11 @@ namespace App::Modules {
                 return engine.make_int(::cpp_fn()); \
             }))
 
+        #define BIND_FLOAT_FN(js_name, cpp_fn) \
+            update_obj.set(js_name, engine.make_function([&engine](const qjspp::ArgList&) -> qjspp::Value { \
+                return engine.make_double(::cpp_fn()); \
+            }))
+
         #define BIND_INT_PARAM_BOOL_FN(js_name, cpp_fn, err_msg) \
             update_obj.set(js_name, engine.make_function([&engine](const qjspp::ArgList& args) -> qjspp::Value { \
                 if (args.empty()) throw std::runtime_error(err_msg); \
@@ -144,6 +149,9 @@ namespace App::Modules {
             const Vector2 pos = GetMousePosition();
             return engine.make_native_object(std::make_unique<JSVector2>(pos));
         }));
+
+        // Time
+        BIND_FLOAT_FN("getDeltaTime", GetFrameTime);
 
         #undef BIND_VOID_FN 
         #undef BIND_BOOL_FN
