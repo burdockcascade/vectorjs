@@ -31,6 +31,11 @@ namespace App::Modules {
                 options.origin = *orig;
             }
         }
+        if (options_val.has("source")) {
+            if (const auto* src = qjspp::get_native_opaque<JSRectangle>(options_val.get("source"))) {
+                options.source = *src;
+            }
+        }
         if (options_val.has("rotation")) {
             options.rotation = static_cast<float>(options_val.get("rotation").to_double());
         }
@@ -289,6 +294,40 @@ namespace App::Modules {
 
     static qjspp::Value create_draw_render_object(const qjspp::Engine& engine) {
         qjspp::Value render2d_obj = engine.make_object();
+
+        // 1. Full Texture Drawing: render.drawTexture(texture, destRectangle, [options])
+        render2d_obj.set("drawTexture", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+            if (args.size() < 2) throw std::runtime_error("drawTexture requires a Texture and a destination Rectangle");
+
+            auto* tex = qjspp::get_native_opaque<JSTexture>(args[0]);
+            auto* dest = qjspp::get_native_opaque<JSRectangle>(args[1]);
+            if (!tex || !tex->texture_ptr || tex->texture_ptr->id == 0 || !dest) return {};
+
+            JSDrawOptions options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
+
+            // Default source is whole image unless explicitly provided
+            Rectangle src_rect = (options.source.width > 0 && options.source.height > 0)
+                ? static_cast<Rectangle>(options.source)
+                : Rectangle{ 0.0f, 0.0f, static_cast<float>(tex->get_width()), static_cast<float>(tex->get_height()) };
+
+            DrawTexturePro(*(tex->texture_ptr), src_rect, *dest, options.origin, options.rotation, options.color);
+            return {};
+        }));
+
+        // 2. Sprite Sheet Drawing: render.drawSprite(texture, sourceRect, destRect, [options])
+        render2d_obj.set("drawSprite", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+            if (args.size() < 3) throw std::runtime_error("drawSprite requires Texture, source Rectangle, and destination Rectangle");
+
+            auto* tex = qjspp::get_native_opaque<JSTexture>(args[0]);
+            auto* src = qjspp::get_native_opaque<JSRectangle>(args[1]);
+            auto* dest = qjspp::get_native_opaque<JSRectangle>(args[2]);
+            if (!tex || !tex->texture_ptr || tex->texture_ptr->id == 0 || !src || !dest) return {};
+
+            JSDrawOptions options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
+
+            DrawTexturePro(*(tex->texture_ptr), *src, *dest, options.origin, options.rotation, options.color);
+            return {};
+        }));
 
         // Add FPS
         render2d_obj.set("drawFPS", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
@@ -878,10 +917,6 @@ namespace App::Modules {
         return removed;
     }
 
-    // ===========================
-    // QuickJS Binding Integration
-    // ===========================
-
     void register_file_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSFile>("File");
 
@@ -921,21 +956,6 @@ namespace App::Modules {
             if (!self) return engine.make_bool(false);
             auto res = JSFile::remove(self->get_path());
             return engine.make_bool(res.value_or(false));
-        });
-
-        // Static Methods
-        cls.static_method("readText", [&engine](const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.empty()) return {};
-            auto res = JSFile::read_text(args[0].to_string());
-            if (!res) throw std::runtime_error("Failed to read file");
-            return engine.make_string(*res);
-        });
-
-        cls.static_method("writeText", [&engine](const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.size() < 2) return engine.make_undefined();
-            auto res = JSFile::write_text(args[0].to_string(), args[1].to_string());
-            if (!res) throw std::runtime_error("Failed to write to file");
-            return engine.make_bool(true);
         });
 
         cls.static_method("exists", [&engine](const qjspp::ArgList& args) -> qjspp::Value {
@@ -1282,8 +1302,28 @@ namespace App::Modules {
 
 #pragma region Graphics
 
-    // =================================================================================================================
-    // Graphics
+    static void register_texture_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
+        auto texture = engine.make_class<JSTexture>("Texture");
+
+        // Constructor: const tex = new vectorjs.Texture("assets/hero.png");
+        texture.constructor([](const qjspp::ArgList& args) -> std::unique_ptr<JSTexture> {
+            if (args.empty()) return nullptr;
+            return std::make_unique<JSTexture>(args[0].to_string());
+        });
+
+        // Read-only properties
+        texture.property("width",
+            [](JSContext* ctx, JSTexture* self) { return qjspp::Value::make_int(ctx, self ? self->get_width() : 0); },
+            nullptr
+        );
+
+        texture.property("height",
+            [](JSContext* ctx, JSTexture* self) { return qjspp::Value::make_int(ctx, self ? self->get_height() : 0); },
+            nullptr
+        );
+
+        builder.export_class("Texture", texture.build());
+    }
 
     static void register_camera2d(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto camera = engine.make_class<JSCamera2D>("Camera2D");
@@ -1302,10 +1342,6 @@ namespace App::Modules {
             }
             return std::make_unique<JSCamera2D>();
         });
-
-        // =========================================================================
-        // Instance Methods
-        // =========================================================================
 
         // Move target along x (horizontal) and y (vertical) axes
         camera.instance_method("move", [&engine](JSCamera2D* self, const qjspp::ArgList& args) -> qjspp::Value {
@@ -1732,6 +1768,7 @@ namespace App::Modules {
         register_vector2(engine, mod);
 
         // Graphics2d
+        register_texture_class(engine, mod);
         register_camera2d(engine, mod);
         register_font_class(engine, mod);
 

@@ -62,6 +62,34 @@ namespace App::Modules {
         }
     };
 
+#pragma region Graphics
+
+    struct JSTexture {
+        std::shared_ptr<::Texture2D> texture_ptr;
+
+        JSTexture() = default;
+        explicit JSTexture(const std::string& path) {
+            const ::Texture2D tex = LoadTexture(path.c_str());
+            if (tex.id != 0) {
+                SetTextureFilter(tex, TEXTURE_FILTER_BILINEAR);
+            }
+
+            texture_ptr = std::shared_ptr<::Texture2D>(new ::Texture2D(tex), [](::Texture2D* pt) {
+                if (pt) {
+                    if (pt->id != 0) {
+                        UnloadTexture(*pt);
+                    }
+                    delete pt;
+                }
+            });
+        }
+
+        [[nodiscard]] int get_width() const noexcept { return texture_ptr ? texture_ptr->width : 0; }
+        [[nodiscard]] int get_height() const noexcept { return texture_ptr ? texture_ptr->height : 0; }
+    };
+
+#pragma endregion
+
 #pragma region Camera
 
     struct JSCamera2D {
@@ -178,10 +206,11 @@ namespace App::Modules {
 #pragma region Application
 
     struct JSDrawOptions {
-        JSColor color{BLACK};
+        JSColor color{WHITE};
         float rotation = 0.0f;
         bool wireframe = false;
         JSVector2 origin{0.0f, 0.0f};
+        JSRectangle source{0.0f, 0.0f, 0.0f, 0.0f};
     };
 
     struct JSTextOptions {
