@@ -130,7 +130,7 @@ app.run({
             if (enable_starfield) {
                 stars.forEach((star) => {
                     const twinkleAmount = 0.4 + 0.6 * Math.sin(time * 3 + star.phase);
-                    const starColor = new Color(star.color.r, star.color.g, star.color.b, star.color.a).applyFade(twinkleAmount);
+                    const starColor = star.color.fade(twinkleAmount);
 
                     ctx.shapes.drawCircle(star.pos, star.size, {
                         color: starColor
@@ -157,10 +157,10 @@ app.run({
             }
 
             const pulse = (Math.sin(time * 2) + 1) * 0.5;
-            const sunGlow = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyBrightness(0.3 * pulse);
-            const sunColor = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyLerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
+            const sunGlow = Palette.YELLOW.brightness(0.3 * pulse);
+            const sunColor = Palette.YELLOW.lerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
 
-            ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.applyFade(0.4) });
+            ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.fade(0.4) });
             ctx.shapes.drawCircle(sunPos, 35, { color: sunColor });
 
             planets.forEach((planet) => {

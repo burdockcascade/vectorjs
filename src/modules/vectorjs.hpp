@@ -117,6 +117,10 @@ namespace App::Modules {
             return *this;
         }
 
+        [[nodiscard]] JSColor clone() const noexcept {
+            return {this->r, this->g, this->b, this->a};
+        }
+
         [[nodiscard]] int to_int() const noexcept {
             return ColorToInt(*this);
         }

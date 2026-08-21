@@ -54,7 +54,7 @@ app.run({
                     center.y + Math.sin(rayAngle) * 380
                 );
 
-                const rayColor = Palette.PURPLE.withAlpha(0.15 + Math.sin(t * 3 + i) * 0.1);
+                const rayColor = Palette.PURPLE.alpha(0.15 + Math.sin(t * 3 + i) * 0.1);
                 screen.shapes.drawLine(center, endPos, { color: rayColor });
             }
 
@@ -66,9 +66,7 @@ app.run({
 
                 // Morph color smoothly across HSV space using lerp and contrast
                 const colorPhase = (Math.sin(t * 1.5 + p.angle * 2) + 1) / 2;
-                const currentColor = p.primaryColor
-                    .withLerp(p.secondaryColor, colorPhase)
-                    .withBrightness(0.2);
+                const currentColor = p.primaryColor.clone().lerp(p.secondaryColor, colorPhase).brightness(0.2);
 
                 // Calculate rotated triangle vertices pointing outward from center
                 const perpAngle = p.angle + Math.PI / 2;
@@ -90,17 +88,17 @@ app.run({
 
                 // Draw glowing tip highlights
                 screen.shapes.drawCircle(p1, p.size * 0.25, {
-                    color: Palette.WHITE.withLerp(currentColor, 0.3)
+                    color: Palette.WHITE.lerp(currentColor, 0.3)
                 });
             }
 
             // 3. Draw central pulsing geometric core
             const pulseRadius = 25 + Math.sin(t * 4) * 8;
-            const coreColor = Palette.GOLD.withLerp(Palette.HOTPINK, (Math.cos(t * 3) + 1) / 2);
+            const coreColor = Palette.GOLD.lerp(Palette.HOTPINK, (Math.cos(t * 3) + 1) / 2);
 
             // Layered translucent core circles creating a neon lens flare effect
-            screen.shapes.drawCircle(center, pulseRadius * 2.5, { color: coreColor.withAlpha(0.15) });
-            screen.shapes.drawCircle(center, pulseRadius * 1.5, { color: coreColor.withAlpha(0.35) });
+            screen.shapes.drawCircle(center, pulseRadius * 2.5, { color: coreColor.clone().alpha(0.15) });
+            screen.shapes.drawCircle(center, pulseRadius * 1.5, { color: coreColor.clone().alpha(0.35) });
             screen.shapes.drawCircle(center, pulseRadius, { color: Palette.WHITE });
         });
     }

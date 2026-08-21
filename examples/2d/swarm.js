@@ -56,13 +56,13 @@ app.run({
         render.withScreenSpace((screen) => {
 
             // Center position reacting slightly to mouse movement
-            const centerX = 400 + (this.mousePos.x - 400) * 0.1;
-            const centerY = 300 + (this.mousePos.y - 300) * 0.1;
+            const centerX = 400;
+            const centerY = 300;
 
             // 1. Draw animated expanding geometric rings
             for (let r of rings) {
                 const alpha = 1.0 - (r.radius / r.maxRadius);
-                const ringColor = Palette.PURPLE.withAlpha(alpha * 0.4);
+                const ringColor = Palette.PURPLE.alpha(alpha * 0.4);
 
                 screen.shapes.drawCircle(
                     new Vector2(centerX, centerY),
@@ -73,7 +73,7 @@ app.run({
 
             // 2. Draw rotating gradient center star/diamond structure
             const diamondSize = 35 + Math.sin(this.time * 3) * 10;
-            const coreColor = Palette.CYAN.withLerp(Palette.MAGENTA, (Math.sin(this.time * 2) + 1) / 2);
+            const coreColor = Palette.CYAN.lerp(Palette.MAGENTA, (Math.sin(this.time * 2) + 1) / 2);
 
             screen.shapes.drawRectangle(
                 new Rectangle(centerX, centerY, diamondSize, diamondSize),
@@ -91,7 +91,7 @@ app.run({
 
                 // Shift dynamic color tone over time
                 const lerpFactor = (Math.sin(this.time + p.angle) + 1) / 2;
-                const particleColor = p.baseColor.withLerp(Palette.YELLOW, lerpFactor);
+                const particleColor = p.baseColor.clone().lerp(Palette.YELLOW, lerpFactor);
 
                 // Main particle shape
                 screen.shapes.drawCircle(
@@ -104,7 +104,7 @@ app.run({
                 screen.shapes.drawCircle(
                     new Vector2(x, y),
                     p.size * 2,
-                    { color: particleColor.withAlpha(0.25) }
+                    { color: particleColor.clone().alpha(0.25) }
                 );
             }
 
@@ -121,7 +121,7 @@ app.run({
                 screen.shapes.drawLine(
                     new Vector2(x1, y1),
                     new Vector2(x2, y2),
-                    { color: Palette.LIME.withAlpha(0.2) }
+                    { color: Palette.LIME.alpha(0.2) }
                 );
             }
         });

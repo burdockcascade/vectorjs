@@ -72,9 +72,9 @@ app.run({
             });
 
             // Color morphing matching the shape transition
-            const themeColor = Palette.TURQUOISE
-                .withLerp(Palette.HOTPINK, (Math.sin(time * 2) + 1) / 2)
-                .withBrightness(0.2);
+            const themeColor = Palette.TURQUOISE.clone()
+                .lerp(Palette.HOTPINK, (Math.sin(time * 2) + 1) / 2)
+                .brightness(0.2);
 
             // 1. Draw glowing background radial echo polygons
             for (let layer = 4; layer >= 1; layer--) {
@@ -90,7 +90,7 @@ app.run({
                 for (let i = 0; i < layerPoints.length; i++) {
                     const nextPt = layerPoints[(i + 1) % layerPoints.length];
                     screen.shapes.drawLine(layerPoints[i], nextPt, {
-                        color: themeColor.withAlpha(0.15 / layer)
+                        color: themeColor.clone().alpha(0.15 / layer)
                     });
                 }
             }
@@ -103,11 +103,11 @@ app.run({
 
                 // Inner web triangle wireframes
                 screen.shapes.drawTriangle(p1, p2, CENTER, {
-                    color: Palette.VIOLET.withAlpha(0.12)
+                    color: Palette.VIOLET.alpha(0.12)
                 });
 
                 screen.shapes.drawLine(p1, p3, {
-                    color: Palette.ELECTRIC_BLUE.withAlpha(0.25)
+                    color: Palette.ELECTRIC_BLUE.alpha(0.25)
                 });
             }
 
@@ -121,13 +121,13 @@ app.run({
 
                 // Corner node spheres
                 screen.shapes.drawCircle(p1, 6, { color: Palette.WHITE });
-                screen.shapes.drawCircle(p1, 12, { color: themeColor.withAlpha(0.3) });
+                screen.shapes.drawCircle(p1, 12, { color: themeColor.clone().alpha(0.3) });
             }
 
             // 4. Core focal point
             const coreSize = 12 + Math.sin(time * 6) * 4;
             screen.shapes.drawCircle(CENTER, coreSize, { color: Palette.GOLD });
-            screen.shapes.drawCircle(CENTER, coreSize * 2, { color: Palette.GOLD.withAlpha(0.2) });
+            screen.shapes.drawCircle(CENTER, coreSize * 2, { color: Palette.GOLD.alpha(0.2) });
         });
     }
 });
