@@ -1,4 +1,4 @@
-import { Application, Palette, Vector2, Keyboard, Camera2D } from "vectorjs";
+import { Application, Palette, Vector2, Keyboard, Camera2D, Color } from "vectorjs";
 
 const enable_orbit_paths = true;
 const enable_starfield = true;
@@ -118,9 +118,6 @@ app.run({
         if (isRunning) {
             time += 1 / 60;
         }
-
-        // Smooth camera drift toward sun center using Vector2.lerp
-        //camera.target = camera.target.lerp(sunPos, 0.02);
     },
 
     onDraw(render) {
@@ -131,14 +128,16 @@ app.run({
         })
 
         render.withViewport2D(camera, (ctx) => {
-            // 2. Draw starfield with twinkling effect using Color.fade
+            // 2. Draw starfield with twinkling effect using new Color instances to avoid global mutation
             if (enable_starfield) {
                 stars.forEach((star) => {
                     const twinkleAmount = 0.4 + 0.6 * Math.sin(time * 3 + star.phase);
-                    const starColor = star.color.fade(twinkleAmount);
 
-                     ctx.shapes.drawCircle(star.pos, star.size, {
-                          color: starColor
+                    // Instantiate a new Color so we don't permanently fade Palette.WHITE or Palette.LIGHTGRAY
+                    const starColor = new Color(star.color.r, star.color.g, star.color.b, star.color.a).applyFade(twinkleAmount);
+
+                    ctx.shapes.drawCircle(star.pos, star.size, {
+                        color: starColor
                     });
                 });
             }
@@ -153,19 +152,20 @@ app.run({
                         const dotPos = sunPos.add(dotDir.scale(planet.radius));
 
                         ctx.shapes.drawCircle(dotPos, 1.5, {
-                            color: Palette.GRAY
+                            color: planet.color
                         });
                     }
                 });
             }
 
-            // Draw Pulsating Sun using Color.brightness and Color.lerp
+            // Draw Pulsating Sun using Color.brightness and Color.lerp on new instances
             const pulse = (Math.sin(time * 2) + 1) * 0.5;
-            const sunGlow = Palette.YELLOW.brightness(0.3 * pulse);
-            const sunColor = Palette.YELLOW.lerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
+
+            const sunGlow = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyBrightness(0.3 * pulse);
+            const sunColor = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyLerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
 
             // Outer sun aura
-            ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.fade(0.4) });
+            ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.applyFade(0.4) });
             // Core sun
             ctx.shapes.drawCircle(sunPos, 35, { color: sunColor });
 

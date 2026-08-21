@@ -60,6 +60,69 @@ namespace App::Modules {
         [[nodiscard]] constexpr operator Color(this const JSColor& self) noexcept {
             return Color{ .r = self.r, .g = self.g, .b = self.b, .a = self.a };
         }
+
+        [[nodiscard]] JSColor with_lerp(JSColor target, float factor) const noexcept {
+            return JSColor(ColorLerp(*this, target, factor));
+        }
+
+        JSColor& apply_lerp(JSColor target, float factor) noexcept {
+            *this = with_lerp(target, factor);
+            return *this;
+        }
+
+        [[nodiscard]] JSColor with_fade(float alpha) const noexcept {
+            return JSColor(Fade(*this, alpha));
+        }
+
+        JSColor& apply_fade(float alpha) noexcept {
+            *this = with_fade(alpha);
+            return *this;
+        }
+
+        [[nodiscard]] JSColor with_brightness(float factor) const noexcept {
+            return JSColor(ColorBrightness(*this, factor));
+        }
+
+        JSColor& apply_brightness(float factor) noexcept {
+            *this = with_brightness(factor);
+            return *this;
+        }
+
+        [[nodiscard]] JSColor with_contrast(float factor) const noexcept {
+            return JSColor(ColorContrast(*this, factor));
+        }
+
+        JSColor& apply_contrast(float factor) noexcept {
+            *this = with_contrast(factor);
+            return *this;
+        }
+
+        [[nodiscard]] JSColor with_alpha(float alpha) const noexcept {
+            return JSColor(ColorAlpha(*this, alpha));
+        }
+
+        JSColor& apply_alpha(float alpha) noexcept {
+            *this = with_alpha(alpha);
+            return *this;
+        }
+
+        [[nodiscard]] JSColor with_tint(JSColor tintColor) const noexcept {
+            return JSColor(ColorTint(*this, tintColor));
+        }
+
+        JSColor& apply_tint(JSColor tintColor) noexcept {
+            *this = with_tint(tintColor);
+            return *this;
+        }
+
+        [[nodiscard]] int to_int() const noexcept {
+            return ColorToInt(*this);
+        }
+
+        [[nodiscard]] bool is_equal(JSColor other) const noexcept {
+            return ColorIsEqual(*this, other);
+        }
+
     };
 
 #pragma region Graphics
@@ -122,6 +185,12 @@ namespace App::Modules {
         [[nodiscard]] constexpr operator Vector2(this JSVector2 self) noexcept {
             return Vector2{ .x = self.x, .y = self.y };
         }
+
+        JSVector2& add(JSVector2 other) {
+            *this = JSVector2(Vector2Add(*this, other));
+            return *this;
+        }
+
     };
 
 #pragma endregion

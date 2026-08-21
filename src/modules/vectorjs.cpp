@@ -718,84 +718,81 @@ namespace App::Modules {
             [](JSColor* self, const qjspp::Value& val) { self->a = static_cast<uint8_t>(val.to_int()); }
         );
 
-        // Instance Method: Linearly interpolates (lerp) towards a target color using a float factor
-        color.instance_method("lerp", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.size() < 2) return {};
-            auto* target = qjspp::get_native_opaque<JSColor>(args[0]);
-            if (!self || !target) return {};
-
-            const double factor = args[1].to_double();
-            Color result = ColorLerp(*self, *target, static_cast<float>(factor));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
+        color.instance_method("applyLerp", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.size() < 2) return {};
+            const auto* target = qjspp::get_native_opaque<JSColor>(args[0]);
+            self->apply_lerp(*target, args[1].to_float());
+            return args.get_this();
         });
 
-        // Instance Method: Returns a new color with adjusted opacity (alpha factor)
-        color.instance_method("fade", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+        color.instance_method("withLerp", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.size() < 2) return {};
+            const auto* target = qjspp::get_native_opaque<JSColor>(args[0]);
+            self->apply_lerp(*target, args[1].to_float());
+            return args.get_this();
+        });
+
+        color.instance_method("applyFade", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
-            const double alpha = args[0].to_double();
-            Color result = Fade(*self, static_cast<float>(alpha));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
+            self->apply_fade(args[0].to_float());
+            return args.get_this();
         });
 
-        // Instance Method: Adjusts the brightness of the color by a specified factor
-        color.instance_method("brightness", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+        color.instance_method("withFade", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
-            const double factor = args[0].to_double();
-            Color result = ColorBrightness(*self, static_cast<float>(factor));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
+            return engine.make_native_object(std::make_unique<JSColor>(self->with_fade(args[0].to_float())));
         });
 
-        // Instance Method: Converts the color to its packed integer representation
+        color.instance_method("applyBrightness", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            self->apply_brightness(args[0].to_float());
+            return args.get_this();
+        });
+
+        color.instance_method("withBrightness", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            return engine.make_native_object(std::make_unique<JSColor>(self->with_brightness(args[0].to_float())));
+        });
+
+        color.instance_method("applyContrast", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            self->apply_contrast(args[0].to_float());
+            return args.get_this();
+        });
+
+        color.instance_method("applyContrast", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            return engine.make_native_object(std::make_unique<JSColor>(self->with_contrast(args[0].to_float())));
+        });
+
+        color.instance_method("applyAlpha", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            self->apply_alpha(args[0].to_float());
+            return args.get_this();
+        });
+
+        color.instance_method("withAlpha", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            return engine.make_native_object(std::make_unique<JSColor>(self->with_alpha(args[0].to_float())));
+        });
+
+        color.instance_method("applyTint", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            const auto* tintColor = qjspp::get_native_opaque<JSColor>(args[0]);
+            if (!tintColor) return {};
+            self->apply_tint(*tintColor);
+            return args.get_this();
+        });
+
         color.instance_method("toInt", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self) return {};
-            return qjspp::Value::make_int(args[0].context(), ColorToInt(*self));
+            return qjspp::Value::make_int(args[0].context(), self->to_int());
         });
 
-        // Instance Method: Adjusts the contrast of the color by a specified factor
-        color.instance_method("contrast", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (!self || args.empty()) return {};
-            Color result = ColorContrast(*self, static_cast<float>(args[0].to_double()));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
-        });
-
-        // Instance Method: Sets the alpha (transparency) of the color
-        color.instance_method("alpha", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (!self || args.empty()) return {};
-            Color result = ColorAlpha(*self, static_cast<float>(args[0].to_double()));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
-        });
-
-        // Instance Method: Tints the current color with another JSColor instance
-        color.instance_method("tint", [&engine](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (!self || args.empty()) return {};
-            auto* tintColor = qjspp::get_native_opaque<JSColor>(args[0]);
-            if (!tintColor) return {};
-            Color result = ColorTint(*self, *tintColor);
-            return engine.make_native_object(std::make_unique<JSColor>(result));
-        });
-
-        // Static Method: Factory function creating a Color object from a hexadecimal integer
-        color.static_method("fromHex", [&engine](const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.empty()) return {};
-            Color result = GetColor(static_cast<unsigned int>(args[0].to_int()));
-            return engine.make_native_object(std::make_unique<JSColor>(result));
-        });
-
-        // Static Method: Factory function creating a Color object from HSV parameters (hue, saturation, value)
-        color.static_method("fromHSV", [&engine](const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.size() < 3) return {};
-            float h = static_cast<float>(args[0].to_double());
-            float s = static_cast<float>(args[1].to_double());
-            float v = static_cast<float>(args[2].to_double());
-            Color result = ColorFromHSV(h, s, v);
-            return engine.make_native_object(std::make_unique<JSColor>(result));
-        });
-
-        // Instance Method: Checks equality against another JSColor instance
         color.instance_method("isEqual", [](JSColor* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return qjspp::Value::make_bool(args[0].context(), false);
-            auto* other = qjspp::get_native_opaque<JSColor>(args[0]);
-            bool equal = other && ColorIsEqual(*self, *other);
+            const auto* other = qjspp::get_native_opaque<JSColor>(args[0]);
+            const bool equal = other && self->is_equal(*other);
             return qjspp::Value::make_bool(args[0].context(), equal);
         });
 
