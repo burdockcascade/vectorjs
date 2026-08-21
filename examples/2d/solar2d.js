@@ -10,13 +10,12 @@ const fpsPos = new Vector2(10, 10);
 
 const camera = new Camera2D(new Vector2(0, 0), new Vector2(0, 0), 0, 1.0);
 
-// 1. Generate a static background starfield
 const starCount = 200;
 const stars = Array.from({ length: starCount }, () => ({
     pos: new Vector2(Math.random() * screenWidth, Math.random() * screenHeight),
     size: Math.random() < 0.8 ? 1 : 2,
     color: Math.random() < 0.2 ? Palette.LIGHTGRAY : Palette.WHITE,
-    phase: Math.random() * Math.PI * 2 // Random speed/phase for twinkling
+    phase: Math.random() * Math.PI * 2
 }));
 
 const planets = [
@@ -108,11 +107,11 @@ app.run({
         }
 
         if (ctx.isKeyDown(Keyboard.KEY_UP)) {
-            camera.moveY(-10)
+            camera.moveY(-10);
         }
 
         if (ctx.isKeyDown(Keyboard.KEY_DOWN)) {
-            camera.moveY(10)
+            camera.moveY(10);
         }
 
         if (isRunning) {
@@ -125,15 +124,12 @@ app.run({
 
         render.withScreenSpace((ctx) => {
             ctx.drawFPS(fpsPos);
-        })
+        });
 
         render.withViewport2D(camera, (ctx) => {
-            // 2. Draw starfield with twinkling effect using new Color instances to avoid global mutation
             if (enable_starfield) {
                 stars.forEach((star) => {
                     const twinkleAmount = 0.4 + 0.6 * Math.sin(time * 3 + star.phase);
-
-                    // Instantiate a new Color so we don't permanently fade Palette.WHITE or Palette.LIGHTGRAY
                     const starColor = new Color(star.color.r, star.color.g, star.color.b, star.color.a).applyFade(twinkleAmount);
 
                     ctx.shapes.drawCircle(star.pos, star.size, {
@@ -142,14 +138,16 @@ app.run({
                 });
             }
 
-            // Draw orbital paths using Vector2.add and Vector2.scale
             if (enable_orbit_paths) {
                 planets.forEach((planet) => {
                     const totalDots = 64;
                     for (let i = 0; i < totalDots; i++) {
                         const dotAngle = (i / totalDots) * Math.PI * 2;
-                        const dotDir = new Vector2(Math.cos(dotAngle), Math.sin(dotAngle));
-                        const dotPos = sunPos.add(dotDir.scale(planet.radius));
+
+                        const dotPos = new Vector2(
+                            sunPos.x + Math.cos(dotAngle) * planet.radius,
+                            sunPos.y + Math.sin(dotAngle) * planet.radius
+                        );
 
                         ctx.shapes.drawCircle(dotPos, 1.5, {
                             color: planet.color
@@ -158,22 +156,21 @@ app.run({
                 });
             }
 
-            // Draw Pulsating Sun using Color.brightness and Color.lerp on new instances
             const pulse = (Math.sin(time * 2) + 1) * 0.5;
-
             const sunGlow = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyBrightness(0.3 * pulse);
             const sunColor = new Color(Palette.YELLOW.r, Palette.YELLOW.g, Palette.YELLOW.b, Palette.YELLOW.a).applyLerp(Palette.GOLD || Palette.ORANGE, pulse * 0.2);
 
-            // Outer sun aura
             ctx.shapes.drawCircle(sunPos, 40, { color: sunGlow.applyFade(0.4) });
-            // Core sun
             ctx.shapes.drawCircle(sunPos, 35, { color: sunColor });
 
-            // Draw planets and moons using Vector2 math
             planets.forEach((planet) => {
                 const angle = time * planet.speed;
-                const planetDir = new Vector2(Math.cos(angle), Math.sin(angle));
-                const planetPos = sunPos.add(planetDir.scale(planet.radius));
+
+                // FIX: Compute X and Y natively in JS
+                const planetPos = new Vector2(
+                    sunPos.x + Math.cos(angle) * planet.radius,
+                    sunPos.y + Math.sin(angle) * planet.radius
+                );
 
                 ctx.shapes.drawCircle(planetPos, planet.size, {
                     color: planet.color
@@ -181,8 +178,12 @@ app.run({
 
                 planet.moons.forEach((moon) => {
                     const moonAngle = time * moon.speed;
-                    const moonDir = new Vector2(Math.cos(moonAngle), Math.sin(moonAngle));
-                    const moonPos = planetPos.add(moonDir.scale(moon.radius));
+
+                    // FIX: Compute X and Y natively in JS
+                    const moonPos = new Vector2(
+                        planetPos.x + Math.cos(moonAngle) * moon.radius,
+                        planetPos.y + Math.sin(moonAngle) * moon.radius
+                    );
 
                     ctx.shapes.drawCircle(moonPos, moon.size, {
                         color: moon.color

@@ -190,9 +190,93 @@ namespace App::Modules {
             return Vector2{ .x = self.x, .y = self.y };
         }
 
-        JSVector2& add(JSVector2 other) {
-            *this = JSVector2(Vector2Add(*this, other));
+        // --- Value-returning methods (immutable operations) ---
+
+        [[nodiscard]] JSVector2 with_add(JSVector2 other) const noexcept {
+            return JSVector2(Vector2Add(*this, other));
+        }
+
+        [[nodiscard]] JSVector2 with_subtract(JSVector2 other) const noexcept {
+            return JSVector2(Vector2Subtract(*this, other));
+        }
+
+        [[nodiscard]] JSVector2 with_multiply(JSVector2 other) const noexcept {
+            return JSVector2(Vector2Multiply(*this, other));
+        }
+
+        [[nodiscard]] JSVector2 with_scale(float scale) const noexcept {
+            return JSVector2(Vector2Scale(*this, scale));
+        }
+
+        [[nodiscard]] JSVector2 with_normalize() const noexcept {
+            return JSVector2(Vector2Normalize(*this));
+        }
+
+        [[nodiscard]] JSVector2 with_negate() const noexcept {
+            return JSVector2(Vector2Negate(*this));
+        }
+
+        [[nodiscard]] JSVector2 with_lerp(JSVector2 target, float factor) const noexcept {
+            return JSVector2(Vector2Lerp(*this, target, factor));
+        }
+
+        // --- In-place mutating methods (returns *this) ---
+
+        JSVector2& apply_add(JSVector2 other) noexcept {
+            *this = with_add(other);
             return *this;
+        }
+
+        JSVector2& apply_subtract(JSVector2 other) noexcept {
+            *this = with_subtract(other);
+            return *this;
+        }
+
+        JSVector2& apply_multiply(JSVector2 other) noexcept {
+            *this = with_multiply(other);
+            return *this;
+        }
+
+        JSVector2& apply_scale(float scale) noexcept {
+            *this = with_scale(scale);
+            return *this;
+        }
+
+        JSVector2& apply_normalize() noexcept {
+            *this = with_normalize();
+            return *this;
+        }
+
+        JSVector2& apply_negate() noexcept {
+            *this = with_negate();
+            return *this;
+        }
+
+        JSVector2& apply_lerp(JSVector2 target, float factor) noexcept {
+            *this = with_lerp(target, factor);
+            return *this;
+        }
+
+        // --- Scalar / Utility operations ---
+
+        [[nodiscard]] float length() const noexcept {
+            return Vector2Length(*this);
+        }
+
+        [[nodiscard]] float dot(JSVector2 other) const noexcept {
+            return Vector2DotProduct(*this, other);
+        }
+
+        [[nodiscard]] float distance(JSVector2 other) const noexcept {
+            return Vector2Distance(*this, other);
+        }
+
+        [[nodiscard]] bool is_equal(JSVector2 other) const noexcept {
+            return (x == other.x) && (y == other.y);
+        }
+
+        [[nodiscard]] JSVector2 clone() const noexcept {
+            return {this->x, this->y};
         }
 
     };

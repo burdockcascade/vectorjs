@@ -1667,9 +1667,6 @@ namespace App::Modules {
 
 #pragma region Math
 
-    // =================================================================================================================
-    // Math
-
     static void register_vector2(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto vector2 = engine.make_class<JSVector2>("Vector2");
 
@@ -1678,6 +1675,7 @@ namespace App::Modules {
             return std::make_unique<JSVector2>(static_cast<float>(args[0].to_double()), static_cast<float>(args[1].to_double()));
         });
 
+        // Properties
         vector2.property("x",
             [](JSContext* ctx, JSVector2* self) { return qjspp::Value::make_double(ctx, self->x); },
             [](JSVector2* self, const qjspp::Value& val) { self->x = static_cast<float>(val.to_double()); }
@@ -1688,68 +1686,80 @@ namespace App::Modules {
             [](JSVector2* self, const qjspp::Value& val) { self->y = static_cast<float>(val.to_double()); }
         );
 
-        vector2.instance_method("add", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !other) return {};
-            Vector2 res = Vector2Add(*self, *other);
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
-        });
-
-        vector2.instance_method("scale", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+        vector2.instance_method("add", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
-            Vector2 res = Vector2Scale(*self, static_cast<float>(args[0].to_double()));
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
+            if (const auto* other = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                self->apply_add(*other);
+            }
+            return args.get_this();
         });
 
-        vector2.instance_method("length", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+        vector2.instance_method("subtract", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            if (const auto* other = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                self->apply_subtract(*other);
+            }
+            return args.get_this();
+        });
+
+        vector2.instance_method("multiply", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            if (const auto* other = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                self->apply_multiply(*other);
+            }
+            return args.get_this();
+        });
+
+        vector2.instance_method("scale", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return {};
+            self->apply_scale(args[0].to_float());
+            return args.get_this();
+        });
+
+        vector2.instance_method("normalize", [](JSVector2* self, const qjspp::ArgList&) -> qjspp::Value {
             if (!self) return {};
-            return qjspp::Value::make_double(args[0].context(), Vector2Length(*self));
+            self->apply_normalize();
+            return {};
         });
 
-        vector2.instance_method("normalize", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+        vector2.instance_method("negate", [](JSVector2* self, const qjspp::ArgList&) -> qjspp::Value {
             if (!self) return {};
-            Vector2 res = Vector2Normalize(*self);
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
+            self->apply_negate();
+            return {};
         });
 
-        vector2.instance_method("subtract", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !other) return {};
-            Vector2 res = Vector2Subtract(*self, *other);
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
+        vector2.instance_method("lerp", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.size() < 2) return {};
+            if (const auto* target = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                self->apply_lerp(*target, args[1].to_float());
+            }
+            return args.get_this();
         });
 
-        vector2.instance_method("multiply", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !other) return {};
-            Vector2 res = Vector2Multiply(*self, *other);
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
+        // --- Scalar / Utility Operations ---
+        vector2.instance_method("getLength", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self) return {};
+            return qjspp::Value::make_double(args[0].context(), self->length());
         });
 
         vector2.instance_method("dot", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !other) return {};
-            return qjspp::Value::make_double(args[0].context(), Vector2DotProduct(*self, *other));
+            if (!self || args.empty()) return {};
+            const auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
+            if (!other) return {};
+            return qjspp::Value::make_double(args[0].context(), self->dot(*other));
         });
 
         vector2.instance_method("distance", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !other) return {};
-            return qjspp::Value::make_double(args[0].context(), Vector2Distance(*self, *other));
+            if (!self || args.empty()) return {};
+            const auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
+            if (!other) return {};
+            return qjspp::Value::make_double(args[0].context(), self->distance(*other));
         });
 
-        vector2.instance_method("negate", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (!self) return {};
-            Vector2 res = Vector2Negate(*self);
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
-        });
-
-        vector2.instance_method("lerp", [&engine](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
-            if (args.size() < 2) return {};
-            auto* target = qjspp::get_native_opaque<JSVector2>(args[0]);
-            if (!self || !target) return {};
-            Vector2 res = Vector2Lerp(*self, *target, static_cast<float>(args[1].to_double()));
-            return engine.make_native_object(std::make_unique<JSVector2>(res));
+        vector2.instance_method("isEqual", [](JSVector2* self, const qjspp::ArgList& args) -> qjspp::Value {
+            if (!self || args.empty()) return qjspp::Value::make_bool(args[0].context(), false);
+            const auto* other = qjspp::get_native_opaque<JSVector2>(args[0]);
+            return qjspp::Value::make_bool(args[0].context(), other && self->is_equal(*other));
         });
 
         builder.export_class("Vector2", vector2.build());
