@@ -97,7 +97,7 @@ namespace App::Modules {
                 return engine.make_int(::cpp_fn()); \
             }))
 
-        #define BIND_FLOAT_FN(js_name, cpp_fn) \
+        #define BIND_DOUBLE_FN(js_name, cpp_fn) \
             update_obj.set(js_name, engine.make_function([&engine](const qjspp::ArgList&) -> qjspp::Value { \
                 return engine.make_double(::cpp_fn()); \
             }))
@@ -151,7 +151,9 @@ namespace App::Modules {
         }));
 
         // Time
-        BIND_FLOAT_FN("getDeltaTime", GetFrameTime);
+        BIND_DOUBLE_FN("getDeltaTime", GetFrameTime);
+        BIND_DOUBLE_FN("getTime", GetTime);
+        BIND_INT_FN("getFPS", GetFPS);
 
         #undef BIND_VOID_FN 
         #undef BIND_BOOL_FN
