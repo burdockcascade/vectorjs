@@ -50,6 +50,8 @@ namespace App::Modules {
         }
     };
 
+#pragma region Color
+
     struct JSColor {
         uint8_t r = 0, g = 0, b = 0, a = 0;
 
@@ -124,6 +126,8 @@ namespace App::Modules {
         }
 
     };
+
+#pragma endregion
 
 #pragma region Graphics
 
