@@ -1,91 +1,85 @@
-import { Application, Vector2, Palette } from "vectorjs";
+import { Application, Vector2, Palette, Rectangle } from "vectorjs";
 
-// Window configuration
-const screenWidth = 600;
-const screenHeight = 600;
-const center = new Vector2(screenWidth / 2, screenHeight / 2);
-const fpsPos = new Vector2(10, 10);
-
-// Clock dimensions
-const clockRadius = 200;
-const hourHandLength = 100;
-const minuteHandLength = 140;
-const secondHandLength = 160;
-
-const app = new Application(screenWidth, screenHeight, "Analog Clock");
+const app = new Application(800, 600, "2D Modern Analog Clock");
 
 app.run({
     onDraw(render) {
-        render.withLayer2D((ctx) => {
+        render.clearBackground(Palette.CHARBLACK);
 
-            // 1. Draw Clock Face Outer Ring & Center
-            ctx.shapes.drawCircle(center, clockRadius, {
-                color: Palette.WHITE
-            });
-            ctx.shapes.drawCircle(center, 8, {
-                color: Palette.BLACK
-            });
+        render.withScreenSpace((screen) => {
+            const center = new Vector2(400, 300);
+            const radius = 200;
 
-            // 2. Draw Hour Ticks (12 main markers)
-            for (let i = 0; i < 12; i++) {
-                const angle = (i * 30 - 90) * (Math.PI / 180);
-                const innerRadius = clockRadius - 20;
-
-                const tickStart = new Vector2(
-                    center.x + innerRadius * Math.cos(angle),
-                    center.y + innerRadius * Math.sin(angle)
-                );
-                const tickEnd = new Vector2(
-                    center.x + clockRadius * Math.cos(angle),
-                    center.y + clockRadius * Math.sin(angle)
-                );
-
-                ctx.shapes.drawLine(tickStart, tickEnd, {
-                    color: Palette.GRAY
-                });
-            }
-
-            // 3. Get Current Time
+            // Get live local time components
             const now = new Date();
             const hours = now.getHours() % 12;
             const minutes = now.getMinutes();
             const seconds = now.getSeconds();
             const milliseconds = now.getMilliseconds();
 
-            // Smooth calculations for hand angles (in radians, -90 deg offset to start at 12 o'clock)
-            const secondAngle = ((seconds + milliseconds / 1000) * 6 - 90) * (Math.PI / 180);
-            const minuteAngle = ((minutes + seconds / 60) * 6 - 90) * (Math.PI / 180);
-            const hourAngle = ((hours + minutes / 60) * 30 - 90) * (Math.PI / 180);
+            // Smooth continuous angles for hands (in radians)
+            const secWithMs = seconds + milliseconds / 1000;
+            const secondAngle = (secWithMs / 60) * Math.PI * 2 - Math.PI / 2;
+            const minuteAngle = ((minutes + secWithMs / 60) / 60) * Math.PI * 2 - Math.PI / 2;
+            const hourAngle = ((hours + minutes / 60) / 12) * Math.PI * 2 - Math.PI / 2;
 
-            // Calculate hand end positions
-            const hourHandEnd = new Vector2(
-                center.x + hourHandLength * Math.cos(hourAngle),
-                center.y + hourHandLength * Math.sin(hourAngle)
-            );
-            const minuteHandEnd = new Vector2(
-                center.x + minuteHandLength * Math.cos(minuteAngle),
-                center.y + minuteHandLength * Math.sin(minuteAngle)
-            );
-            const secondHandEnd = new Vector2(
-                center.x + secondHandLength * Math.cos(secondAngle),
-                center.y + secondHandLength * Math.sin(secondAngle)
-            );
+            // 1. Clock Outer Frame & Face Background
+            screen.shapes.drawCircle(center, radius + 15, { color: Palette.SLATE });
+            screen.shapes.drawCircle(center, radius + 10, { color: Palette.OFFWHITE });
+            screen.shapes.drawCircle(center, radius, { color: Palette.CHARBLACK });
 
-            // 4. Draw Clock Hands
+            // 2. Hour / Minute Dial Ticks
+            for (let i = 0; i < 60; i++) {
+                const angle = (i / 60) * Math.PI * 2 - Math.PI / 2;
+                const isHourTick = i % 5 === 0;
+
+                const innerRadius = isHourTick ? radius - 20 : radius - 10;
+                const tickColor = isHourTick ? Palette.WHITE : Palette.GRAY;
+
+                const start = new Vector2(
+                    center.x + Math.cos(angle) * innerRadius,
+                    center.y + Math.sin(angle) * innerRadius
+                );
+                const end = new Vector2(
+                    center.x + Math.cos(angle) * (radius - 5),
+                    center.y + Math.sin(angle) * (radius - 5)
+                );
+
+                screen.shapes.drawLine(start, end, { color: tickColor });
+            }
+
+            // Helper function to draw rotated clock hand rectangles
+            const drawHand = (angle, length, width, color) => {
+                const rect = new Rectangle(center.x, center.y, length, width);
+                screen.shapes.drawRectangle(rect, {
+                    color: color,
+                    rotation: (angle * 180) / Math.PI,
+                    origin: new Vector2(0, width / 2)
+                });
+            };
+
+            // 3. Clock Hands
             // Hour Hand
-            ctx.shapes.drawLine(center, hourHandEnd, {
-                color: Palette.BLUE
-            });
+            drawHand(hourAngle, radius * 0.5, 8, Palette.WHITE);
 
             // Minute Hand
-            ctx.shapes.drawLine(center, minuteHandEnd, {
-                color: Palette.GREEN
-            });
+            drawHand(minuteAngle, radius * 0.75, 5, Palette.CYAN);
 
-            // Second Hand
-            ctx.shapes.drawLine(center, secondHandEnd, {
-                color: Palette.RED
-            });
+            // Second Hand (Sweeping Neon Accent with Tail Offset)
+            const secTailLength = 30;
+            const secTailPos = new Vector2(
+                center.x - Math.cos(secondAngle) * secTailLength,
+                center.y - Math.sin(secondAngle) * secTailLength
+            );
+            const secTipPos = new Vector2(
+                center.x + Math.cos(secondAngle) * (radius - 15),
+                center.y + Math.sin(secondAngle) * (radius - 15)
+            );
+            screen.shapes.drawLine(secTailPos, secTipPos, { color: Palette.HOTPINK });
+
+            // 4. Center Pin Cap
+            screen.shapes.drawCircle(center, 10, { color: Palette.HOTPINK });
+            screen.shapes.drawCircle(center, 4, { color: Palette.WHITE });
         });
     }
 });
