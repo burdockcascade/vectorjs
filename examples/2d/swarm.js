@@ -1,21 +1,33 @@
-import { Application, Vector2, Color, Palette, Rectangle } from "vectorjs";
+import { Application, Vector2, Color, Palette, Rectangle, Circle } from "vectorjs";
 
 let particles = [];
 let rings = [];
 
-const app = new Application(800, 600, "2D Orbiting Neon Swarm");
+const NUM_PARTICLES = 180;
+
+const width = 900;
+const height = 700;
+
+const centerX = width/2;
+const centerY = height/2;
+
+
+const app = new Application(width, height, "2D Orbiting Neon Swarm");
 
 app.run({
     onInit() {
         // Initialize interactive orbiting particles with unique radius, speed, and color
-        for (let i = 0; i < 180; i++) {
+        for (let i = 0; i < NUM_PARTICLES; i++) {
             particles.push({
                 angle: Math.random() * Math.PI * 2,
                 orbitRadius: 40 + Math.random() * 260,
                 speed: (Math.random() - 0.5) * 0.04,
                 size: 2 + Math.random() * 6,
                 baseColor: i % 2 === 0 ? Palette.ELECTRIC_BLUE : Palette.HOTPINK,
-                offsetY: (Math.random() - 0.5) * 50
+                offsetY: (Math.random() - 0.5) * 50,
+                isColliding: false,
+                x: 0,
+                y: 0
             });
         }
 
@@ -33,11 +45,24 @@ app.run({
         const dt = ctx.getDeltaTime();
 
         this.time = ctx.getTime();
-        this.mousePos = ctx.getMousePosition();
 
-        // Rotate orbiting shapes
+        // Rotate orbiting shapes and update current positions/circles
         for (let p of particles) {
             p.angle += p.speed;
+            p.x = centerX + Math.cos(p.angle) * p.orbitRadius;
+            p.y = centerY + Math.sin(p.angle) * p.orbitRadius + Math.sin(this.time * 2 + p.angle) * 15;
+            p.circle = new Circle(p.x, p.y, p.size);
+            p.isColliding = false;
+        }
+
+        // Check circle collision overlaps
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = i + 1; j < particles.length; j++) {
+                if (particles[i].circle.overlaps(particles[j].circle)) {
+                    particles[i].isColliding = true;
+                    particles[j].isColliding = true;
+                }
+            }
         }
 
         // Expand animated geometric background rings
@@ -54,10 +79,6 @@ app.run({
         render.clearBackground(Palette.CHARBLACK);
 
         render.withScreenSpace((screen) => {
-
-            // Center position reacting slightly to mouse movement
-            const centerX = 400;
-            const centerY = 300;
 
             // 1. Draw animated expanding geometric rings
             for (let r of rings) {
@@ -86,43 +107,48 @@ app.run({
 
             // 3. Draw orbiting particle cloud with dynamic positions and colors
             for (let p of particles) {
-                const x = centerX + Math.cos(p.angle) * p.orbitRadius;
-                const y = centerY + Math.sin(p.angle) * p.orbitRadius + Math.sin(this.time * 2 + p.angle) * 15;
-
-                // Shift dynamic color tone over time
-                const lerpFactor = (Math.sin(this.time + p.angle) + 1) / 2;
-                const particleColor = p.baseColor.clone().lerp(Palette.YELLOW, lerpFactor);
+                let particleColor;
+                if (p.isColliding) {
+                    particleColor = Palette.COPPER;
+                } else {
+                    const lerpFactor = (Math.sin(this.time + p.angle) + 1) / 2;
+                    particleColor = p.baseColor.clone().lerp(Palette.YELLOW, lerpFactor);
+                }
 
                 // Main particle shape
                 screen.shapes.drawCircle(
-                    new Vector2(x, y),
+                    new Vector2(p.x, p.y),
                     p.size,
                     { color: particleColor }
                 );
 
                 // Outer ambient glow circle
                 screen.shapes.drawCircle(
-                    new Vector2(x, y),
+                    new Vector2(p.x, p.y),
                     p.size * 2,
                     { color: particleColor.clone().alpha(0.25) }
                 );
             }
 
             // 4. Draw vibrant connecting geometry line pulses
-            for (let i = 0; i < 12; i++) {
-                const p1 = particles[i * 10];
-                const p2 = particles[(i * 10 + 15) % particles.length];
+            if (particles.length > 0) {
+                const lineCount = Math.min(12, particles.length);
+                const step = Math.floor(particles.length / lineCount) || 1;
+                const offset = Math.max(1, Math.floor(particles.length * 0.15));
 
-                const x1 = centerX + Math.cos(p1.angle) * p1.orbitRadius;
-                const y1 = centerY + Math.sin(p1.angle) * p1.orbitRadius;
-                const x2 = centerX + Math.cos(p2.angle) * p2.orbitRadius;
-                const y2 = centerY + Math.sin(p2.angle) * p2.orbitRadius;
+                for (let i = 0; i < lineCount; i++) {
+                    const idx1 = (i * step) % particles.length;
+                    const idx2 = (idx1 + offset) % particles.length;
 
-                screen.shapes.drawLine(
-                    new Vector2(x1, y1),
-                    new Vector2(x2, y2),
-                    { color: Palette.LIME.alpha(0.2) }
-                );
+                    const p1 = particles[idx1];
+                    const p2 = particles[idx2];
+
+                    screen.shapes.drawLine(
+                        new Vector2(p1.x, p1.y),
+                        new Vector2(p2.x, p2.y),
+                        { color: Palette.LIME.alpha(0.2) }
+                    );
+                }
             }
         });
     }

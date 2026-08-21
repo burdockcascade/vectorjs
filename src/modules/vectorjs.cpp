@@ -995,22 +995,21 @@ namespace App::Modules {
             if (!self || args.empty()) return engine.make_bool(false);
             auto* point = qjspp::get_native_opaque<JSVector2>(args[0]);
             if (!point) return engine.make_bool(false);
-            return engine.make_bool(CheckCollisionPointRec(*point, *self));
+            return engine.make_bool(self->contains(*point));
         });
 
         rectangle.instance_method("overlaps", [&engine](JSRectangle* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return engine.make_bool(false);
             auto* rec2 = qjspp::get_native_opaque<JSRectangle>(args[0]);
             if (!rec2) return engine.make_bool(false);
-            return engine.make_bool(CheckCollisionRecs(*self, *rec2));
+            return engine.make_bool(self->overlaps(*rec2));
         });
 
         rectangle.instance_method("getCollisionRect", [&engine](JSRectangle* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return {};
             auto* rec2 = qjspp::get_native_opaque<JSRectangle>(args[0]);
             if (!rec2) return {};
-            auto result = GetCollisionRec(*self, *rec2);
-            return engine.make_native_object(std::make_unique<JSRectangle>(result));
+            return engine.make_native_object(std::make_unique<JSRectangle>(self->get_collision_rect(*rec2)));
         });
 
         builder.export_class("Rectangle", rectangle.build());
@@ -1047,21 +1046,21 @@ namespace App::Modules {
         // Collision: Check if a Vector2 point is inside this circle
         circle.instance_method("contains", [&engine](JSCircle* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return engine.make_bool(false);
-            auto* point = qjspp::get_native_opaque<JSVector2>(args[0]);
+            auto point = qjspp::get_native_opaque<JSVector2>(args[0]);
             if (!point) return engine.make_bool(false);
-            return engine.make_bool(CheckCollisionPointCircle(*point, self->center, self->radius));
+            return engine.make_bool(self->contains(*point));
         });
 
         // Collision: Check overlap with another Circle or a Rectangle
         circle.instance_method("overlaps", [&engine](JSCircle* self, const qjspp::ArgList& args) -> qjspp::Value {
             if (!self || args.empty()) return engine.make_bool(false);
 
-            if (auto* otherCircle = qjspp::get_native_opaque<JSCircle>(args[0])) {
-                return engine.make_bool(CheckCollisionCircles(self->center, self->radius, otherCircle->center, otherCircle->radius));
+            if (const auto otherCircle = qjspp::get_native_opaque<JSCircle>(args[0])) {
+                return engine.make_bool(self->overlaps(*otherCircle));
             }
 
-            if (auto* rec = qjspp::get_native_opaque<JSRectangle>(args[0])) {
-                return engine.make_bool(CheckCollisionCircleRec(self->center, self->radius, *rec));
+            if (const auto rec = qjspp::get_native_opaque<JSRectangle>(args[0])) {
+                return engine.make_bool(self->overlaps(*rec));
             }
 
             return engine.make_bool(false);

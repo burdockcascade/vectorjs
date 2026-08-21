@@ -299,11 +299,36 @@ namespace App::Modules {
         [[nodiscard]] constexpr operator ::Rectangle(this JSRectangle self) noexcept {
             return ::Rectangle{ .x = self.x, .y = self.y, .width = self.width, .height = self.height };
         }
+
+        [[nodiscard]] bool contains(JSVector2 other) const noexcept {
+            return ::CheckCollisionPointRec(other, *this);
+        }
+
+        [[nodiscard]] bool overlaps(JSRectangle other) const noexcept {
+            return ::CheckCollisionRecs(*this, other);
+        }
+
+        JSRectangle get_collision_rect(JSRectangle other) noexcept {
+            return JSRectangle(::GetCollisionRec(*this, other));
+        }
     };
 
     struct JSCircle {
         Vector2 center;
         float radius;
+
+        [[nodiscard]] bool contains(JSVector2 other) const noexcept {
+            return ::CheckCollisionPointCircle(other, this->center, this->radius);
+        }
+
+        [[nodiscard]] bool overlaps(JSCircle other) const noexcept {
+            return ::CheckCollisionCircles(this->center, this->radius, other.center, other.radius);
+        }
+
+        [[nodiscard]] bool overlaps(JSRectangle other) const noexcept {
+            return ::CheckCollisionCircleRec(this->center, this->radius, other);
+        }
+
     };
 
     struct JSTriangle {
