@@ -3,7 +3,7 @@ import { Application, Vector2, Color, Palette, Rectangle, Circle } from "vectorj
 let particles = [];
 let rings = [];
 
-const NUM_PARTICLES = 180;
+const NUM_PARTICLES = 150;
 
 const width = 900;
 const height = 700;

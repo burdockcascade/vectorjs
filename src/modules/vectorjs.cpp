@@ -4,11 +4,12 @@
 #include <array>
 #include <fstream>
 #include <raylib.h>
-#include <raymath.h>
 #include <qjspp.hpp>
 
-#include "screens.hpp"
+#include "info.hpp"
 #include "vectorjs.hpp"
+#include "engine/engine.hpp"
+#include "engine/commands.hpp"
 
 namespace App::Modules {
 
@@ -163,90 +164,75 @@ namespace App::Modules {
         return update_obj;
     }
 
-    static qjspp::Value create_shapes_object(const qjspp::Engine& engine) {
+    static qjspp::Value create_shapes_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
         qjspp::Value shape_obj = engine.make_object();
 
-        shape_obj.set("drawPixel", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawPixel", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawPixel requires position and color arguments");
-            auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
-            auto* col = qjspp::get_native_opaque<JSColor>(args[1]);
-
-            DrawPixelV(pos ? static_cast<Vector2>(*pos) : Vector2{.x = 0, .y = 0},
-                         col ? static_cast<::Color>(*col) : RAYWHITE);
+            const auto pos = qjspp::get_native_opaque<JSVector2>(args[0]);
+            const auto* col = qjspp::get_native_opaque<JSColor>(args[1]);
+            builder.draw_pixel(*pos, Color(col->r, col->g, col->b, col->a));
             return {};
         }));
 
-        shape_obj.set("drawLine", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawLine", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawLine requires start and end positions");
-            auto* start = qjspp::get_native_opaque<JSVector2>(args[0]);
-            auto* end = qjspp::get_native_opaque<JSVector2>(args[1]);
-
+            const auto* start = qjspp::get_native_opaque<JSVector2>(args[0]);
+            const auto* end = qjspp::get_native_opaque<JSVector2>(args[1]);
             JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
-            DrawLineV(start ? static_cast<Vector2>(*start) : Vector2{.x = 0, .y = 0},
-                        end ? static_cast<Vector2>(*end) : Vector2{.x = 0, .y = 0},
-                        draw_options.color);
+            builder.draw_line(*start, *end, draw_options.color);
             return {};
         }));
 
-        shape_obj.set("drawRectangle", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawRectangle", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawRectangle requires a Rectangle argument");
             auto* rect = qjspp::get_native_opaque<JSRectangle>(args[0]);
 
             JSDrawOptions draw_options = parse_draw_options(args.size() > 1 ? args[1].clone() : qjspp::Value());
-            DrawRectanglePro(rect ? static_cast<::Rectangle>(*rect) : ::Rectangle{.x = 0, .y = 0, .width = 0, .height = 0},
-                               draw_options.origin,
-                               draw_options.rotation,
-                               draw_options.color);
+
+            if (rect) {
+                builder.draw_rectangle(*rect, draw_options.color);
+            }
+
             return {};
         }));
 
-        shape_obj.set("drawCircle", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawCircle", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawCircle requires center and radius arguments");
-            auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
-            const double rad = args[1].to_double();
-
+            const auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
+            const auto rad = args[1].to_float();
             JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
-            DrawCircleV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
-                          static_cast<float>(rad),
-                          draw_options.color);
+            builder.draw_circle(*center, rad, draw_options.color);
             return {};
         }));
 
-        shape_obj.set("drawTriangle", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawTriangle", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawTriangle requires 3 Vector2 point arguments");
             auto* p1 = qjspp::get_native_opaque<JSVector2>(args[0]);
             auto* p2 = qjspp::get_native_opaque<JSVector2>(args[1]);
             auto* p3 = qjspp::get_native_opaque<JSVector2>(args[2]);
-
             JSDrawOptions draw_options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
-            DrawTriangle(p1 ? static_cast<Vector2>(*p1) : Vector2{.x = 0, .y = 0},
-                           p2 ? static_cast<Vector2>(*p2) : Vector2{.x = 0, .y = 0},
-                           p3 ? static_cast<Vector2>(*p3) : Vector2{.x = 0, .y = 0},
-                           draw_options.color);
+            builder.draw_triangle(*p1, *p2, *p3, draw_options.color);
             return {};
         }));
 
-        shape_obj.set("drawEllipse", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        shape_obj.set("drawEllipse", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawEllipse requires center, radiusH, and radiusV arguments");
-            auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
-            const double radH = args[1].to_double();
-            const double radV = args[2].to_double();
-
+            const auto* center = qjspp::get_native_opaque<JSVector2>(args[0]);
+            const auto radH = args[1].to_float();
+            const auto radV = args[2].to_float();
             JSDrawOptions draw_options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
-            DrawEllipseV(center ? static_cast<Vector2>(*center) : Vector2{.x = 0, .y = 0},
-                           static_cast<float>(radH),
-                           static_cast<float>(radV),
-                           draw_options.color);
+            builder.draw_ellipse(*center, radH, radV, draw_options.color);
             return {};
         }));
 
         return shape_obj;
     }
 
-    static qjspp::Value create_text_object(const qjspp::Engine& engine) {
+    static qjspp::Value create_text_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
         qjspp::Value text_obj = engine.make_object();
 
-        text_obj.set("drawText", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        text_obj.set("drawText", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawText requires position and text string arguments");
             auto* pos = qjspp::get_native_opaque<JSVector2>(args[0]);
             const std::string txt_str = args[1].to_string();
@@ -257,25 +243,18 @@ namespace App::Modules {
                 fontToUse = *options.font.font_ptr;
             }
 
-            DrawTextPro(fontToUse,
-                          txt_str.c_str(),
-                          pos ? static_cast<Vector2>(*pos) : Vector2{.x = 0, .y = 0},
-                          options.origin,
-                          options.rotation,
-                          options.fontSize,
-                          options.spacing,
-                          options.color);
+            builder.draw_text(txt_str.c_str(), *pos, fontToUse, options.fontSize, options.color);
+
             return {};
         }));
 
         return text_obj;
     }
 
-    static qjspp::Value create_viewport2d_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val) {
+    static qjspp::Value create_viewport2d_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Commands::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
         return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
-
             JSCamera2D camera;
             if (const auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
                 camera = *cam_ptr;
@@ -293,7 +272,7 @@ namespace App::Modules {
         });
     }
 
-    static qjspp::Value create_screen_space_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val) {
+    static qjspp::Value create_screen_space_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Commands::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
         return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withScreenSpace requires a callback function");
@@ -302,7 +281,7 @@ namespace App::Modules {
         });
     }
 
-    static qjspp::Value create_draw_render_object(const qjspp::Engine& engine) {
+    static qjspp::Value create_draw_render_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
         qjspp::Value render2d_obj = engine.make_object();
 
         // 1. Full Texture Drawing: render.drawTexture(texture, destRectangle, [options])
@@ -349,13 +328,13 @@ namespace App::Modules {
         }));
 
         // Add Sub Objects
-        render2d_obj.set("shapes", create_shapes_object(engine));
-        render2d_obj.set("text", create_text_object(engine));
+        render2d_obj.set("shapes", create_shapes_object(engine, builder));
+        render2d_obj.set("text", create_text_object(engine, builder));
 
         // Layer Wrappers
         qjspp::Value render_obj = engine.make_object();
-        render_obj.set("withViewport2D", create_viewport2d_function(engine, render2d_obj));
-        render_obj.set("withScreenSpace", create_screen_space_function(engine, render2d_obj));
+        render_obj.set("withViewport2D", create_viewport2d_function(engine, render2d_obj, builder));
+        render_obj.set("withScreenSpace", create_screen_space_function(engine, render2d_obj, builder));
 
         // ClearBackground
         render_obj.set("clearBackground", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
@@ -365,64 +344,6 @@ namespace App::Modules {
         }));
 
         return render_obj;
-    }
-
-    JSApplication::JSApplication(qjspp::Engine& engine, const int w, const int h, const std::string& title): engine(engine) {
-        InitWindow(w, h, title.data());
-        InitAudioDevice();
-        SetTargetFPS(60);
-    }
-
-    qjspp::Value JSApplication::run(const qjspp::ArgList& args) const {
-        if (args.empty()) {
-            throw std::runtime_error("Expected a user application config object");
-        }
-
-        const qjspp::Value user_app = args[0].clone();
-        const qjspp::Value on_init_func = user_app.get("onInit");
-        const qjspp::Value on_update_func = user_app.get("onUpdate");
-        const qjspp::Value on_draw_func = user_app.get("onDraw");
-        const qjspp::Value on_event_func = user_app.get("onEvent");
-
-        // Instantiate rendering and context objects ONCE outside the frame loop
-        const qjspp::Value update_obj = create_update_context_object(engine);
-        const qjspp::Value render_obj = create_draw_render_object(engine);
-
-        try {
-            if (!on_init_func.is_undefined()) {
-                std::ignore = on_init_func.call_method(user_app, {});
-            }
-
-            while (!WindowShouldClose()) {
-                BeginDrawing();
-
-                if (!on_update_func.is_undefined()) {
-                    std::ignore = on_update_func.call_method(user_app, {update_obj.clone()});
-                }
-
-                if (!on_draw_func.is_undefined()) {
-                    std::ignore = on_draw_func.call_method(user_app, {render_obj.clone()});
-                }
-
-                EndDrawing();
-            }
-        } catch (const std::exception& e) {
-            // Catch the qjspp/JS exception and pass the message to the BSOD screen
-            std::cerr << "JS Exception during execution: " << e.what() << std::endl;
-            show_bsod(e.what());
-            return {};
-        }
-
-        return {};
-    }
-
-    JSApplication::~JSApplication() {
-        if (IsAudioDeviceReady()) {
-            CloseAudioDevice();
-        }
-        if (IsWindowReady()) {
-            CloseWindow();
-        }
     }
 
     static void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
@@ -437,9 +358,43 @@ namespace App::Modules {
             return std::make_unique<JSApplication>(engine, w, h, title);
         });
 
-        cls.instance_method("run", [](const JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
+        cls.instance_method("run", [&engine](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
             if (!app) return {};
-            return app->run(args);
+
+            qjspp::Value user_app = args[0].clone();
+
+            // Setup onInit callback
+            if (const qjspp::Value on_init_func = user_app.get("onInit"); on_init_func.is_function()) {
+                auto func_ptr = std::make_shared<qjspp::Value>(on_init_func.clone());
+                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
+                app->rengine.set_on_init([func_ptr, app_ptr]() {
+                    std::ignore = func_ptr->call_method(*app_ptr, {});
+                });
+            }
+
+            // Setup onUpdate callback
+            if (const qjspp::Value on_update_func = user_app.get("onUpdate"); on_update_func.is_function()) {
+                auto func_ptr = std::make_shared<qjspp::Value>(on_update_func.clone());
+                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
+                auto update_obj_ptr = std::make_shared<qjspp::Value>(create_update_context_object(engine));
+                app->rengine.set_on_update([func_ptr, app_ptr, update_obj_ptr](float delta) {
+                    std::ignore = func_ptr->call_method(*app_ptr, { update_obj_ptr->clone() });
+                });
+            }
+
+            // Setup onDraw callback
+            if (const qjspp::Value on_draw_func = user_app.get("onDraw"); on_draw_func.is_function()) {
+                auto func_ptr = std::make_shared<qjspp::Value>(on_draw_func.clone());
+                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
+                auto render_obj_ptr = std::make_shared<qjspp::Value>(create_draw_render_object(engine, app->rengine.get_buffer()));
+                app->rengine.set_on_draw([func_ptr, app_ptr, render_obj_ptr]() {
+                    std::ignore = func_ptr->call_method(*app_ptr, { render_obj_ptr->clone() });
+                });
+            }
+
+            app->rengine.run();
+
+            return {};
         });
 
         builder.export_class("Application", cls.build());
@@ -1745,7 +1700,6 @@ namespace App::Modules {
 #pragma endregion
 
     void register_vectorjs_module(qjspp::Engine& engine) {
-
         auto mod = engine.new_module("vectorjs");
 
         // Core

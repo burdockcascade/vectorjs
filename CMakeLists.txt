@@ -55,6 +55,7 @@ target_sources(vectorjs PRIVATE
         src/main.cpp
         src/core.cpp
         src/modules/vectorjs.cpp
+        src/engine/engine.cpp
 )
 
 # Hide console on Windows, keep standard main() entry point

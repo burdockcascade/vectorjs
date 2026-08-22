@@ -4,6 +4,9 @@
 
 namespace App {
 
+    void show_welcome();
+    void show_bsod(const std::string &errStr);
+
     class Core {
     public:
         // Lifecycle

@@ -1,7 +1,5 @@
 #include <CLI/CLI.hpp>
-#include "screens.hpp"
 #include "core.hpp"
-
 
 int main(const int argc, char** argv) {
 
@@ -18,14 +16,13 @@ int main(const int argc, char** argv) {
         return cli.exit(e);
     }
 
-    if (scriptInput.empty()) {
-        App::show_welcome();
-        return 0;
-    }
-
     try {
         App::Core app{};
-        app.eval_script(scriptInput);
+        if (scriptInput.empty()) {
+            App::show_welcome();
+        } else {
+            app.eval_script(scriptInput);
+        }
     } catch (const std::exception& e) {
         std::cerr << "Fatal Error: " << e.what() << std::endl;
         App::show_bsod(e.what());

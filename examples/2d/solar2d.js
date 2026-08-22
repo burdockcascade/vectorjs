@@ -97,26 +97,13 @@ let time = 0;
 
 app.run({
     onUpdate(ctx) {
-        if (ctx.isKeyPressed(Keyboard.KEY_SPACE)) {
-            isRunning = !isRunning;
-        }
-
-        if (ctx.isKeyPressed(Keyboard.KEY_R)) {
-            time = 0;
-            camera.target = new Vector2(0, 0);
-        }
-
-        if (ctx.isKeyDown(Keyboard.KEY_UP)) {
-            camera.moveY(-10);
-        }
-
-        if (ctx.isKeyDown(Keyboard.KEY_DOWN)) {
-            camera.moveY(10);
-        }
-
         if (isRunning) {
             time += ctx.getDeltaTime();
         }
+    },
+
+    onKeyDown(key) {
+        isRunning = !isRunning;
     },
 
     onDraw(render) {

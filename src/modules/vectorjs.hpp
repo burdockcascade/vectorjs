@@ -1,8 +1,12 @@
 #pragma once
 
 #include <raylib.h>
+#include <raymath.h>
 #include <qjspp.hpp>
 #include <span>
+
+#include "engine/commands.hpp"
+#include "engine/engine.hpp"
 
 namespace App::Modules {
 
@@ -411,9 +415,8 @@ namespace App::Modules {
     class JSApplication {
     public:
         qjspp::Engine& engine;
-        JSApplication(qjspp::Engine& engine, int w, int h, const std::string& title);
-        [[nodiscard]] qjspp::Value run(const qjspp::ArgList& args) const;
-        ~JSApplication();
+        JSApplication(qjspp::Engine& engine, int w, int h, const std::string& title): engine(engine), rengine(Engine::Engine{w, h, title}) {}
+        Engine::Engine rengine;
     };
 
 #pragma endregion
