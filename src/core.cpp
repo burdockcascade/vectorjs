@@ -1,6 +1,7 @@
 #include <string>
 #include <filesystem>
 #include <iostream>
+#include <sstream>
 #include "core.hpp"
 #include "engine/commands.hpp"
 #include "engine/engine.hpp"
