@@ -12,9 +12,10 @@ namespace Hooray {
 
         using Callback = std::function<void()>;
         using UpdateCallback = std::function<void(float)>;
-        using KeyCallback = std::function<void(int key)>;               // Key pressed event
-        using MouseButtonCallback = std::function<void(int button, Vector2 pos)>; // Mouse click event
-        using MouseMoveCallback = std::function<void(Vector2 pos)>;    // Mouse movement event
+        using KeyCallback = std::function<void(int key)>;
+        using MouseButtonCallback = std::function<void(int button, Vector2 pos)>;
+        using MouseMoveCallback = std::function<void(Vector2 pos)>;
+        using MouseWheelCallback = std::function<void(Vector2 delta)>;
 
         Engine(int width, int height, std::string title);
         ~Engine();
@@ -31,6 +32,7 @@ namespace Hooray {
         void set_on_key_pressed(KeyCallback callback) { on_key_pressed_ = std::move(callback); }
         void set_on_mouse_pressed(MouseButtonCallback callback) { on_mouse_pressed_ = std::move(callback); }
         void set_on_mouse_move(MouseMoveCallback callback) { on_mouse_move_ = std::move(callback); }
+        void set_on_mousewheel_move(MouseWheelCallback callback) { on_mouse_wheel_move_ = std::move(callback); }
 
         void run();
         void display() const;
@@ -51,6 +53,7 @@ namespace Hooray {
         KeyCallback on_key_pressed_;
         MouseButtonCallback on_mouse_pressed_;
         MouseMoveCallback on_mouse_move_;
+        MouseWheelCallback on_mouse_wheel_move_;
 
         void process_input() const;
         void execute_commands() const;

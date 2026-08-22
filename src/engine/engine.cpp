@@ -34,6 +34,14 @@ namespace Hooray {
                 on_mouse_move_(GetMousePosition());
             }
         }
+
+        // Mouse Wheel handling
+        if (on_mouse_wheel_move_) {
+            Vector2 delta = GetMouseWheelMoveV();
+            if (delta.x != 0.0f || delta.y != 0.0f) {
+                on_mouse_wheel_move_(GetMousePosition());
+            }
+        }
     }
 
     void Engine::run() {
