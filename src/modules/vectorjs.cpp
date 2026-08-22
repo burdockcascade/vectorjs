@@ -164,7 +164,7 @@ namespace App::Modules {
         return update_obj;
     }
 
-    static qjspp::Value create_shapes_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
+    static qjspp::Value create_shapes_object(const qjspp::Engine& engine, Hooray::CommandBufferBuilder& builder) {
         qjspp::Value shape_obj = engine.make_object();
 
         shape_obj.set("drawPixel", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
@@ -229,7 +229,7 @@ namespace App::Modules {
         return shape_obj;
     }
 
-    static qjspp::Value create_text_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
+    static qjspp::Value create_text_object(const qjspp::Engine& engine, Hooray::CommandBufferBuilder& builder) {
         qjspp::Value text_obj = engine.make_object();
 
         text_obj.set("drawText", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
@@ -251,7 +251,7 @@ namespace App::Modules {
         return text_obj;
     }
 
-    static qjspp::Value create_viewport2d_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Commands::CommandBufferBuilder& builder) {
+    static qjspp::Value create_viewport2d_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Hooray::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
         return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
@@ -272,7 +272,7 @@ namespace App::Modules {
         });
     }
 
-    static qjspp::Value create_screen_space_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Commands::CommandBufferBuilder& builder) {
+    static qjspp::Value create_screen_space_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Hooray::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
         return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withScreenSpace requires a callback function");
@@ -281,7 +281,7 @@ namespace App::Modules {
         });
     }
 
-    static qjspp::Value create_draw_render_object(const qjspp::Engine& engine, Commands::CommandBufferBuilder& builder) {
+    static qjspp::Value create_draw_render_object(const qjspp::Engine& engine, Hooray::CommandBufferBuilder& builder) {
         qjspp::Value render2d_obj = engine.make_object();
 
         // 1. Full Texture Drawing: render.drawTexture(texture, destRectangle, [options])

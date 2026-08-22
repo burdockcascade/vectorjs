@@ -33,7 +33,7 @@ namespace App {
         std::string qjs_str = std::format("QuickJS Version: {}", QUICKJS_VERSION_STR);
         std::string raylib_str = std::format("Raylib Version: {}", RAYLIB_VERSION_STR);
 
-        Engine::Engine rengine{WIN_WIDTH, WIN_HEIGHT, "Welcome"};
+        Hooray::Engine rengine{WIN_WIDTH, WIN_HEIGHT, "Welcome"};
 
         auto& builder = rengine.get_buffer();
         builder.clear_background(RAYWHITE);
@@ -49,7 +49,7 @@ namespace App {
     void show_bsod(const std::string &errStr) {
         if (IsWindowReady()) CloseWindow();
 
-        Engine::Engine rengine{WIN_WIDTH, WIN_HEIGHT, "VectorJS - Fatal Error"};
+        Hooray::Engine rengine{WIN_WIDTH, WIN_HEIGHT, "VectorJS - Fatal Error"};
         auto& builder = rengine.get_buffer();
 
         builder.clear_background(BLUE);

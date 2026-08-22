@@ -5,7 +5,7 @@
 #include "commands.hpp"
 #include "raylib.h"
 
-namespace Engine {
+namespace Hooray {
 
     class Engine {
     public:
@@ -35,13 +35,13 @@ namespace Engine {
         void run();
         void display() const;
 
-        Commands::CommandBufferBuilder& get_buffer() { return command_buffer_; }
+        Hooray::CommandBufferBuilder& get_buffer() { return command_buffer_; }
 
     private:
         int width_;
         int height_;
         std::string title_;
-        Commands::CommandBufferBuilder command_buffer_{ 1024 };
+        Hooray::CommandBufferBuilder command_buffer_{ 1024 };
 
         Callback on_init_;
         UpdateCallback on_update_;

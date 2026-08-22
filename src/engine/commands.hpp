@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <raylib.h>
 
-namespace Commands {
+namespace Hooray {
 
     // ==========================================
     // State Commands

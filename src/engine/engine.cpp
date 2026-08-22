@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-namespace Engine {
+namespace Hooray {
 
     Engine::Engine(int width, int height, std::string title)
         : width_(width), height_(height), title_(std::move(title)) {}
@@ -113,10 +113,10 @@ namespace Engine {
             std::visit([](auto&& arg) {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, Commands::ClearBackground>) {
+                if constexpr (std::is_same_v<T, Hooray::ClearBackground>) {
                     ClearBackground(arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::SetViewport>) {
+                else if constexpr (std::is_same_v<T, Hooray::SetViewport>) {
                     // Uses Raylib scissor mode to bound viewport rendering statefully
                     BeginScissorMode(
                         static_cast<int>(arg.bounds.x),
@@ -125,28 +125,28 @@ namespace Engine {
                         static_cast<int>(arg.bounds.height)
                     );
                 }
-                else if constexpr (std::is_same_v<T, Commands::SetMatrix>) {
+                else if constexpr (std::is_same_v<T, Hooray::SetMatrix>) {
                     // Set custom matrix transformation if needed
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawPixel>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawPixel>) {
                     DrawPixelV(arg.position, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawLine>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawLine>) {
                     DrawLineEx(arg.start, arg.end, arg.thickness, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawCircle>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawCircle>) {
                     DrawCircleV(arg.center, arg.radius, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawRectangle>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawRectangle>) {
                     DrawRectangleRec(arg.rect, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawTriangle>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawTriangle>) {
                     DrawTriangle(arg.p1, arg.p2, arg.p3, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawEllipse>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawEllipse>) {
                     DrawEllipseV(arg.center, arg.radius_h, arg.radius_v, arg.color);
                 }
-                else if constexpr (std::is_same_v<T, Commands::DrawText>) {
+                else if constexpr (std::is_same_v<T, Hooray::DrawText>) {
                     DrawTextEx(GetFontDefault(), arg.text, arg.position, arg.font_size, 1.0f, arg.color);
                 }
             }, cmd);

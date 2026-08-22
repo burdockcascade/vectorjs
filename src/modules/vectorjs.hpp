@@ -415,8 +415,8 @@ namespace App::Modules {
     class JSApplication {
     public:
         qjspp::Engine& engine;
-        JSApplication(qjspp::Engine& engine, int w, int h, const std::string& title): engine(engine), rengine(Engine::Engine{w, h, title}) {}
-        Engine::Engine rengine;
+        JSApplication(qjspp::Engine& engine, int w, int h, const std::string& title): engine(engine), rengine(Hooray::Engine{w, h, title}) {}
+        Hooray::Engine rengine;
     };
 
 #pragma endregion
