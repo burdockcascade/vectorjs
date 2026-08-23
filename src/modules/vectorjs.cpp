@@ -253,30 +253,24 @@ namespace App::Modules {
 
     static qjspp::Value create_viewport2d_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Hooray::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
-        return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
+
+        return engine.make_function([r2d_ptr, &builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withViewport2D requires at least a callback function");
-            JSCamera2D camera;
             if (const auto* cam_ptr = qjspp::get_native_opaque<JSCamera2D>(args[0])) {
-                camera = *cam_ptr;
-            } else {
-                return {};
+                const qjspp::Value callback = args[1].clone();
+                builder.start_mode_2d(*cam_ptr);
+                std::ignore = callback.call({r2d_ptr->clone()});
+                builder.end_mode_2d();
             }
-
-            const qjspp::Value callback = args[1].clone();
-
-            BeginMode2D(camera);
-            std::ignore = callback.call({r2d_ptr->clone()});
-            EndMode2D();
-
             return {};
         });
     }
 
     static qjspp::Value create_screen_space_function(const qjspp::Engine& engine, const qjspp::Value& r2d_val, Hooray::CommandBufferBuilder& builder) {
         auto r2d_ptr = std::make_shared<qjspp::Value>(r2d_val.clone());
-        return engine.make_function([r2d_ptr](const qjspp::ArgList& args) -> qjspp::Value {
+        return engine.make_function([r2d_ptr, &builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("withScreenSpace requires a callback function");
-            (void)args[0].call({r2d_ptr->clone()});
+            std::ignore = args[0].call({r2d_ptr->clone()});
             return {};
         });
     }
@@ -319,10 +313,10 @@ namespace App::Modules {
         }));
 
         // Add FPS
-        render2d_obj.set("drawFPS", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        render2d_obj.set("drawFPS", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.empty()) throw std::runtime_error("drawFPS requires a Vector2 position argument");
-            if (const auto* pos = qjspp::get_native_opaque<JSVector2>(args[0])) {
-                DrawFPS(static_cast<int>(pos->x), static_cast<int>(pos->y));
+            if (auto pos = qjspp::get_native_opaque<JSVector2>(args[0])) {
+                builder.draw_fps(*pos);
             }
             return {};
         }));
@@ -337,9 +331,9 @@ namespace App::Modules {
         render_obj.set("withScreenSpace", create_screen_space_function(engine, render2d_obj, builder));
 
         // ClearBackground
-        render_obj.set("clearBackground", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        render_obj.set("clearBackground", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             auto* color = args.empty() ? nullptr : qjspp::get_native_opaque<JSColor>(args[0]);
-            ::ClearBackground(color ? static_cast<::Color>(*color) : BLACK);
+            builder.clear_background(color ? static_cast<::Color>(*color) : BLACK);
             return {};
         }));
 

@@ -1,6 +1,10 @@
 #include "engine.hpp"
 
 namespace Hooray {
+    namespace {
+        template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+        template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+    }
 
     Engine::Engine(int width, int height, std::string title)
         : width_(width), height_(height), title_(std::move(title)) {}
@@ -45,6 +49,14 @@ namespace Hooray {
     }
 
     void Engine::run() {
+        run_loop(true);
+    }
+
+    void Engine::display() {
+        run_loop(false);
+    }
+
+    void Engine::run_loop(const bool clear_buffer_after_frame) {
         InitWindow(width_, height_, title_.c_str());
         InitAudioDevice();
         SetTargetFPS(60);
@@ -54,7 +66,7 @@ namespace Hooray {
         }
 
         while (!WindowShouldClose()) {
-            command_buffer_.clear();
+            if (clear_buffer_after_frame) command_buffer_.clear();
 
             process_input();
 
@@ -81,81 +93,42 @@ namespace Hooray {
         }
     }
 
-    void Engine::display() const {
-        InitWindow(width_, height_, title_.c_str());
-        InitAudioDevice();
-        SetTargetFPS(60);
-
-        if (on_init_) {
-            on_init_();
-        }
-
-        while (!WindowShouldClose()) {
-
-            if (on_update_) {
-                on_update_(GetFrameTime());
-            }
-
-            BeginDrawing();
-
-            if (on_draw_) {
-                on_draw_();
-            }
-
-            execute_commands();
-
-            EndDrawing();
-
-        }
-
-        if (IsAudioDeviceReady()) {
-            CloseAudioDevice();
-        }
-        if (IsWindowReady()) {
-            CloseWindow();
-        }
-    }
-
+    // 2. The refactored execute_commands function
     void Engine::execute_commands() const {
         for (const auto& cmd : command_buffer_.get_commands()) {
-            std::visit([](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
-
-                if constexpr (std::is_same_v<T, Hooray::ClearBackground>) {
-                    ClearBackground(arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::SetViewport>) {
-                    // Uses Raylib scissor mode to bound viewport rendering statefully
-                    BeginScissorMode(
-                        static_cast<int>(arg.bounds.x),
-                        static_cast<int>(arg.bounds.y),
-                        static_cast<int>(arg.bounds.width),
-                        static_cast<int>(arg.bounds.height)
-                    );
-                }
-                else if constexpr (std::is_same_v<T, Hooray::SetMatrix>) {
-                    // Set custom matrix transformation if needed
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawPixel>) {
-                    DrawPixelV(arg.position, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawLine>) {
-                    DrawLineEx(arg.start, arg.end, arg.thickness, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawCircle>) {
-                    DrawCircleV(arg.center, arg.radius, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawRectangle>) {
-                    DrawRectangleRec(arg.rect, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawTriangle>) {
-                    DrawTriangle(arg.p1, arg.p2, arg.p3, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawEllipse>) {
-                    DrawEllipseV(arg.center, arg.radius_h, arg.radius_v, arg.color);
-                }
-                else if constexpr (std::is_same_v<T, Hooray::DrawText>) {
-                    DrawTextEx(GetFontDefault(), arg.text, arg.position, arg.font_size, 1.0f, arg.color);
+            std::visit(overloaded{
+                [](const ClearBackground& arg) {
+                    ::ClearBackground(arg.color);
+                },
+                [](const BeginMode2D& arg) {
+                    ::BeginMode2D(arg.camera);
+                },
+                [](const EndMode2D& arg) {
+                    ::EndMode2D();
+                },
+                [](const DrawFPS& arg) {
+                    ::DrawFPS(static_cast<int>(arg.position.x), static_cast<int>(arg.position.y));
+                },
+                [](const DrawPixel& arg) {
+                    ::DrawPixelV(arg.position, arg.color);
+                },
+                [](const DrawLine& arg) {
+                    ::DrawLineEx(arg.start, arg.end, arg.thickness, arg.color);
+                },
+                [](const DrawCircle& arg) {
+                    ::DrawCircleV(arg.center, arg.radius, arg.color);
+                },
+                [](const DrawRectangle& arg) {
+                    ::DrawRectangleRec(arg.rect, arg.color);
+                },
+                [](const DrawTriangle& arg) {
+                    ::DrawTriangle(arg.p1, arg.p2, arg.p3, arg.color);
+                },
+                [](const DrawEllipse& arg) {
+                    ::DrawEllipseV(arg.center, arg.radius_h, arg.radius_v, arg.color);
+                },
+                [](const DrawText& arg) {
+                    ::DrawTextEx(GetFontDefault(), arg.text, arg.position, arg.font_size, 1.0f, arg.color);
                 }
             }, cmd);
         }

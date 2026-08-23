@@ -35,9 +35,12 @@ namespace Hooray {
         void set_on_mousewheel_move(MouseWheelCallback callback) { on_mouse_wheel_move_ = std::move(callback); }
 
         void run();
-        void display() const;
 
-        Hooray::CommandBufferBuilder& get_buffer() { return command_buffer_; }
+        void display();
+
+        void run_loop(bool clear_buffer_after_frame);
+
+        CommandBufferBuilder& get_buffer() { return command_buffer_; }
 
     private:
         int width_;

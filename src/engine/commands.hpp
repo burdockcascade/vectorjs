@@ -15,17 +15,19 @@ namespace Hooray {
         Color color{ RAYWHITE };
     };
 
-    struct SetViewport {
-        Rectangle bounds;
+    struct BeginMode2D {
+        Camera2D camera;
     };
 
-    struct SetMatrix {
-        Matrix transform;
-    };
+    struct EndMode2D {};
 
     // ==========================================
     // Primitive Draw Commands
     // ==========================================
+
+    struct DrawFPS {
+        Vector2 position;
+    };
 
     struct DrawPixel {
         Vector2 position;
@@ -78,8 +80,9 @@ namespace Hooray {
 
     using Command = std::variant<
         ClearBackground,
-        SetViewport,
-        SetMatrix,
+        BeginMode2D,
+        EndMode2D,
+        DrawFPS,
         DrawPixel,
         DrawLine,
         DrawCircle,
@@ -115,6 +118,18 @@ namespace Hooray {
         // Helper ergonomics for pushing raw commands directly
         void clear_background(Color color = RAYWHITE) {
             queue.emplace_back(ClearBackground{ .color = color });
+        }
+
+        void start_mode_2d(Camera2D camera) {
+            queue.emplace_back(BeginMode2D{camera});
+        }
+
+        void end_mode_2d() {
+            queue.emplace_back(EndMode2D{});
+        }
+
+        void draw_fps(Vector2 pos) {
+            queue.emplace_back(DrawFPS{ .position = pos });
         }
 
         void draw_circle(Vector2 center, float radius, Color color) {
