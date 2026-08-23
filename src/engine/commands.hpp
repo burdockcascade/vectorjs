@@ -88,7 +88,13 @@ namespace Hooray {
         Color tint{ WHITE };
     };
 
-
+    struct DrawPoly {
+        Vector2 center;
+        int sides;
+        float radius;
+        float rotation; // Rotation in degrees
+        Color color;
+    };
 
     // ==========================================
     // Command Variant & Queue
@@ -107,7 +113,8 @@ namespace Hooray {
         DrawEllipse,
         DrawText,
         DrawTexture,
-        DrawTextureRec
+        DrawTextureRec,
+        DrawPoly
     >;
 
     // Contiguous linear buffer for cache-friendly execution
@@ -184,6 +191,16 @@ namespace Hooray {
 
         void draw_texture_rec(const Texture2D& texture, Rectangle source, Vector2 pos, Color tint = WHITE) {
             queue.emplace_back(DrawTextureRec{ .texture = texture, .source = source, .position = pos, .tint = tint });
+        }
+
+        void draw_poly(Vector2 center, int sides, float radius, float rotation, Color color) {
+            queue.emplace_back(DrawPoly{
+                .center = center,
+                .sides = sides,
+                .radius = radius,
+                .rotation = rotation,
+                .color = color
+            });
         }
 
         // Read access for execution dispatcher
