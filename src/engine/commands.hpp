@@ -71,6 +71,7 @@ namespace Hooray {
         Vector2 position;
         Font font_face;
         float font_size;
+        float spacing;
         Color color;
     };
 
