@@ -279,7 +279,7 @@ namespace App::Modules {
         qjspp::Value render2d_obj = engine.make_object();
 
         // 1. Full Texture Drawing: render.drawTexture(texture, destRectangle, [options])
-        render2d_obj.set("drawTexture", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        render2d_obj.set("drawTexture", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 2) throw std::runtime_error("drawTexture requires a Texture and a destination Rectangle");
 
             auto* tex = qjspp::get_native_opaque<JSTexture>(args[0]);
@@ -294,6 +294,9 @@ namespace App::Modules {
                 : Rectangle{ 0.0f, 0.0f, static_cast<float>(tex->get_width()), static_cast<float>(tex->get_height()) };
 
             DrawTexturePro(*(tex->texture_ptr), src_rect, *dest, options.origin, options.rotation, options.color);
+
+            builder.draw_texture_rec(*(tex->texture_ptr), src_rect, dest, options.color);
+
             return {};
         }));
 

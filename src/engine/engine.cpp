@@ -128,7 +128,13 @@ namespace Hooray {
                     ::DrawEllipseV(arg.center, arg.radius_h, arg.radius_v, arg.color);
                 },
                 [](const DrawText& arg) {
-                    ::DrawTextEx(GetFontDefault(), arg.text, arg.position, arg.font_size, 1.0f, arg.color);
+                    ::DrawTextEx(arg.font_face, arg.text, arg.position, arg.font_size, 1.0f, arg.color);
+                },
+                [](const DrawTexture& arg) {
+                    ::DrawTextureV(arg.texture, arg.position, arg.tint);
+                },
+                [](const DrawTextureRec& arg) {
+                    ::DrawTextureRec(arg.texture, arg.source, arg.position, arg.tint);
                 }
             }, cmd);
         }

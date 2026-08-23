@@ -74,6 +74,22 @@ namespace Hooray {
         Color color;
     };
 
+    struct DrawTexture {
+        Texture2D texture;
+        Vector2 position;
+        Color tint{ WHITE };
+    };
+
+    // Perfect for sprite sheets and animations
+    struct DrawTextureRec {
+        Texture2D texture;
+        Rectangle source;
+        Vector2 position;
+        Color tint{ WHITE };
+    };
+
+
+
     // ==========================================
     // Command Variant & Queue
     // ==========================================
@@ -89,7 +105,9 @@ namespace Hooray {
         DrawRectangle,
         DrawTriangle,
         DrawEllipse,
-        DrawText
+        DrawText,
+        DrawTexture,
+        DrawTextureRec
     >;
 
     // Contiguous linear buffer for cache-friendly execution
@@ -158,6 +176,14 @@ namespace Hooray {
 
         void draw_text(const char* text, const Vector2 pos, const Font &font_face, const float size, const Color color) {
             queue.emplace_back(DrawText{ .text = text, .position = pos, .font_face = font_face, .font_size = size, .color = color });
+        }
+
+        void draw_texture(const Texture2D& texture, Vector2 pos, Color tint = WHITE) {
+            queue.emplace_back(DrawTexture{ .texture = texture, .position = pos, .tint = tint });
+        }
+
+        void draw_texture_rec(const Texture2D& texture, Rectangle source, Vector2 pos, Color tint = WHITE) {
+            queue.emplace_back(DrawTextureRec{ .texture = texture, .source = source, .position = pos, .tint = tint });
         }
 
         // Read access for execution dispatcher
