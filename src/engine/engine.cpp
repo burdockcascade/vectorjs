@@ -93,7 +93,6 @@ namespace Hooray {
         }
     }
 
-    // 2. The refactored execute_commands function
     void Engine::execute_commands() const {
         for (const auto& cmd : command_buffer_.get_commands()) {
             std::visit(overloaded{
@@ -103,7 +102,7 @@ namespace Hooray {
                 [](const BeginMode2D& arg) {
                     ::BeginMode2D(arg.camera);
                 },
-                [](const EndMode2D& arg) {
+                [](const EndMode2D&) {
                     ::EndMode2D();
                 },
                 [](const DrawFPS& arg) {
@@ -128,7 +127,7 @@ namespace Hooray {
                     ::DrawEllipseV(arg.center, arg.radius_h, arg.radius_v, arg.color);
                 },
                 [](const DrawText& arg) {
-                    ::DrawTextEx(arg.font_face, arg.text, arg.position, arg.font_size, arg.spacing, arg.color);
+                    ::DrawTextEx(arg.font_face, arg.text.c_str(), arg.position, arg.font_size, arg.spacing, arg.color);
                 },
                 [](const DrawTexture& arg) {
                     ::DrawTextureV(arg.texture, arg.position, arg.tint);

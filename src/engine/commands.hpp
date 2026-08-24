@@ -3,6 +3,7 @@
 #include <vector>
 #include <variant>
 #include <type_traits>
+#include <string>
 #include <raylib.h>
 
 namespace Hooray {
@@ -67,7 +68,7 @@ namespace Hooray {
     };
 
     struct DrawText {
-        const char* text; // Pointer to static/arena memory; avoids std::string heap allocation
+        std::string text;
         Vector2 position;
         Font font_face;
         float font_size;
@@ -92,7 +93,6 @@ namespace Hooray {
         Texture2D texture;
         Rectangle source;
         Rectangle dest;
-        Vector2 position;
         Vector2 origin;
         float rotation;
         Color tint;
@@ -102,7 +102,7 @@ namespace Hooray {
         Vector2 center;
         int sides;
         float radius;
-        float rotation; // Rotation in degrees
+        float rotation;
         Color color;
     };
 
@@ -128,19 +128,16 @@ namespace Hooray {
         DrawPoly
     >;
 
-    // Contiguous linear buffer for cache-friendly execution
     class CommandBufferBuilder {
         std::vector<Command> queue;
 
     public:
         CommandBufferBuilder() = default;
 
-        // Reserves contiguous memory up front to eliminate vector reallocations during frame updates
         explicit CommandBufferBuilder(const size_t initial_capacity) {
             queue.reserve(initial_capacity);
         }
 
-        // Generic push method for any valid command struct
         template <typename T>
         void push(T&& command) {
             static_assert(
@@ -150,15 +147,16 @@ namespace Hooray {
             queue.push_back(std::forward<T>(command));
         }
 
-        // Helper ergonomics for pushing raw commands directly
+        void reserve(const size_t capacity) {
+            queue.reserve(capacity);
+        }
+
         void clear_background(const Color color = RAYWHITE) {
-            queue.emplace_back(ClearBackground{
-                .color = color
-            });
+            queue.emplace_back(ClearBackground{ .color = color });
         }
 
         void start_mode_2d(const Camera2D &camera) {
-            queue.emplace_back(BeginMode2D{camera});
+            queue.emplace_back(BeginMode2D{ camera });
         }
 
         void end_mode_2d() {
@@ -166,121 +164,75 @@ namespace Hooray {
         }
 
         void draw_fps(const Vector2 pos) {
-            queue.emplace_back(DrawFPS{
-                .position = pos
-            });
+            queue.emplace_back(DrawFPS{ .position = pos });
         }
 
         void draw_circle(const Vector2 center, const float radius, const Color color) {
-            queue.emplace_back(DrawCircle{
-                .center = center,
-                .radius = radius,
-                .color = color
-            });
+            queue.emplace_back(DrawCircle{ .center = center, .radius = radius, .color = color });
         }
 
         void draw_rectangle(const Rectangle rect, const Color color) {
-            queue.emplace_back(DrawRectangle{
-                .rect = rect,
-                .color = color
-            });
+            queue.emplace_back(DrawRectangle{ .rect = rect, .color = color });
         }
 
         void draw_pixel(const Vector2 pos, const Color color) {
-            queue.emplace_back(DrawPixel{
-                .position = pos,
-                .color = color
-            });
+            queue.emplace_back(DrawPixel{ .position = pos, .color = color });
         }
 
-        void draw_line(const Vector2 start, const Vector2 end, Color color) {
-            queue.emplace_back(DrawLine{
-                .start = start,
-                .end = end
-            });
+        // Added thickness parameter (defaulted to 1.0f)
+        void draw_line(const Vector2 start, const Vector2 end, const Color color, const float thickness = 1.0f) {
+            queue.emplace_back(DrawLine{ .start = start, .end = end, .thickness = thickness, .color = color });
         }
 
+        // Added missing p3 parameter
         void draw_triangle(const Vector2 p1, const Vector2 p2, const Vector2 p3, const Color color) {
-            queue.emplace_back(DrawTriangle{
-                .p1 = p1,
-                .p2 = p2,
-                .color = color
-            });
+            queue.emplace_back(DrawTriangle{ .p1 = p1, .p2 = p2, .p3 = p3, .color = color });
         }
 
-        void draw_ellipse(Vector2 center, const float radH, const float radV, const Color color) {
-            queue.emplace_back(DrawEllipse{
-                .center = center,
-                .radius_h = radH,
-                .radius_v = radV,
-                .color = color
-            });
+        void draw_ellipse(const Vector2 center, const float radH, const float radV, const Color color) {
+            queue.emplace_back(DrawEllipse{ .center = center, .radius_h = radH, .radius_v = radV, .color = color });
         }
 
-        void draw_text(const char* text, const Vector2 pos, const Font &font_face, const float size, const Color color) {
+        // Added missing spacing parameter (defaulted to 1.0f)
+        void draw_text(std::string text, const Vector2 pos, const Font &font_face, const float size, const Color color, const float spacing = 1.0f) {
             queue.emplace_back(DrawText{
-                .text = text,
+                .text = std::move(text),
                 .position = pos,
                 .font_face = font_face,
                 .font_size = size,
+                .spacing = spacing,
                 .color = color
             });
         }
 
         void draw_texture(const Texture2D& texture, const Vector2 pos, const Color tint = WHITE) {
-            queue.emplace_back(DrawTexture{
-                .texture = texture,
-                .position = pos,
-                .tint = tint
-            });
+            queue.emplace_back(DrawTexture{ .texture = texture, .position = pos, .tint = tint });
         }
 
         void draw_texture_rec(const Texture2D& texture, const Rectangle source, const Vector2 pos, const Color tint = WHITE) {
-            queue.emplace_back(DrawTextureRec{
-                .texture = texture,
-                .source = source,
-                .position = pos,
-                .tint = tint
-            });
+            queue.emplace_back(DrawTextureRec{ .texture = texture, .source = source, .position = pos, .tint = tint });
         }
 
-        void draw_texture_pro(const Texture& texture, const Rectangle source, const Rectangle dest, const Vector2 origin, const float rotation, const Color color) {
+        // Removed position parameter from DrawTexturePro helper
+        void draw_texture_pro(const Texture2D& texture, const Rectangle source, const Rectangle dest, const Vector2 origin, const float rotation, const Color tint = WHITE) {
             queue.emplace_back(DrawTexturePro{
                 .texture = texture,
                 .source = source,
                 .dest = dest,
                 .origin = origin,
                 .rotation = rotation,
-                .tint = color
+                .tint = tint
             });
         }
 
         void draw_poly(const Vector2 center, const int sides, const float radius, const float rotation, const Color color) {
-            queue.emplace_back(DrawPoly{
-                .center = center,
-                .sides = sides,
-                .radius = radius,
-                .rotation = rotation,
-                .color = color
-            });
+            queue.emplace_back(DrawPoly{ .center = center, .sides = sides, .radius = radius, .rotation = rotation, .color = color });
         }
 
-        [[nodiscard]] const std::vector<Command>& get_commands() const {
-            return queue;
-        }
-
-        void clear() {
-            queue.clear();
-        }
-
-        [[nodiscard]] bool empty() const {
-            return queue.empty();
-        }
-
-        [[nodiscard]] size_t size() const {
-            return queue.size();
-        }
-
+        [[nodiscard]] const std::vector<Command>& get_commands() const { return queue; }
+        void clear() { queue.clear(); }
+        [[nodiscard]] bool empty() const { return queue.empty(); }
+        [[nodiscard]] size_t size() const { return queue.size(); }
     };
 
 }
