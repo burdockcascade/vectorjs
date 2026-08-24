@@ -16,6 +16,7 @@ namespace Hooray {
         using MouseButtonCallback = std::function<void(int button, Vector2 pos)>;
         using MouseMoveCallback = std::function<void(Vector2 pos)>;
         using MouseWheelCallback = std::function<void(Vector2 delta)>;
+        using MouseButtonCallback = std::function<void(int button, Vector2 pos)>;
 
         Engine(int width, int height, std::string title);
         ~Engine();
@@ -33,6 +34,7 @@ namespace Hooray {
         void set_on_mouse_pressed(MouseButtonCallback callback) { on_mouse_pressed_ = std::move(callback); }
         void set_on_mouse_move(MouseMoveCallback callback) { on_mouse_move_ = std::move(callback); }
         void set_on_mousewheel_move(MouseWheelCallback callback) { on_mouse_wheel_move_ = std::move(callback); }
+        void set_on_mouse_released(MouseButtonCallback callback) { on_mouse_released_ = std::move(callback); }
 
         void run();
 
@@ -57,6 +59,7 @@ namespace Hooray {
         MouseButtonCallback on_mouse_pressed_;
         MouseMoveCallback on_mouse_move_;
         MouseWheelCallback on_mouse_wheel_move_;
+        MouseButtonCallback on_mouse_released_;
 
         void process_input() const;
         void execute_commands() const;

@@ -21,16 +21,6 @@ namespace Hooray {
             }
         }
 
-        // Mouse click handling
-        if (on_mouse_pressed_) {
-            const Vector2 mouse_pos = GetMousePosition();
-            for (int button = MOUSE_BUTTON_LEFT; button <= MOUSE_BUTTON_BACK; ++button) {
-                if (IsMouseButtonPressed(button)) {
-                    on_mouse_pressed_(button, mouse_pos);
-                }
-            }
-        }
-
         // Mouse move handling
         if (on_mouse_move_) {
             Vector2 delta = GetMouseDelta();
@@ -43,7 +33,20 @@ namespace Hooray {
         if (on_mouse_wheel_move_) {
             Vector2 delta = GetMouseWheelMoveV();
             if (delta.x != 0.0f || delta.y != 0.0f) {
-                on_mouse_wheel_move_(GetMousePosition());
+                on_mouse_wheel_move_(delta);
+            }
+        }
+
+        // Mouse press and release handling
+        if (on_mouse_pressed_ || on_mouse_released_) {
+            const Vector2 mouse_pos = GetMousePosition();
+            for (int button = MOUSE_BUTTON_LEFT; button <= MOUSE_BUTTON_BACK; ++button) {
+                if (on_mouse_pressed_ && IsMouseButtonPressed(button)) {
+                    on_mouse_pressed_(button, mouse_pos);
+                }
+                if (on_mouse_released_ && IsMouseButtonReleased(button)) {
+                    on_mouse_released_(button, mouse_pos);
+                }
             }
         }
     }
