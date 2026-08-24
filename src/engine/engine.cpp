@@ -6,7 +6,7 @@ namespace Hooray {
         template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
     }
 
-    Engine::Engine(int width, int height, std::string title)
+    Engine::Engine(const int width, const int height, std::string title)
         : width_(width), height_(height), title_(std::move(title)) {}
 
     Engine::~Engine() = default;
@@ -23,7 +23,7 @@ namespace Hooray {
 
         // Mouse click handling
         if (on_mouse_pressed_) {
-            Vector2 mouse_pos = GetMousePosition();
+            const Vector2 mouse_pos = GetMousePosition();
             for (int button = MOUSE_BUTTON_LEFT; button <= MOUSE_BUTTON_BACK; ++button) {
                 if (IsMouseButtonPressed(button)) {
                     on_mouse_pressed_(button, mouse_pos);
