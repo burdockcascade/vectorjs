@@ -136,6 +136,9 @@ namespace Hooray {
                 [](const DrawTextureRec& arg) {
                     ::DrawTextureRec(arg.texture, arg.source, arg.position, arg.tint);
                 },
+                [](const DrawTexturePro& arg) {
+                    ::DrawTexturePro(arg.texture, arg.source, arg.dest, arg.origin, arg.rotation, arg.tint);
+                },
                 [](const DrawPoly& arg) {
                     ::DrawPoly(arg.center, arg.sides, arg.radius, arg.rotation, arg.color);
                 }

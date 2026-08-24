@@ -78,15 +78,24 @@ namespace Hooray {
     struct DrawTexture {
         Texture2D texture;
         Vector2 position;
-        Color tint{ WHITE };
+        Color tint;
     };
 
-    // Perfect for sprite sheets and animations
     struct DrawTextureRec {
         Texture2D texture;
         Rectangle source;
         Vector2 position;
-        Color tint{ WHITE };
+        Color tint;
+    };
+
+    struct DrawTexturePro {
+        Texture2D texture;
+        Rectangle source;
+        Rectangle dest;
+        Vector2 position;
+        Vector2 origin;
+        float rotation;
+        Color tint;
     };
 
     struct DrawPoly {
@@ -115,6 +124,7 @@ namespace Hooray {
         DrawText,
         DrawTexture,
         DrawTextureRec,
+        DrawTexturePro,
         DrawPoly
     >;
 
@@ -231,6 +241,17 @@ namespace Hooray {
                 .source = source,
                 .position = pos,
                 .tint = tint
+            });
+        }
+
+        void draw_texture_pro(const Texture& texture, const Rectangle source, const Rectangle dest, const Vector2 origin, const float rotation, const Color color) {
+            queue.emplace_back(DrawTexturePro{
+                .texture = texture,
+                .source = source,
+                .dest = dest,
+                .origin = origin,
+                .rotation = rotation,
+                .tint = color
             });
         }
 

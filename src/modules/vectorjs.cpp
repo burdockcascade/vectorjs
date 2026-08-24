@@ -293,15 +293,13 @@ namespace App::Modules {
                 ? static_cast<Rectangle>(options.source)
                 : Rectangle{ 0.0f, 0.0f, static_cast<float>(tex->get_width()), static_cast<float>(tex->get_height()) };
 
-            DrawTexturePro(*(tex->texture_ptr), src_rect, *dest, options.origin, options.rotation, options.color);
-
-            builder.draw_texture_rec(*(tex->texture_ptr), src_rect, dest, options.color);
+            builder.draw_texture_pro(*(tex->texture_ptr), src_rect, *dest, options.origin, options.rotation, options.color);
 
             return {};
         }));
 
         // 2. Sprite Sheet Drawing: render.drawSprite(texture, sourceRect, destRect, [options])
-        render2d_obj.set("drawSprite", engine.make_function([](const qjspp::ArgList& args) -> qjspp::Value {
+        render2d_obj.set("drawSprite", engine.make_function([&builder](const qjspp::ArgList& args) -> qjspp::Value {
             if (args.size() < 3) throw std::runtime_error("drawSprite requires Texture, source Rectangle, and destination Rectangle");
 
             auto* tex = qjspp::get_native_opaque<JSTexture>(args[0]);
@@ -311,7 +309,7 @@ namespace App::Modules {
 
             JSDrawOptions options = parse_draw_options(args.size() > 3 ? args[3].clone() : qjspp::Value());
 
-            DrawTexturePro(*(tex->texture_ptr), *src, *dest, options.origin, options.rotation, options.color);
+            builder.draw_texture_pro(*(tex->texture_ptr), *src, *dest, options.origin, options.rotation, options.color);
             return {};
         }));
 
