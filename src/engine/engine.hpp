@@ -46,7 +46,7 @@ namespace Hooray {
         int width_;
         int height_;
         std::string title_;
-        Hooray::CommandBufferBuilder command_buffer_{ 1024 };
+        CommandBufferBuilder command_buffer_{ 1024 };
 
         Callback on_init_;
         UpdateCallback on_update_;
