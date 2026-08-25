@@ -180,7 +180,7 @@ namespace App::Modules {
             if (args.size() < 2) throw std::runtime_error("drawLine requires start and end positions");
             const auto* start = qjspp::get_native_opaque<JSVector2>(args[0]);
             const auto* end = qjspp::get_native_opaque<JSVector2>(args[1]);
-            JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2].clone() : qjspp::Value());
+            JSDrawOptions draw_options = parse_draw_options(args.size() > 2 ? args[2] : qjspp::Value());
             builder.draw_line(*start, *end, draw_options.color);
             return {};
         }));
@@ -189,7 +189,7 @@ namespace App::Modules {
             if (args.empty()) throw std::runtime_error("drawRectangle requires a Rectangle argument");
             auto* rect = qjspp::get_native_opaque<JSRectangle>(args[0]);
 
-            JSDrawOptions draw_options = parse_draw_options(args.size() > 1 ? args[1].clone() : qjspp::Value());
+            JSDrawOptions draw_options = parse_draw_options(args.size() > 1 ? args[1] : qjspp::Value());
 
             if (rect) {
                 builder.draw_rectangle(*rect, draw_options.color);
