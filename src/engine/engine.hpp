@@ -12,9 +12,41 @@ namespace Hooray {
     class LifecycleListener {
     public:
         virtual ~LifecycleListener() = default;
-        virtual void on_init() {}
-        virtual void on_update(float delta_time) {}
-        virtual void on_draw() {}
+        virtual bool on_init() { return false; }
+        virtual bool on_update(float delta_time) { return false; }
+        virtual bool on_draw() { return false; }
+    };
+
+    class LifecycleManager {
+    public:
+        void add_listener(const std::shared_ptr<LifecycleListener>& listener) {
+            listeners_.push_back(listener);
+        }
+
+        void remove_listener(const std::shared_ptr<LifecycleListener>& listener) {
+            std::erase(listeners_, listener);
+        }
+
+        void notify_init() {
+            for (auto& listener : listeners_) {
+                listener->on_init();
+            }
+        }
+
+        void notify_update(float delta_time) {
+            for (auto& listener : listeners_) {
+                listener->on_update(delta_time);
+            }
+        }
+
+        void notify_draw() {
+            for (auto& listener : listeners_) {
+                listener->on_draw();
+            }
+        }
+
+    private:
+        std::vector<std::shared_ptr<LifecycleListener>> listeners_;
     };
 
     class InputListener {
@@ -28,12 +60,12 @@ namespace Hooray {
 
     class InputManager {
     public:
-        void add_listener(std::shared_ptr<InputListener> listener) {
+        void add_listener(const std::shared_ptr<InputListener>& listener) {
             listeners_.push_back(listener);
         }
 
         void remove_listener(const std::shared_ptr<InputListener>& listener) {
-            listeners_.erase(std::remove(listeners_.begin(), listeners_.end(), listener), listeners_.end());
+            std::erase(listeners_, listener);
         }
 
         // --- State Polling API ---
@@ -73,25 +105,25 @@ namespace Hooray {
         std::vector<std::shared_ptr<InputListener>> listeners_;
 
         void dispatch_key_pressed(int key) {
-            for (auto & listener : std::views::reverse(listeners_)) {
+            for (auto& listener : std::views::reverse(listeners_)) {
                 if (listener->on_key_pressed(key)) break;
             }
         }
 
         void dispatch_mouse_pressed(int button, Vector2 pos) {
-            for (auto & listener : std::views::reverse(listeners_)) {
+            for (auto& listener : std::views::reverse(listeners_)) {
                 if (listener->on_mouse_pressed(button, pos)) break;
             }
         }
 
         void dispatch_mouse_released(int button, Vector2 pos) {
-            for (auto & listener : std::views::reverse(listeners_)) {
+            for (auto& listener : std::views::reverse(listeners_)) {
                 if (listener->on_mouse_released(button, pos)) break;
             }
         }
 
         void dispatch_mouse_moved(Vector2 pos) {
-            for (auto & listener : std::views::reverse(listeners_)) {
+            for (auto& listener : std::views::reverse(listeners_)) {
                 if (listener->on_mouse_moved(pos)) break;
             }
         }
@@ -123,6 +155,9 @@ namespace Hooray {
         InputManager& get_input_manager() { return input_manager_; }
         [[nodiscard]] const InputManager& get_input_manager() const { return input_manager_; }
 
+        LifecycleManager& get_lifecycle_manager() { return lifecycle_manager_; }
+        [[nodiscard]] const LifecycleManager& get_lifecycle_manager() const { return lifecycle_manager_; }
+
         void run();
 
         void display();
@@ -137,6 +172,7 @@ namespace Hooray {
         std::string title_;
         CommandBufferBuilder command_buffer_{ 1024 };
 
+        LifecycleManager lifecycle_manager_;
         InputManager input_manager_;
 
         Callback on_init_;

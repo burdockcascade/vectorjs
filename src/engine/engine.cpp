@@ -24,26 +24,20 @@ namespace Hooray {
         InitAudioDevice();
         SetTargetFPS(60);
 
-        if (on_init_) {
-            on_init_();
-        }
+        lifecycle_manager_.notify_init();
 
         while (!WindowShouldClose()) {
             if (clear_buffer_after_frame) command_buffer_.clear();
 
-            // Process Input Listeners
+            const float delta_time = GetFrameTime();
+
+            // Update
             input_manager_.process_frame();
+            lifecycle_manager_.notify_update(delta_time);
 
-            if (on_update_) {
-                on_update_(GetFrameTime());
-            }
-
+            // Draw
             BeginDrawing();
-
-            if (on_draw_) {
-                on_draw_();
-            }
-
+            lifecycle_manager_.notify_draw();
             execute_commands();
 
             EndDrawing();

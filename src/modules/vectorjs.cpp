@@ -342,14 +342,61 @@ namespace App::Modules {
         return render_obj;
     }
 
+    class JSLifecycleListener : public Hooray::LifecycleListener {
+    public:
+        JSLifecycleListener(qjspp::Engine& engine, JSApplication& app, qjspp::Value user_app): app(app), engine(engine), user_app_(std::move(user_app))  {
+
+            cached_update_obj_ = create_update_context_object(engine);
+            cached_render_obj_ = create_draw_render_object(engine, app.rengine.get_buffer());
+
+            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onInit")); fn->is_function()) {
+                on_init_fn_ = std::move(fn);
+            }
+
+            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onUpdate")); fn->is_function()) {
+                on_update_fn_ = std::move(fn);
+            }
+
+            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onDraw")); fn->is_function()) {
+                on_draw_fn_ = std::move(fn);
+            }
+        }
+
+        bool on_init() override {
+            if (!on_init_fn_) return false;
+            std::ignore = on_init_fn_->call_method(user_app_, {});
+            return false;
+        }
+
+        bool on_update(float delta_time) override {
+            if (!on_update_fn_) return false;
+            std::ignore = on_update_fn_->call_method(user_app_, { cached_update_obj_.clone() });
+            return false;
+        }
+
+        bool on_draw() override {
+            if (!on_draw_fn_) return false;
+            std::ignore = on_draw_fn_->call_method(user_app_, { cached_render_obj_.clone() });
+            return false;
+        }
+
+    private:
+        JSApplication& app;
+        qjspp::Value user_app_;
+        qjspp::Engine& engine;
+        qjspp::Value cached_update_obj_;
+        qjspp::Value cached_render_obj_;
+        std::unique_ptr<qjspp::Value> on_init_fn_;
+        std::unique_ptr<qjspp::Value> on_update_fn_;
+        std::unique_ptr<qjspp::Value> on_draw_fn_;
+    };
+
     class JSInputListener : public Hooray::InputListener {
     public:
-        JSInputListener(qjspp::Engine& engine, qjspp::Value user_app) : engine(engine), user_app_(std::move(user_app)) {
-            // Cache JavaScript callback functions if they exist on the JS object
+        JSInputListener(qjspp::Engine& engine, JSApplication& app, qjspp::Value user_app) : app(app), engine(engine), user_app_(std::move(user_app)) {
             if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onKeyPressed")); fn->is_function()) {
                 on_key_pressed_fn_ = std::move(fn);
             }
-
             if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onMousePressed")); fn->is_function()) {
                 on_mouse_pressed_fn_ = std::move(fn);
             }
@@ -372,6 +419,7 @@ namespace App::Modules {
         }
 
     private:
+        JSApplication& app;
         qjspp::Value user_app_;
         qjspp::Engine& engine;
         std::unique_ptr<qjspp::Value> on_key_pressed_fn_;
@@ -391,40 +439,24 @@ namespace App::Modules {
         });
 
         cls.instance_method("run", [&engine](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
-            if (!app) return {};
+            if (!app || args.empty()) return {};
 
             const qjspp::Value user_app = args[0].clone();
 
-            const auto js_listener = std::make_shared<JSInputListener>(engine, user_app.clone());
-            app->rengine.get_input_manager().add_listener(js_listener);
+            // Instantiate listeners once for this application run session
+            auto input_listener = std::make_shared<JSInputListener>(engine, *app, user_app.clone());
+            auto lifecycle_listener = std::make_shared<JSLifecycleListener>(engine, *app, user_app.clone());
 
-            if (const qjspp::Value on_init_func = user_app.get("onInit"); on_init_func.is_function()) {
-                auto func_ptr = std::make_shared<qjspp::Value>(on_init_func.clone());
-                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
-                app->rengine.set_on_init([func_ptr, app_ptr]() {
-                    std::ignore = func_ptr->call_method(*app_ptr, {});
-                });
-            }
+            // Register listeners with the engine managers
+            app->rengine.get_input_manager().add_listener(input_listener);
+            app->rengine.get_lifecycle_manager().add_listener(lifecycle_listener);
 
-            if (const qjspp::Value on_update_func = user_app.get("onUpdate"); on_update_func.is_function()) {
-                auto func_ptr = std::make_shared<qjspp::Value>(on_update_func.clone());
-                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
-                auto update_obj_ptr = std::make_shared<qjspp::Value>(create_update_context_object(engine));
-                app->rengine.set_on_update([func_ptr, app_ptr, update_obj_ptr](float delta) {
-                    std::ignore = func_ptr->call_method(*app_ptr, { update_obj_ptr->clone() });
-                });
-            }
-
-            if (const qjspp::Value on_draw_func = user_app.get("onDraw"); on_draw_func.is_function()) {
-                auto func_ptr = std::make_shared<qjspp::Value>(on_draw_func.clone());
-                auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
-                auto render_obj_ptr = std::make_shared<qjspp::Value>(create_draw_render_object(engine, app->rengine.get_buffer()));
-                app->rengine.set_on_draw([func_ptr, app_ptr, render_obj_ptr]() {
-                    std::ignore = func_ptr->call_method(*app_ptr, { render_obj_ptr->clone() });
-                });
-            }
-
+            // Run the main game/render loop
             app->rengine.run();
+
+            // Cleanup listeners upon exiting the main loop to prevent leaks or dangling references
+            app->rengine.get_input_manager().remove_listener(input_listener);
+            app->rengine.get_lifecycle_manager().remove_listener(lifecycle_listener);
 
             return {};
         });
