@@ -393,28 +393,28 @@ namespace App::Modules {
 
     class JSInputListener : public Hooray::InputListener {
     public:
-        JSInputListener(qjspp::Engine& engine, JSApplication& app, qjspp::Value user_app) : app(app), engine(engine), user_app_(std::move(user_app)) {
-            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onKeyPressed")); fn->is_function()) {
-                on_key_pressed_fn_ = std::move(fn);
+        JSInputListener(qjspp::Engine& engine, JSApplication& app, qjspp::Value user_app) : app(app), user_app_(std::move(user_app)), engine(engine) {
+            if (const auto fn = user_app_.get("onKeyPressed"); fn.is_function()) {
+                on_key_pressed_fn_ = fn.clone();
             }
-            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onMousePressed")); fn->is_function()) {
-                on_mouse_pressed_fn_ = std::move(fn);
+            if (const auto fn = user_app_.get("onMousePressed"); fn.is_function()) {
+                on_mouse_pressed_fn_ = fn.clone();
             }
         }
 
         bool on_key_pressed(int key) override {
-            if (!on_key_pressed_fn_) return false;
-            qjspp::Value js_key = engine.make_int(key);
-            qjspp::Value result = on_key_pressed_fn_->call_method(user_app_, { (std::move(js_key)) });
+            if (!on_key_pressed_fn_.is_function()) return false;
+            const qjspp::Value js_key = engine.make_int(key);
+            const qjspp::Value result = on_key_pressed_fn_.call_method(user_app_, { js_key.clone() });
             return result.is_bool() ? result.to_bool() : false;
         }
 
         bool on_mouse_pressed(int button, Vector2 pos) override {
-            if (!on_mouse_pressed_fn_) return false;
-            qjspp::Value js_btn = engine.make_int(button);
-            qjspp::Value js_x   = engine.make_double(pos.x);
-            qjspp::Value js_y   = engine.make_double(pos.y);
-            qjspp::Value result = on_mouse_pressed_fn_->call_method(user_app_, { (std::move(js_btn)), (std::move(js_x)), (std::move(js_y)) });
+            if (on_mouse_pressed_fn_.is_function()) return false;
+            const qjspp::Value js_btn = engine.make_int(button);
+            const qjspp::Value js_x   = engine.make_double(pos.x);
+            const qjspp::Value js_y   = engine.make_double(pos.y);
+            const qjspp::Value result = on_mouse_pressed_fn_.call_method(user_app_, { js_btn.clone(), js_x.clone(), js_y.clone() });
             return result.is_bool() ? result.to_bool() : false;
         }
 
@@ -422,8 +422,8 @@ namespace App::Modules {
         JSApplication& app;
         qjspp::Value user_app_;
         qjspp::Engine& engine;
-        std::unique_ptr<qjspp::Value> on_key_pressed_fn_;
-        std::unique_ptr<qjspp::Value> on_mouse_pressed_fn_;
+        qjspp::Value on_key_pressed_fn_;
+        qjspp::Value on_mouse_pressed_fn_;
     };
 
     static void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
