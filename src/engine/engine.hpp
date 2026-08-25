@@ -138,7 +138,6 @@ namespace Hooray {
         using MouseButtonCallback = std::function<void(int button, Vector2 pos)>;
         using MouseMoveCallback = std::function<void(Vector2 pos)>;
         using MouseWheelCallback = std::function<void(Vector2 delta)>;
-        using MouseButtonCallback = std::function<void(int button, Vector2 pos)>;
 
         Engine(int width, int height, std::string title);
         ~Engine();
