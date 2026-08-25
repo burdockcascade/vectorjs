@@ -3,6 +3,7 @@
 #include <memory>
 #include <array>
 #include <fstream>
+#include <print>
 #include <raylib.h>
 #include <qjspp.hpp>
 
@@ -341,6 +342,42 @@ namespace App::Modules {
         return render_obj;
     }
 
+    class JSInputListener : public Hooray::InputListener {
+    public:
+        JSInputListener(qjspp::Engine& engine, qjspp::Value user_app) : engine(engine), user_app_(std::move(user_app)) {
+            // Cache JavaScript callback functions if they exist on the JS object
+            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onKeyPressed")); fn->is_function()) {
+                on_key_pressed_fn_ = std::move(fn);
+            }
+
+            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onMousePressed")); fn->is_function()) {
+                on_mouse_pressed_fn_ = std::move(fn);
+            }
+        }
+
+        bool on_key_pressed(int key) override {
+            if (!on_key_pressed_fn_) return false;
+            qjspp::Value js_key = engine.make_int(key);
+            qjspp::Value result = on_key_pressed_fn_->call_method(user_app_, { (std::move(js_key)) });
+            return result.is_bool() ? result.to_bool() : false;
+        }
+
+        bool on_mouse_pressed(int button, Vector2 pos) override {
+            if (!on_mouse_pressed_fn_) return false;
+            qjspp::Value js_btn = engine.make_int(button);
+            qjspp::Value js_x   = engine.make_double(pos.x);
+            qjspp::Value js_y   = engine.make_double(pos.y);
+            qjspp::Value result = on_mouse_pressed_fn_->call_method(user_app_, { (std::move(js_btn)), (std::move(js_x)), (std::move(js_y)) });
+            return result.is_bool() ? result.to_bool() : false;
+        }
+
+    private:
+        qjspp::Value user_app_;
+        qjspp::Engine& engine;
+        std::unique_ptr<qjspp::Value> on_key_pressed_fn_;
+        std::unique_ptr<qjspp::Value> on_mouse_pressed_fn_;
+    };
+
     static void register_application_class(qjspp::Engine& engine, qjspp::ModuleBuilder& builder) {
         auto cls = engine.make_class<JSApplication>("Application");
 
@@ -356,9 +393,11 @@ namespace App::Modules {
         cls.instance_method("run", [&engine](JSApplication* app, const qjspp::ArgList& args) -> qjspp::Value {
             if (!app) return {};
 
-            qjspp::Value user_app = args[0].clone();
+            const qjspp::Value user_app = args[0].clone();
 
-            // Setup onInit callback
+            const auto js_listener = std::make_shared<JSInputListener>(engine, user_app.clone());
+            app->rengine.get_input_manager().add_listener(js_listener);
+
             if (const qjspp::Value on_init_func = user_app.get("onInit"); on_init_func.is_function()) {
                 auto func_ptr = std::make_shared<qjspp::Value>(on_init_func.clone());
                 auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
@@ -367,7 +406,6 @@ namespace App::Modules {
                 });
             }
 
-            // Setup onUpdate callback
             if (const qjspp::Value on_update_func = user_app.get("onUpdate"); on_update_func.is_function()) {
                 auto func_ptr = std::make_shared<qjspp::Value>(on_update_func.clone());
                 auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());
@@ -377,7 +415,6 @@ namespace App::Modules {
                 });
             }
 
-            // Setup onDraw callback
             if (const qjspp::Value on_draw_func = user_app.get("onDraw"); on_draw_func.is_function()) {
                 auto func_ptr = std::make_shared<qjspp::Value>(on_draw_func.clone());
                 auto app_ptr = std::make_shared<qjspp::Value>(user_app.clone());

@@ -11,46 +11,6 @@ namespace Hooray {
 
     Engine::~Engine() = default;
 
-    void Engine::process_input() const {
-        // Keyboard input handling
-        if (on_key_pressed_) {
-            int key = GetKeyPressed();
-            while (key > 0) {
-                on_key_pressed_(key);
-                key = GetKeyPressed();
-            }
-        }
-
-        // Mouse move handling
-        if (on_mouse_move_) {
-            Vector2 delta = GetMouseDelta();
-            if (delta.x != 0.0f || delta.y != 0.0f) {
-                on_mouse_move_(GetMousePosition());
-            }
-        }
-
-        // Mouse Wheel handling
-        if (on_mouse_wheel_move_) {
-            Vector2 delta = GetMouseWheelMoveV();
-            if (delta.x != 0.0f || delta.y != 0.0f) {
-                on_mouse_wheel_move_(delta);
-            }
-        }
-
-        // Mouse press and release handling
-        if (on_mouse_pressed_ || on_mouse_released_) {
-            const Vector2 mouse_pos = GetMousePosition();
-            for (int button = MOUSE_BUTTON_LEFT; button <= MOUSE_BUTTON_BACK; ++button) {
-                if (on_mouse_pressed_ && IsMouseButtonPressed(button)) {
-                    on_mouse_pressed_(button, mouse_pos);
-                }
-                if (on_mouse_released_ && IsMouseButtonReleased(button)) {
-                    on_mouse_released_(button, mouse_pos);
-                }
-            }
-        }
-    }
-
     void Engine::run() {
         run_loop(true);
     }
@@ -71,7 +31,8 @@ namespace Hooray {
         while (!WindowShouldClose()) {
             if (clear_buffer_after_frame) command_buffer_.clear();
 
-            process_input();
+            // Process Input Listeners
+            input_manager_.process_frame();
 
             if (on_update_) {
                 on_update_(GetFrameTime());
