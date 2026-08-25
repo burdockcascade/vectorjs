@@ -349,34 +349,34 @@ namespace App::Modules {
             cached_update_obj_ = create_update_context_object(engine);
             cached_render_obj_ = create_draw_render_object(engine, app.rengine.get_buffer());
 
-            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onInit")); fn->is_function()) {
-                on_init_fn_ = std::move(fn);
+            if (auto fn = user_app_.get("onInit"); fn.is_function()) {
+                on_init_fn_ = fn.clone();
             }
 
-            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onUpdate")); fn->is_function()) {
-                on_update_fn_ = std::move(fn);
+            if (auto fn = user_app_.get("onUpdate"); fn.is_function()) {
+                on_update_fn_ = fn.clone();
             }
 
-            if (auto fn = std::make_unique<qjspp::Value>(user_app_.get("onDraw")); fn->is_function()) {
-                on_draw_fn_ = std::move(fn);
+            if (auto fn = user_app_.get("onDraw"); fn.is_function()) {
+                on_draw_fn_ = fn.clone();
             }
         }
 
         bool on_init() override {
-            if (!on_init_fn_) return false;
-            std::ignore = on_init_fn_->call_method(user_app_, {});
+            if (!on_init_fn_.is_function()) return false;
+            std::ignore = on_init_fn_.call_method(user_app_, {});
             return false;
         }
 
         bool on_update(float delta_time) override {
-            if (!on_update_fn_) return false;
-            std::ignore = on_update_fn_->call_method(user_app_, { cached_update_obj_.clone() });
+            if (!on_update_fn_.is_function()) return false;
+            std::ignore = on_update_fn_.call_method(user_app_, { cached_update_obj_.clone() });
             return false;
         }
 
         bool on_draw() override {
-            if (!on_draw_fn_) return false;
-            std::ignore = on_draw_fn_->call_method(user_app_, { cached_render_obj_.clone() });
+            if (!on_draw_fn_.is_function()) return false;
+            std::ignore = on_draw_fn_.call_method(user_app_, { cached_render_obj_.clone() });
             return false;
         }
 
@@ -386,9 +386,9 @@ namespace App::Modules {
         qjspp::Engine& engine;
         qjspp::Value cached_update_obj_;
         qjspp::Value cached_render_obj_;
-        std::unique_ptr<qjspp::Value> on_init_fn_;
-        std::unique_ptr<qjspp::Value> on_update_fn_;
-        std::unique_ptr<qjspp::Value> on_draw_fn_;
+        qjspp::Value on_init_fn_;
+        qjspp::Value on_update_fn_;
+        qjspp::Value on_draw_fn_;
     };
 
     class JSInputListener : public Hooray::InputListener {
