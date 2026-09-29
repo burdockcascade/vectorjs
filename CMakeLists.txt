@@ -47,6 +47,12 @@ FetchContent_MakeAvailable(cli11 raylib qjspp)
 # 2. Executable Target
 # -----------------------------------------------------------------------------
 
+if (CMAKE_C_COMPILER_ID MATCHES "Clang|AppleClang")
+    target_compile_options(raylib PRIVATE -Wno-tautological-compare)
+elseif (CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    target_compile_options(raylib PRIVATE -Wno-type-limits)
+endif()
+
 # Define the target executable
 add_executable(vectorjs)
 
