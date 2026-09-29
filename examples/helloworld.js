@@ -9,6 +9,7 @@ RL.setTargetFPS(60);
 while (!RL.windowShouldClose()) {
     RL.beginDrawing();
     RL.clearBackground(RL.WHITE);
+    RL.drawText("Hello, World!", 190, 200, 20, RL.MAROON);
     RL.endDrawing();
 }
 

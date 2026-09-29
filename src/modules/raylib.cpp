@@ -338,9 +338,19 @@ namespace App::Modules {
 
     }
 
+    static void register_text_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
+
+        mod.export_function("drawText", [&js_engine](const qjspp::ArgList& args) {
+            DrawText(args[0].to_string().c_str(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
+            return js_engine.make_undefined();
+        });
+
+    }
+
     void register_raylib_module(qjspp::Engine& js_engine) {
         auto mod = js_engine.new_module("raylib");
         register_core_functions(mod, js_engine);
+        register_text_functions(mod, js_engine);
         register_color_constants(mod, js_engine);
 
         mod.export_value("VERSION", js_engine.make_string(std::format("{}.{}.{}", RAYLIB_VERSION_MAJOR, RAYLIB_VERSION_MINOR, RAYLIB_VERSION_PATCH)));
