@@ -12,6 +12,59 @@ namespace App::Modules {
         return obj;
     }
 
+    static Vector2 ValueToVector2(const qjspp::Value& val) {
+
+        Vector2 out = {
+            .x = 0.0f,
+            .y = 0.0f
+        };
+
+        if (!val.is_object()) return out;
+
+        if (const auto x = val.get("x"); !x.is_undefined()) {
+            out.x = x.to_float();
+        }
+
+        if (const auto y = val.get("y"); !y.is_undefined()) {
+            out.y = y.to_float();
+        }
+
+        return out;
+    }
+
+    static qjspp::Value Vector3ToValue(const qjspp::Engine &js_engine, const Vector3& val) {
+        auto obj = js_engine.make_object();
+        obj.set("x", js_engine.make_double(val.x));
+        obj.set("y", js_engine.make_double(val.y));
+        obj.set("z", js_engine.make_double(val.z));
+        return obj;
+    }
+
+    static Vector3 ValueToVector3(const qjspp::Value& val) {
+
+        Vector3 out = {
+            .x = 0.0f,
+            .y = 0.0f,
+            .z = 0.0f
+        };
+
+        if (!val.is_object()) return out;
+
+        if (const auto x = val.get("x"); !x.is_undefined() && x.is_number()) {
+            out.x = x.to_float();
+        }
+
+        if (const auto y = val.get("y"); !y.is_undefined() && y.is_number()) {
+            out.y = y.to_float();
+        }
+
+        if (const auto z = val.get("z"); !z.is_undefined() && z.is_number()) {
+            out.z = z.to_float();
+        }
+
+        return out;
+    }
+
     static qjspp::Value ColorToValue(const qjspp::Engine &js_engine, const Color& val) {
         auto obj = js_engine.make_object();
         obj.set("r", js_engine.make_int(val.r));
@@ -49,6 +102,149 @@ namespace App::Modules {
         }
 
         return out;
+    }
+
+    static qjspp::Value RectangleToValue(const qjspp::Engine &js_engine, const Rectangle& val) {
+        auto obj = js_engine.make_object();
+        obj.set("x", js_engine.make_double(val.x));
+        obj.set("y", js_engine.make_double(val.y));
+        obj.set("width", js_engine.make_double(val.width));
+        obj.set("height", js_engine.make_double(val.height));
+        return obj;
+    }
+
+    static Rectangle ValueToRectangle(const qjspp::Value& val) {
+
+        Rectangle out = {
+            .x = 0.0f,
+            .y = 0.0f,
+            .width = 0.0f,
+            .height = 0.0f
+        };
+
+        if (!val.is_object()) return out;
+
+        if (const auto x = val.get("x"); !x.is_undefined() && x.is_number()) {
+            out.x = x.to_float();
+        }
+
+        if (const auto y = val.get("y"); !y.is_undefined() && y.is_number()) {
+            out.y = y.to_float();
+        }
+
+        if (const auto width = val.get("width"); !width.is_undefined() && width.is_number()) {
+            out.width = width.to_float();
+        }
+
+        if (const auto height = val.get("height"); !height.is_undefined() && height.is_number()) {
+            out.height = height.to_float();
+        }
+
+        return out;
+    }
+
+    static Camera2D ValueToCamera2D(const qjspp::Value& val) {
+
+        Camera2D out = {
+            .offset = {.x = 0.0f, .y = 0.0f},
+            .target = {.x = 0.0f, .y = 0.0f},
+            .rotation = 0.0f,
+            .zoom = 1.0f
+        };
+
+        if (!val.is_object()) return out;
+
+        if (const auto offset = val.get("offset"); !offset.is_undefined() && offset.is_object()) {
+            out.offset = ValueToVector2(offset);
+        }
+
+        if (const auto target = val.get("target"); !target.is_undefined() && target.is_object()) {
+            out.target = ValueToVector2(target);
+        }
+
+        if (const auto rotation = val.get("rotation"); !rotation.is_undefined() && rotation.is_number()) {
+            out.rotation = rotation.to_float();
+        }
+
+        if (const auto zoom = val.get("zoom"); !zoom.is_undefined() && zoom.is_number()) {
+            out.zoom = zoom.to_float();
+        }
+
+        return out;
+    }
+
+    static Camera3D ValueToCamera3D(const qjspp::Value& val) {
+
+        Camera3D out = {
+            .position = {.x = 0.0f, .y = 0.0f, .z = 0.0f},
+            .target = {.x = 0.0f, .y = 0.0f, .z = 0.0f},
+            .up = {.x = 0.0f, .y = 1.0f, .z = 0.0f},
+            .fovy = 45.0f,
+            .projection = CAMERA_PERSPECTIVE
+        };
+
+        if (!val.is_object()) return out;
+
+        if (const auto position = val.get("position"); !position.is_undefined() && position.is_object()) {
+            out.position = ValueToVector3(position);
+        }
+
+        if (const auto target = val.get("target"); !target.is_undefined() && target.is_object()) {
+            out.target = ValueToVector3(target);
+        }
+
+        if (const auto up = val.get("up"); !up.is_undefined() && up.is_object()) {
+            out.up = ValueToVector3(up);
+        }
+
+        if (const auto fovy = val.get("fovy"); !fovy.is_undefined() && fovy.is_number()) {
+            out.fovy = fovy.to_float();
+        }
+
+        if (const auto projection = val.get("projection"); !projection.is_undefined() && projection.is_number()) {
+            out.projection = static_cast<int>(projection.to_int());
+        }
+
+        return out;
+    }
+
+    static qjspp::Value MatrixToValue(const qjspp::Engine &js_engine, const Matrix& val) {
+        auto obj = js_engine.make_object();
+        obj.set("m0", js_engine.make_double(val.m0));
+        obj.set("m4", js_engine.make_double(val.m4));
+        obj.set("m8", js_engine.make_double(val.m8));
+        obj.set("m12", js_engine.make_double(val.m12));
+        obj.set("m1", js_engine.make_double(val.m1));
+        obj.set("m5", js_engine.make_double(val.m5));
+        obj.set("m9", js_engine.make_double(val.m9));
+        obj.set("m13", js_engine.make_double(val.m13));
+        obj.set("m2", js_engine.make_double(val.m2));
+        obj.set("m6", js_engine.make_double(val.m6));
+        obj.set("m10", js_engine.make_double(val.m10));
+        obj.set("m14", js_engine.make_double(val.m14));
+        obj.set("m3", js_engine.make_double(val.m3));
+        obj.set("m7", js_engine.make_double(val.m7));
+        obj.set("m11", js_engine.make_double(val.m11));
+        obj.set("m15", js_engine.make_double(val.m15));
+        return obj;
+    }
+
+    static qjspp::Value RayToValue(qjspp::Engine &js_engine, const Ray& val) {
+        auto obj = js_engine.make_object();
+        obj.set("position", Vector3ToValue(js_engine, val.position));
+        obj.set("direction", Vector3ToValue(js_engine, val.direction));
+        return obj;
+    }
+
+    static std::vector<Vector2> ParseVector2Array(const qjspp::Value& arr_val) {
+        std::vector<Vector2> points;
+        if (!arr_val.is_array()) return points;
+        const auto items = arr_val.to_vector();
+        points.reserve(items.size());
+        for (const auto& item : items) {
+            points.push_back(ValueToVector2(item));
+        }
+        return points;
     }
 
     static void register_core_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
