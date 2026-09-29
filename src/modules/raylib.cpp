@@ -1033,6 +1033,51 @@ namespace App::Modules {
 
     }
 
+    static void register_collision_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
+
+        mod.export_function("checkCollisionRecs", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionRecs(ValueToRectangle(args[0]), ValueToRectangle(args[1])));
+        });
+
+        mod.export_function("checkCollisionCircles", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionCircles(ValueToVector2(args[0]), args[1].to_float(), ValueToVector2(args[2]), args[3].to_float()));
+        });
+
+        mod.export_function("checkCollisionCircleRec", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionCircleRec(ValueToVector2(args[0]), args[1].to_float(), ValueToRectangle(args[2])));
+        });
+
+        mod.export_function("checkCollisionCircleLine", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionCircleLine(ValueToVector2(args[0]), args[1].to_float(), ValueToVector2(args[2]), ValueToVector2(args[3])));
+        });
+
+        mod.export_function("checkCollisionPointRec", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionPointRec(ValueToVector2(args[0]), ValueToRectangle(args[1])));
+        });
+
+        mod.export_function("checkCollisionPointCircle", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionPointCircle(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_float()));
+        });
+
+        mod.export_function("checkCollisionPointTriangle", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionPointTriangle(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3])));
+        });
+
+        mod.export_function("checkCollisionPointLine", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(CheckCollisionPointLine(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), args[3].to_int()));
+        });
+
+        mod.export_function("checkCollisionPointPoly", [&js_engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[1]);
+            return js_engine.make_bool(CheckCollisionPointPoly(ValueToVector2(args[0]), points.data(), static_cast<int>(points.size())));
+        });
+
+        mod.export_function("getCollisionRec", [&js_engine](const qjspp::ArgList& args) {
+            return RectangleToValue(js_engine, GetCollisionRec(ValueToRectangle(args[0]), ValueToRectangle(args[1])));
+        });
+
+    }
+
     static void register_text_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
 
         mod.export_function("drawText", [&js_engine](const qjspp::ArgList& args) {
@@ -1079,6 +1124,7 @@ namespace App::Modules {
         register_draw2d_functions(mod, js_engine);
         register_input_functions(mod, js_engine);
         register_text_functions(mod, js_engine);
+        register_collision_functions(mod, js_engine);
         register_color_constants(mod, js_engine);
 
         mod.export_value("VERSION", js_engine.make_string(std::format("{}.{}.{}", RAYLIB_VERSION_MAJOR, RAYLIB_VERSION_MINOR, RAYLIB_VERSION_PATCH)));
