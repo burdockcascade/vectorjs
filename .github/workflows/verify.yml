@@ -50,8 +50,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Install Ninja
-        run: brew install ninja
       - name: Configure CMake
         run: cmake -B ${{ github.workspace }}/build -S . -DCMAKE_BUILD_TYPE=Release
       - name: Build Target
