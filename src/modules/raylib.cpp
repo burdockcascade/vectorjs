@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include <vector>
+#include <sstream>
 #include <raylib.h>
 #include <qjspp.hpp>
 
