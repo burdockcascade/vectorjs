@@ -486,18 +486,357 @@ namespace App::Modules {
             return js_engine.make_undefined();
         });
 
-        mod.export_function("clearBackground", [&js_engine](const qjspp::ArgList& args) {
+    }
+
+    static void register_draw2d_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& engine) {
+
+        mod.export_function("clearBackground", [&engine](const qjspp::ArgList& args) {
             ClearBackground(ValueToColor(args[0]));
-            return js_engine.make_undefined();
+            return engine.make_undefined();
         });
 
-        mod.export_function("beginDrawing", [&js_engine](const qjspp::ArgList&) {
+        mod.export_function("beginDrawing", [&engine](const qjspp::ArgList&) {
             BeginDrawing();
-            return js_engine.make_undefined();
+            return engine.make_undefined();
         });
 
-        mod.export_function("endDrawing", [&js_engine](const qjspp::ArgList&) {
+        mod.export_function("endDrawing", [&engine](const qjspp::ArgList&) {
             EndDrawing();
+            return engine.make_undefined();
+        });
+
+        mod.export_function("beginMode2D", [&engine](const qjspp::ArgList& args) {
+            BeginMode2D(ValueToCamera2D(args[0]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("endMode2D", [&engine](const qjspp::ArgList&) {
+            EndMode2D();
+            return engine.make_undefined();
+        });
+
+        mod.export_function("getScreenToWorldRay", [&engine](const qjspp::ArgList& args) {
+            return RayToValue(engine, GetScreenToWorldRay(ValueToVector2(args[0]), ValueToCamera3D(args[1])));
+        });
+
+        mod.export_function("getScreenToWorldRayEx", [&engine](const qjspp::ArgList& args) {
+            return RayToValue(engine, GetScreenToWorldRayEx(ValueToVector2(args[0]), ValueToCamera3D(args[1]), args[2].to_int(), args[3].to_int()));
+        });
+
+        mod.export_function("getWorldToScreen", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetWorldToScreen(ValueToVector3(args[0]), ValueToCamera3D(args[1])));
+        });
+
+        mod.export_function("getWorldToScreenEx", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetWorldToScreenEx(ValueToVector3(args[0]), ValueToCamera3D(args[1]), args[2].to_int(), args[3].to_int()));
+        });
+
+        mod.export_function("getWorldToScreen2D", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetWorldToScreen2D(ValueToVector2(args[0]), ValueToCamera2D(args[1])));
+        });
+
+        mod.export_function("getScreenToWorld2D", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetScreenToWorld2D(ValueToVector2(args[0]), ValueToCamera2D(args[1])));
+        });
+
+        mod.export_function("getCameraMatrix", [&engine](const qjspp::ArgList& args) {
+            return MatrixToValue(engine, GetCameraMatrix(ValueToCamera3D(args[0])));
+        });
+
+        mod.export_function("getCameraMatrix2D", [&engine](const qjspp::ArgList& args) {
+            return MatrixToValue(engine, GetCameraMatrix2D(ValueToCamera2D(args[0])));
+        });
+
+        mod.export_function("drawPixel", [&engine](const qjspp::ArgList& args) {
+            DrawPixel(args[0].to_int(), args[1].to_int(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawPixelV", [&engine](const qjspp::ArgList& args) {
+            DrawPixelV(ValueToVector2(args[0]), ValueToColor(args[1]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLine", [&engine](const qjspp::ArgList& args) {
+            DrawLine(args[0].to_int(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLineV", [&engine](const qjspp::ArgList& args) {
+            DrawLineV(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLineEx", [&engine](const qjspp::ArgList& args) {
+            DrawLineEx(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLineStrip", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawLineStrip(points.data(), static_cast<int>(points.size()), ValueToColor(args[1]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLineBezier", [&engine](const qjspp::ArgList& args) {
+            DrawLineBezier(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawLineDashed", [&engine](const qjspp::ArgList& args) {
+            DrawLineDashed(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircle", [&engine](const qjspp::ArgList& args) {
+            DrawCircle(args[0].to_int(), args[1].to_int(), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleSector", [&engine](const qjspp::ArgList& args) {
+            DrawCircleSector(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), args[3].to_float(), args[4].to_int(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleSectorLines", [&engine](const qjspp::ArgList& args) {
+            DrawCircleSectorLines(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), args[3].to_float(), args[4].to_int(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleGradient", [&engine](const qjspp::ArgList& args) {
+            DrawCircleGradient(ValueToVector2(args[0]), args[1].to_float(), ValueToColor(args[2]), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleV", [&engine](const qjspp::ArgList& args) {
+            DrawCircleV(ValueToVector2(args[0]), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleLines", [&engine](const qjspp::ArgList& args) {
+            DrawCircleLines(args[0].to_int(), args[1].to_int(), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawCircleLinesV", [&engine](const qjspp::ArgList& args) {
+            DrawCircleLinesV(ValueToVector2(args[0]), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawEllipse", [&engine](const qjspp::ArgList& args) {
+            DrawEllipse(args[0].to_int(), args[1].to_int(), args[2].to_float(), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawEllipseV", [&engine](const qjspp::ArgList& args) {
+            DrawEllipseV(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawEllipseLines", [&engine](const qjspp::ArgList& args) {
+            DrawEllipseLines(args[0].to_int(), args[1].to_int(), args[2].to_float(), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawEllipseLinesV", [&engine](const qjspp::ArgList& args) {
+            DrawEllipseLinesV(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRing", [&engine](const qjspp::ArgList& args) {
+            DrawRing(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), args[3].to_float(), args[4].to_float(), args[5].to_int(), ValueToColor(args[6]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRingLines", [&engine](const qjspp::ArgList& args) {
+            DrawRingLines(ValueToVector2(args[0]), args[1].to_float(), args[2].to_float(), args[3].to_float(), args[4].to_float(), args[5].to_int(), ValueToColor(args[6]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangle", [&engine](const qjspp::ArgList& args) {
+            DrawRectangle(args[0].to_int(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleV", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleV(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleRec", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleRec(ValueToRectangle(args[0]), ValueToColor(args[1]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectanglePro", [&engine](const qjspp::ArgList& args) {
+            DrawRectanglePro(ValueToRectangle(args[0]), ValueToVector2(args[1]), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleGradientV", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleGradientV(args[0].to_int(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleGradientH", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleGradientH(args[0].to_int(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleGradientEx", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleGradientEx(ValueToRectangle(args[0]), ValueToColor(args[1]), ValueToColor(args[2]), ValueToColor(args[3]), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleLines", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleLines(args[0].to_int(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleLinesEx", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleLinesEx(ValueToRectangle(args[0]), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleRounded", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleRounded(ValueToRectangle(args[0]), args[1].to_float(), args[2].to_int(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleRoundedLines", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleRoundedLines(ValueToRectangle(args[0]), args[1].to_float(), args[2].to_int(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawRectangleRoundedLinesEx", [&engine](const qjspp::ArgList& args) {
+            DrawRectangleRoundedLinesEx(ValueToRectangle(args[0]), args[1].to_float(), args[2].to_int(), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawTriangle", [&engine](const qjspp::ArgList& args) {
+            DrawTriangle(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawTriangleLines", [&engine](const qjspp::ArgList& args) {
+            DrawTriangleLines(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawTriangleFan", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawTriangleFan(points.data(), static_cast<int>(points.size()), ValueToColor(args[1]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawTriangleStrip", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawTriangleStrip(points.data(), static_cast<int>(points.size()), ValueToColor(args[1]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawPoly", [&engine](const qjspp::ArgList& args) {
+            DrawPoly(ValueToVector2(args[0]), args[1].to_int(), args[2].to_float(), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawPolyLines", [&engine](const qjspp::ArgList& args) {
+            DrawPolyLines(ValueToVector2(args[0]), args[1].to_int(), args[2].to_float(), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawPolyLinesEx", [&engine](const qjspp::ArgList& args) {
+            DrawPolyLinesEx(ValueToVector2(args[0]), args[1].to_int(), args[2].to_float(), args[3].to_float(), args[4].to_float(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineLinear", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawSplineLinear(points.data(), static_cast<int>(points.size()), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineBasis", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawSplineBasis(points.data(), static_cast<int>(points.size()), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineCatmullRom", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawSplineCatmullRom(points.data(), static_cast<int>(points.size()), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineBezierQuadratic", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawSplineBezierQuadratic(points.data(), static_cast<int>(points.size()), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineBezierCubic", [&engine](const qjspp::ArgList& args) {
+            const auto points = ParseVector2Array(args[0]);
+            DrawSplineBezierCubic(points.data(), static_cast<int>(points.size()), args[1].to_float(), ValueToColor(args[2]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineSegmentLinear", [&engine](const qjspp::ArgList& args) {
+            DrawSplineSegmentLinear(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_float(), ValueToColor(args[3]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineSegmentBasis", [&engine](const qjspp::ArgList& args) {
+            DrawSplineSegmentBasis(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineSegmentCatmullRom", [&engine](const qjspp::ArgList& args) {
+            DrawSplineSegmentCatmullRom(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineSegmentBezierQuadratic", [&engine](const qjspp::ArgList& args) {
+            DrawSplineSegmentBezierQuadratic(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), args[3].to_float(), ValueToColor(args[4]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("drawSplineSegmentBezierCubic", [&engine](const qjspp::ArgList& args) {
+            DrawSplineSegmentBezierCubic(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float(), ValueToColor(args[5]));
+            return engine.make_undefined();
+        });
+
+        mod.export_function("getSplinePointLinear", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetSplinePointLinear(ValueToVector2(args[0]), ValueToVector2(args[1]), args[2].to_float()));
+        });
+
+        mod.export_function("getSplinePointBasis", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetSplinePointBasis(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float()));
+        });
+
+        mod.export_function("getSplinePointCatmullRom", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetSplinePointCatmullRom(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float()));
+        });
+
+        mod.export_function("getSplinePointBezierQuad", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetSplinePointBezierQuad(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), args[3].to_float()));
+        });
+
+        mod.export_function("getSplinePointBezierCubic", [&engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(engine, GetSplinePointBezierCubic(ValueToVector2(args[0]), ValueToVector2(args[1]), ValueToVector2(args[2]), ValueToVector2(args[3]), args[4].to_float()));
+        });
+
+        mod.export_function("drawFPS", [&engine](const qjspp::ArgList& args) {
+            DrawFPS(args[0].to_int(), args[1].to_int());
+            return engine.make_undefined();
+        });
+
+    }
+
+
+    static void register_text_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
+
+        mod.export_function("drawText", [&js_engine](const qjspp::ArgList& args) {
+            DrawText(args[0].to_string().c_str(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
             return js_engine.make_undefined();
         });
 
@@ -534,18 +873,10 @@ namespace App::Modules {
 
     }
 
-    static void register_text_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
-
-        mod.export_function("drawText", [&js_engine](const qjspp::ArgList& args) {
-            DrawText(args[0].to_string().c_str(), args[1].to_int(), args[2].to_int(), args[3].to_int(), ValueToColor(args[4]));
-            return js_engine.make_undefined();
-        });
-
-    }
-
     void register_raylib_module(qjspp::Engine& js_engine) {
         auto mod = js_engine.new_module("raylib");
         register_core_functions(mod, js_engine);
+        register_draw2d_functions(mod, js_engine);
         register_text_functions(mod, js_engine);
         register_color_constants(mod, js_engine);
 
