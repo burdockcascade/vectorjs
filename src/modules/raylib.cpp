@@ -832,6 +832,206 @@ namespace App::Modules {
 
     }
 
+    static void register_input_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
+
+        mod.export_function("isKeyPressed", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsKeyPressed(args[0].to_int()));
+        });
+
+        mod.export_function("isKeyPressedRepeat", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsKeyPressedRepeat(args[0].to_int()));
+        });
+
+        mod.export_function("isKeyDown", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsKeyDown(args[0].to_int()));
+        });
+
+        mod.export_function("isKeyReleased", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsKeyReleased(args[0].to_int()));
+        });
+
+        mod.export_function("isKeyUp", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsKeyUp(args[0].to_int()));
+        });
+
+        mod.export_function("getKeyPressed", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetKeyPressed());
+        });
+
+        mod.export_function("getCharPressed", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetCharPressed());
+        });
+
+        mod.export_function("getKeyName", [&js_engine](const qjspp::ArgList& args) {
+            const char* name = GetKeyName(args[0].to_int());
+            return name ? js_engine.make_string(name) : js_engine.make_null();
+        });
+
+        mod.export_function("setExitKey", [&js_engine](const qjspp::ArgList& args) {
+            SetExitKey(args[0].to_int());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("isGamepadAvailable", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGamepadAvailable(args[0].to_int()));
+        });
+
+        mod.export_function("getGamepadName", [&js_engine](const qjspp::ArgList& args) {
+            const char* name = GetGamepadName(args[0].to_int());
+            return name ? js_engine.make_string(name) : js_engine.make_null();
+        });
+
+        mod.export_function("isGamepadButtonPressed", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGamepadButtonPressed(args[0].to_int(), args[1].to_int()));
+        });
+
+        mod.export_function("isGamepadButtonDown", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGamepadButtonDown(args[0].to_int(), args[1].to_int()));
+        });
+
+        mod.export_function("isGamepadButtonReleased", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGamepadButtonReleased(args[0].to_int(), args[1].to_int()));
+        });
+
+        mod.export_function("isGamepadButtonUp", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGamepadButtonUp(args[0].to_int(), args[1].to_int()));
+        });
+
+        mod.export_function("getGamepadButtonPressed", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetGamepadButtonPressed());
+        });
+
+        mod.export_function("getGamepadAxisCount", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_int(GetGamepadAxisCount(args[0].to_int()));
+        });
+
+        mod.export_function("getGamepadAxisMovement", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_double(GetGamepadAxisMovement(args[0].to_int(), args[1].to_int()));
+        });
+
+        mod.export_function("setGamepadMappings", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_int(SetGamepadMappings(args[0].to_string().c_str()));
+        });
+
+        mod.export_function("setGamepadVibration", [&js_engine](const qjspp::ArgList& args) {
+            SetGamepadVibration(args[0].to_int(), args[1].to_float(), args[2].to_float(), args[3].to_float());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("isMouseButtonPressed", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsMouseButtonPressed(args[0].to_int()));
+        });
+
+        mod.export_function("isMouseButtonDown", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsMouseButtonDown(args[0].to_int()));
+        });
+
+        mod.export_function("isMouseButtonReleased", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsMouseButtonReleased(args[0].to_int()));
+        });
+
+        mod.export_function("isMouseButtonUp", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsMouseButtonUp(args[0].to_int()));
+        });
+
+        mod.export_function("getMouseX", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetMouseX());
+        });
+
+        mod.export_function("getMouseY", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetMouseY());
+        });
+
+        mod.export_function("getMousePosition", [&js_engine](const qjspp::ArgList&) {
+            return Vector2ToValue(js_engine, GetMousePosition());
+        });
+
+        mod.export_function("getMouseDelta", [&js_engine](const qjspp::ArgList&) {
+            return Vector2ToValue(js_engine, GetMouseDelta());
+        });
+
+        mod.export_function("setMousePosition", [&js_engine](const qjspp::ArgList& args) {
+            SetMousePosition(args[0].to_int(), args[1].to_int());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("setMouseOffset", [&js_engine](const qjspp::ArgList& args) {
+            SetMouseOffset(args[0].to_int(), args[1].to_int());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("setMouseScale", [&js_engine](const qjspp::ArgList& args) {
+            SetMouseScale(args[0].to_float(), args[1].to_float());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("getMouseWheelMove", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_double(GetMouseWheelMove());
+        });
+
+        mod.export_function("getMouseWheelMoveV", [&js_engine](const qjspp::ArgList&) {
+            return Vector2ToValue(js_engine, GetMouseWheelMoveV());
+        });
+
+        mod.export_function("setMouseCursor", [&js_engine](const qjspp::ArgList& args) {
+            SetMouseCursor(args[0].to_int());
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("getTouchX", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetTouchX());
+        });
+
+        mod.export_function("getTouchY", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetTouchY());
+        });
+
+        mod.export_function("getTouchPosition", [&js_engine](const qjspp::ArgList& args) {
+            return Vector2ToValue(js_engine, GetTouchPosition(args[0].to_int()));
+        });
+
+        mod.export_function("getTouchPointId", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_int(GetTouchPointId(args[0].to_int()));
+        });
+
+        mod.export_function("getTouchPointCount", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetTouchPointCount());
+        });
+
+        mod.export_function("setGesturesEnabled", [&js_engine](const qjspp::ArgList& args) {
+            SetGesturesEnabled(static_cast<unsigned int>(args[0].to_int()));
+            return js_engine.make_undefined();
+        });
+
+        mod.export_function("isGestureDetected", [&js_engine](const qjspp::ArgList& args) {
+            return js_engine.make_bool(IsGestureDetected(static_cast<unsigned int>(args[0].to_int())));
+        });
+
+        mod.export_function("getGestureDetected", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_int(GetGestureDetected());
+        });
+
+        mod.export_function("getGestureHoldDuration", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_double(GetGestureHoldDuration());
+        });
+
+        mod.export_function("getGestureDragVector", [&js_engine](const qjspp::ArgList&) {
+            return Vector2ToValue(js_engine, GetGestureDragVector());
+        });
+
+        mod.export_function("getGestureDragAngle", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_double(GetGestureDragAngle());
+        });
+
+        mod.export_function("getGesturePinchVector", [&js_engine](const qjspp::ArgList&) {
+            return Vector2ToValue(js_engine, GetGesturePinchVector());
+        });
+
+        mod.export_function("getGesturePinchAngle", [&js_engine](const qjspp::ArgList&) {
+            return js_engine.make_double(GetGesturePinchAngle());
+        });
+
+    }
 
     static void register_text_functions(qjspp::ModuleBuilder& mod, qjspp::Engine& js_engine) {
 
@@ -877,6 +1077,7 @@ namespace App::Modules {
         auto mod = js_engine.new_module("raylib");
         register_core_functions(mod, js_engine);
         register_draw2d_functions(mod, js_engine);
+        register_input_functions(mod, js_engine);
         register_text_functions(mod, js_engine);
         register_color_constants(mod, js_engine);
 
