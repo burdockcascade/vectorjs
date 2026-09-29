@@ -37,7 +37,7 @@ FetchContent_Declare(
         qjspp
         #SOURCE_DIR "C:/workspace/c/qjspp"
         GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
-        GIT_TAG master
+        GIT_TAG v0.2.0
 )
 
 # Bring all dependencies into the build tree automatically
