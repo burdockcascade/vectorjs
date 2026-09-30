@@ -84,7 +84,7 @@ jobs:
           usesh: true
           prepare: |
             pkgman refresh
-            pkgman install -y cmd:git cmd:cmake cmd:ninja cmd:gcc cmd:pkg_config
+            pkgman install -y cmd:git cmd:cmake cmd:ninja cmd:gcc cmd:pkg_config devel:libraylib
           run: |
             cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G Ninja
             cmake --build build --config Release
