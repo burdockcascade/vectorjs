@@ -18,6 +18,7 @@ option(ENABLE_MSVC_WIN_MAIN "Hide the console window for MSVC builds" OFF)
 FetchContent_Declare(
         cli11
         GIT_REPOSITORY https://github.com/CLIUtils/CLI11.git
+        GIT_SHALLOW
         GIT_TAG v2.7.2
 )
 set(CLI11_BUILD_TESTS OFF CACHE BOOL "" FORCE)
@@ -27,6 +28,7 @@ set(CLI11_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(
         raylib
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_SHALLOW
         GIT_TAG 6.0
 )
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -37,6 +39,7 @@ FetchContent_Declare(
         qjspp
         #SOURCE_DIR "C:/workspace/c/qjspp"
         GIT_REPOSITORY https://github.com/burdockcascade/qjspp.git
+        GIT_SHALLOW
         GIT_TAG v0.2.0
 )
 
