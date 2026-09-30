@@ -65,7 +65,7 @@ jobs:
         with:
           usesh: true
           prepare: |
-            pkg install -y cmake ninja pkgconf libX11 libXrandr libXi libXcursor libXinerama mesa-libs libGLU alsa-lib
+            pkg install -y git cmake ninja pkgconf libX11 libXrandr libXi libXcursor libXinerama mesa-libs libGLU alsa-lib
           run: |
             cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
             cmake --build build --config Release
