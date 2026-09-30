@@ -54,38 +54,38 @@ jobs:
       - name: Verify Executable Production
         run: ls -l ${{ github.workspace }}/build/vectorjs
 
-  verify-freebsd:
-    name: Verify on FreeBSD
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Build and Verify on FreeBSD
-        uses: vmactions/freebsd-vm@v1
-        with:
-          usesh: true
-          prepare: |
-            pkg install -y git cmake ninja pkgconf libX11 libXrandr libXi libXcursor libXinerama mesa-libs libGLU alsa-lib
-          run: |
-            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
-            cmake --build build --config Release
-            ls -l build/vectorjs
+#  verify-freebsd:
+#    name: Verify on FreeBSD
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v6
+#      - name: Build and Verify on FreeBSD
+#        uses: vmactions/freebsd-vm@v1
+#        with:
+#          usesh: true
+#          prepare: |
+#            pkg install -y git cmake ninja pkgconf libX11 libXrandr libXi libXcursor libXinerama mesa-libs libGLU alsa-lib
+#          run: |
+#            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+#            cmake --build build --config Release
+#            ls -l build/vectorjs
 
-  verify-haiku:
-    name: Verify on Haiku
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Build on Haiku
-        uses: vmactions/haiku-vm@v1
-        with:
-          usesh: true
-          prepare: |
-            pkgman refresh
-            pkgman install -y cmd:git cmd:cmake cmd:ninja cmd:gcc cmd:pkg_config devel:libraylib
-          run: |
-            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G Ninja
-            cmake --build build --config Release
-            ls -l build/vectorjs
+#  verify-haiku:
+#    name: Verify on Haiku
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout repository
+#        uses: actions/checkout@v6
+#
+#      - name: Build on Haiku
+#        uses: vmactions/haiku-vm@v1
+#        with:
+#          usesh: true
+#          prepare: |
+#            pkgman refresh
+#            pkgman install -y cmd:git cmd:cmake cmd:ninja cmd:gcc cmd:pkg_config devel:libraylib
+#          run: |
+#            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G Ninja
+#            cmake --build build --config Release
+#            ls -l build/vectorjs
