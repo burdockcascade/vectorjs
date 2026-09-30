@@ -70,3 +70,22 @@ jobs:
             cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
             cmake --build build --config Release
             ls -l build/vectorjs
+
+  verify-haiku:
+    name: Verify on Haiku
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build on Haiku
+        uses: vmactions/haiku-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkgman refresh
+            pkgman install -y cmd:git cmd:cmake cmd:ninja cmd:gcc cmd:pkg_config
+          run: |
+            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -G Ninja
+            cmake --build build --config Release
+            ls -l build/vectorjs
