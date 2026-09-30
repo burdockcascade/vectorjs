@@ -53,3 +53,20 @@ jobs:
         run: cmake --build ${{ github.workspace }}/build --config Release
       - name: Verify Executable Production
         run: ls -l ${{ github.workspace }}/build/vectorjs
+
+  verify-freebsd:
+    name: Verify on FreeBSD
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Build and Verify on FreeBSD
+        uses: vmactions/freebsd-vm@v1
+        with:
+          usesh: true
+          prepare: |
+            pkg install -y cmake ninja pkgconf libX11 libXrandr libXi libXcursor libXinerama mesa-libs libGLU alsa-lib
+          run: |
+            cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+            cmake --build build --config Release
+            ls -l build/vectorjs
