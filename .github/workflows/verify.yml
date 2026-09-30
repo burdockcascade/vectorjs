@@ -1,7 +1,4 @@
 name: Verify
-concurrency:
-  cancel-in-progress: false
-  group: verify
 
 on:
   push:
